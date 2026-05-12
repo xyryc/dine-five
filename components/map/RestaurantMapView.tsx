@@ -1,0 +1,736 @@
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  NativeSyntheticEvent,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
+import { useStore } from "../../stores/stores";
+import { Restaurant, useRestaurantStore } from "../../stores/useRestaurantStore";
+import { extractHomeRestaurants } from "../../utils/homeFeedRestaurants";
+import {
+  buildRestaurantSearchHaystack,
+  formatRestaurantDistance,
+  getRestaurantImage,
+  normalizeRestaurantSearchQuery,
+} from "../../utils/restaurantDetailNavigation";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = SCREEN_WIDTH * 0.82;
+const CARD_GAP = 12;
+const CARD_SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
+
+const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000];
+
+const toNumber = (value: unknown, fallback = 0): number => {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
+};
+
+const formatRadius = (meters: number): string => {
+  if (meters < 1000) return `${Math.round(meters)}m`;
+  return `${(meters / 1000).toFixed(1)}km`;
+};
+
+const getRestaurantCoords = (restaurant: Restaurant | null) => {
+  if (!restaurant) return null;
+
+  const lat = toNumber(
+    restaurant.location?.lat ?? (restaurant as any).latitude ?? (restaurant as any).lat,
+    NaN,
+  );
+  const lng = toNumber(
+    restaurant.location?.lng ?? (restaurant as any).longitude ?? (restaurant as any).lng,
+    NaN,
+  );
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    // If it's a free meal and missing coords, we could fallback to a specific logic
+    // but for now return null to avoid map crashes
+    return null;
+  }
+  return { latitude: lat, longitude: lng };
+};
+
+type RestaurantMapViewProps = {
+  onOpenRestaurant?: (restaurant: Restaurant) => void;
+};
+
+export default function RestaurantMapView({
+  onOpenRestaurant,
+}: RestaurantMapViewProps) {
+  const mapRef = useRef<MapView>(null);
+  const flatListRef = useRef<FlatList<Restaurant>>(null);
+
+  const {
+    location,
+    locationLoading,
+    restaurants,
+    homeRestaurants,
+    restaurantsLoading,
+    restaurantsError,
+    selectedRestaurant,
+    cuisineFilter,
+    radiusMeters,
+    total,
+    availableTokenCount,
+    fetchLocation,
+    fetchNearbyRestaurants,
+    fetchFreeMeals,
+    setHomeRestaurants,
+    setSelectedRestaurant,
+    setActiveFeedMode,
+    setRadiusMeters,
+    claimToken,
+  } = useRestaurantStore();
+  const fetchHomeFeed = useStore((state: any) => state.fetchHomeFeed);
+
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [searchText, setSearchText] = useState("");
+  const [mealFilter, setMealFilter] = useState<"all" | "free">("all");
+
+  const userLat = location?.latitude ?? 23.780704;
+  const userLng = location?.longitude ?? 90.407756;
+  const hasLocation = !!location && !locationLoading;
+
+  useEffect(() => {
+    fetchLocation();
+  }, [fetchLocation]);
+
+  useEffect(() => {
+    if (!hasLocation) return;
+
+    let isCancelled = false;
+
+    const loadData = async () => {
+      if (mealFilter === "free") {
+        console.log("[RestaurantMapView] Fetching free meals...");
+        await fetchFreeMeals({ page: 1, limit: 20 });
+        return;
+      }
+
+      // If we have home restaurants already, don't fetch nearby again unless needed
+      if (homeRestaurants.length > 0) return;
+
+      console.log("[RestaurantMapView] Fetching home feed and nearby...");
+      try {
+        const homeFeed = await fetchHomeFeed?.({ page: 1, limit: 20 });
+        if (isCancelled) return;
+
+        const extractedProviders = extractHomeRestaurants(homeFeed);
+        if (extractedProviders.length > 0) {
+          setHomeRestaurants(extractedProviders);
+          // fetchNearbyRestaurants will be called by the next effect run if needed
+          // or we can call it here if we want to combine them
+        }
+      } catch (error) {
+        console.log("Location home provider load error", error);
+      }
+
+      if (isCancelled) return;
+
+      fetchNearbyRestaurants({
+        latitude: userLat,
+        longitude: userLng,
+        radius: radiusMeters,
+        cuisine: cuisineFilter,
+        sortBy: "distance",
+        page: 1,
+        limit: 20,
+      });
+    };
+
+    loadData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    mealFilter,
+    hasLocation,
+    userLat,
+    userLng,
+    radiusMeters,
+    cuisineFilter,
+    // homeRestaurants.length omitted to prevent loop if setHomeRestaurants is called
+  ]);
+
+  // Auto-zoom to user location when it's first loaded
+  const hasAutoZoomed = useRef(false);
+  useEffect(() => {
+    if (location && !locationLoading && !hasAutoZoomed.current && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
+      }, 1000);
+      hasAutoZoomed.current = true;
+    }
+  }, [location, locationLoading]);
+
+  const allRestaurants = useMemo(() => {
+    if (mealFilter === "free") return restaurants;
+
+    // Combine nearby restaurants and home restaurants, avoiding duplicates by id/providerId
+    const combined = [...restaurants];
+    homeRestaurants.forEach((hr) => {
+      const exists = combined.some(
+        (r) => (r.id === hr.id) || (r.providerId === hr.providerId)
+      );
+      if (!exists) {
+        combined.push(hr);
+      }
+    });
+    return combined;
+  }, [restaurants, homeRestaurants, mealFilter]);
+
+  const filteredRestaurants = useMemo(() => {
+    const normalizedQuery = normalizeRestaurantSearchQuery(searchText);
+    if (!normalizedQuery) return allRestaurants;
+
+    const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+    if (!queryTokens.length) {
+      console.log(`[RestaurantMapView] Filter: ${mealFilter}, Items: ${allRestaurants.length}`);
+      return allRestaurants;
+    }
+
+    const list = allRestaurants.filter((restaurant) => {
+      const haystack = buildRestaurantSearchHaystack(restaurant);
+      return queryTokens.every((token) => haystack.includes(token));
+    });
+    console.log(`[RestaurantMapView] Filter: ${mealFilter}, Items: ${list.length}`);
+    return list;
+  }, [allRestaurants, searchText, mealFilter]);
+
+  useEffect(() => {
+    if (filteredRestaurants.length === 0) {
+      if (selectedRestaurant !== null) setSelectedRestaurant(null);
+      if (activeCardIndex !== 0) setActiveCardIndex(0);
+      return;
+    }
+
+    if (!selectedRestaurant) {
+      setSelectedRestaurant(filteredRestaurants[0]);
+      setActiveCardIndex(0);
+      return;
+    }
+
+    const selectedIndex = filteredRestaurants.findIndex(
+      (restaurant) => restaurant.id === selectedRestaurant.id,
+    );
+
+    if (selectedIndex === -1) {
+      const firstRes = filteredRestaurants[0];
+      if (firstRes) {
+        setSelectedRestaurant(firstRes);
+        setActiveCardIndex(0);
+        try {
+          flatListRef.current?.scrollToIndex({ index: 0, animated: true });
+        } catch (err) { }
+      }
+      return;
+    }
+
+    if (selectedIndex !== activeCardIndex) {
+      setActiveCardIndex(selectedIndex);
+      try {
+        flatListRef.current?.scrollToIndex({ index: selectedIndex, animated: true });
+      } catch (err) { }
+    }
+  }, [filteredRestaurants, selectedRestaurant?.id]); // Only depend on list and selected ID
+
+  useEffect(() => {
+    if (!selectedRestaurant || !mapRef.current) return;
+
+    const coords = getRestaurantCoords(selectedRestaurant);
+    if (!coords) return;
+
+    mapRef.current.animateToRegion(
+      {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        latitudeDelta: 0.002,
+        longitudeDelta: 0.002,
+      } as Region,
+      450,
+    );
+  }, [selectedRestaurant]);
+
+  const handleMarkerPress = (restaurant: Restaurant) => {
+    const index = filteredRestaurants.findIndex(
+      (item) => item.id === restaurant.id,
+    );
+
+    setSelectedRestaurant(restaurant);
+
+    if (index !== -1) {
+      setActiveCardIndex(index);
+      try {
+        flatListRef.current?.scrollToIndex({ index, animated: true });
+      } catch (err) {
+        // List might not be ready
+      }
+    }
+  };
+
+  const handleCardSnap = (event: NativeSyntheticEvent<any>) => {
+    if (!filteredRestaurants.length) return;
+
+    const x = event.nativeEvent.contentOffset?.x ?? 0;
+    const index = Math.round(x / CARD_SNAP_INTERVAL);
+    const safeIndex = Math.max(0, Math.min(index, filteredRestaurants.length - 1));
+
+    const restaurant = filteredRestaurants[safeIndex];
+    if (!restaurant) return;
+
+    setActiveCardIndex(safeIndex);
+    if (selectedRestaurant?.id !== restaurant.id) {
+      setSelectedRestaurant(restaurant);
+    }
+  };
+
+  const openRestaurantDetail = (restaurant: Restaurant) => {
+    const isFreeMode = mealFilter === "free";
+    onOpenRestaurant?.({
+      ...restaurant,
+      isFreeAvailable: isFreeMode ? true : restaurant.isFreeAvailable,
+      freeTokenCount: isFreeMode ? (restaurant.freeTokenCount || 1) : restaurant.freeTokenCount
+    });
+  };
+
+  const handleRadiusPress = (radius: number) => {
+    if (mealFilter === "all" && homeRestaurants.length > 0) {
+      return;
+    }
+
+    if (radius !== radiusMeters) {
+      setRadiusMeters(radius);
+      setSelectedRestaurant(null);
+    }
+  };
+
+  const handleClaimFreeMeal = async (item: Restaurant) => {
+    // Usually tokenId is required, but if not present, we try foodId or id
+    const tokenId = (item as any).tokenId || (item as any).foodId || item.id;
+    if (!tokenId) {
+      Alert.alert("Error", "Missing token information");
+      return;
+    }
+
+    try {
+      const result = await claimToken(tokenId);
+      const newTokenId = result?.data?.token?.tokenId || tokenId;
+
+      Alert.alert("Success", result.message || "Free meal claimed successfully!", [
+        {
+          text: "Order Now",
+          onPress: () => onOpenRestaurant?.({ ...item, tokenId: newTokenId } as any),
+        },
+        { text: "Later", style: "cancel" },
+      ]);
+
+      // Refresh the list to update available token count
+      await fetchFreeMeals({ page: 1, limit: 20 });
+    } catch (err: any) {
+      Alert.alert("Claim Failed", err.message || "Failed to claim free meal");
+    }
+  };
+
+  const isShowingHomeProviders =
+    mealFilter === "all" && homeRestaurants.length > 0;
+
+  if (locationLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#FDFBF7]">
+        <ActivityIndicator size="large" color="#FFC107" />
+        <Text className="mt-4 text-gray-500 text-sm">Locating you...</Text>
+      </View>
+    );
+  }
+
+  if (restaurantsError && restaurants.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#FDFBF7] px-8">
+        <Ionicons name="wifi-outline" size={48} color="#D1D5DB" />
+        <Text className="mt-4 text-gray-500 text-center text-sm">{restaurantsError}</Text>
+        <TouchableOpacity
+          onPress={() => {
+            if (mealFilter === "free") {
+              fetchFreeMeals({ page: 1, limit: 20 });
+            } else {
+              fetchNearbyRestaurants({
+                latitude: userLat,
+                longitude: userLng,
+                radius: radiusMeters,
+                cuisine: cuisineFilter,
+                sortBy: "distance",
+                page: 1,
+                limit: 20,
+              });
+            }
+          }}
+          className="mt-6 bg-[#FFC107] px-8 py-3 rounded-full shadow-sm"
+        >
+          <Text className="font-bold text-gray-900">Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-gray-100">
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_DEFAULT}
+        style={{ flex: 1 }}
+        initialRegion={{
+          latitude: userLat,
+          longitude: userLng,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
+        }}
+        showsUserLocation
+        showsMyLocationButton={false}
+        showsCompass={false}
+        onPress={() => setSelectedRestaurant(null)}
+      >
+        {filteredRestaurants.map((restaurant) => {
+          const coords = getRestaurantCoords(restaurant);
+          if (!coords) return null;
+
+          const isSelected = selectedRestaurant?.id === restaurant.id;
+
+          return (
+            <Marker
+              key={restaurant.id}
+              coordinate={coords}
+              onPress={() => handleMarkerPress(restaurant)}
+            >
+              <View className="items-center justify-center">
+                {/* Distance Badge */}
+                <View className="bg-[#FFC107] px-2 py-0.5 rounded-full mb-0.5 shadow-md border border-white">
+                  <Text className="text-[11px] font-black text-gray-900">
+                    {formatRestaurantDistance(restaurant.distance)}
+                  </Text>
+                </View>
+
+                {/* Restaurant Icon */}
+                <View
+                  className={`w-10 h-10 rounded-full items-center justify-center border-2 shadow-md ${isSelected ? "bg-[#FFC107] border-[#FFC107]" : "bg-white border-white"}`}
+                >
+                  <Ionicons
+                    name="restaurant"
+                    size={18}
+                    color={isSelected ? "#fff" : "#FFC107"}
+                  />
+                </View>
+              </View>
+            </Marker>
+          );
+        })}
+      </MapView>
+
+      <View className="absolute top-4 left-4 right-4">
+        <View className="flex-row items-center">
+          <View className="bg-white p-1.5 rounded-xl shadow-md mr-3 border border-gray-100">
+            <Image
+              source={require("@/assets/images/icon.png")}
+              style={{ width: 34, height: 34 }}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View className="flex-1 bg-white rounded-full h-[46px] shadow-md flex-row items-center px-4 border border-gray-100">
+            <View className="flex-row items-center flex-1">
+              <Ionicons name="search-outline" size={20} color="#D1D5DB" />
+              <TextInput
+                value={searchText}
+                onChangeText={setSearchText}
+                placeholder="Search"
+                placeholderTextColor="#D1D5DB"
+                className="flex-1 ml-2 text-[15px] text-gray-700"
+              />
+            </View>
+            <View className="w-[1px] h-5 bg-gray-200 mx-2" />
+            <View className="flex-row items-center">
+              <Ionicons name="location-sharp" size={18} color="#9CA3AF" />
+              <Text className="ml-1 text-[14px] text-[#9CA3AF] font-medium">
+                3067 Fifth Ave
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mt-2"
+          contentContainerStyle={{ gap: 6, paddingHorizontal: 2 }}
+        >
+          {RADIUS_STEPS.map((radius) => {
+            const active = radius === radiusMeters;
+            return (
+              <TouchableOpacity
+                key={radius}
+                onPress={() => handleRadiusPress(radius)}
+                className={`px-3 py-1.5 rounded-full border ${active ? "bg-[#FFC107] border-[#FFC107]" : "bg-white border-gray-200"
+                  }`}
+              >
+                <Text className={`text-xs font-semibold ${active ? "text-gray-900" : "text-gray-500"}`}>
+                  {formatRadius(radius)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      <View className="absolute top-[100px] left-4 bg-white px-3 py-1.5 rounded-full shadow-md border border-gray-100">
+        {restaurantsLoading ? (
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator size="small" color="#FFC107" />
+            <Text className="text-xs text-gray-500">Searching...</Text>
+          </View>
+        ) : (
+          <Text className="text-xs font-semibold text-gray-700">
+            {isShowingHomeProviders
+              ? `${filteredRestaurants.length} providers available`
+              : `${filteredRestaurants.length} found within ${formatRadius(radiusMeters)}`}
+            {mealFilter === "free" ? ` | ${(availableTokenCount || total || 0)} Tokens Available` : ""}
+          </Text>
+        )}
+      </View>
+
+      <View className="absolute bottom-32 left-0 right-0">
+        <View className="flex-row justify-center gap-3 px-4 mb-4">
+          <TouchableOpacity
+            onPress={async () => {
+              if (mealFilter === "all") return;
+              const newFilter = "all";
+              setMealFilter(newFilter);
+              setActiveFeedMode(newFilter);
+              setActiveCardIndex(0);
+              setSelectedRestaurant(null);
+
+              useRestaurantStore.setState({
+                restaurants: [],
+                restaurantsError: null,
+                availableTokenCount: 0,
+              });
+
+              if (!hasLocation) return;
+
+              try {
+                const homeFeed = await fetchHomeFeed?.({ page: 1, limit: 20 });
+                const extractedProviders = extractHomeRestaurants(homeFeed);
+                if (extractedProviders.length > 0) {
+                  setHomeRestaurants(extractedProviders);
+                }
+              } catch (error) {
+                console.log("Meal near you load error", error);
+              }
+
+              fetchNearbyRestaurants({
+                latitude: userLat,
+                longitude: userLng,
+                radius: radiusMeters,
+                cuisine: cuisineFilter,
+                sortBy: "distance",
+                page: 1,
+                limit: 20,
+              });
+            }}
+            className={`flex-1 flex-row items-center justify-center px-4 py-2.5 rounded-full shadow-lg border ${mealFilter === "all" ? "bg-[#FFC107] border-white" : "bg-white border-gray-100"
+              }`}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="restaurant"
+              size={16}
+              color={mealFilter === "all" ? "#000" : "#6B7280"}
+            />
+            <Text className={`font-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "all" ? "text-gray-900" : "text-gray-500"
+              }`}>
+              Meal near you
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={async () => {
+              if (mealFilter === "free") return;
+              const newFilter = "free";
+              setMealFilter(newFilter);
+              setActiveFeedMode(newFilter);
+              setActiveCardIndex(0);
+              setSelectedRestaurant(null);
+
+              useRestaurantStore.setState({
+                restaurants: [],
+                restaurantsError: null,
+                availableTokenCount: 0,
+              });
+
+              if (!hasLocation) return;
+              await fetchFreeMeals({ page: 1, limit: 20 });
+            }}
+            className={`flex-1 flex-row items-center justify-center px-4 py-2.5 rounded-full shadow-lg border ${mealFilter === "free" ? "bg-[#FFC107] border-white" : "bg-white border-gray-100"
+              }`}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="gift"
+              size={16}
+              color={mealFilter === "free" ? "#000" : "#6B7280"}
+            />
+            <Text className={`font-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "free" ? "text-gray-900" : "text-gray-500"
+              }`}>
+              free meal near you
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {filteredRestaurants.length === 0 ? (
+          <View className="mx-4 bg-white/95 rounded-2xl px-4 py-3 shadow-md">
+            <Text className="text-sm text-gray-500 text-center">
+              No restaurants found in this area.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={filteredRestaurants}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_SNAP_INTERVAL}
+            decelerationRate="fast"
+            snapToAlignment="start"
+            onMomentumScrollEnd={handleCardSnap}
+            contentContainerStyle={{
+              paddingLeft: 12,
+              paddingRight: 12,
+              gap: CARD_GAP,
+            }}
+            getItemLayout={(_, index) => ({
+              length: CARD_SNAP_INTERVAL,
+              offset: CARD_SNAP_INTERVAL * index,
+              index,
+            })}
+            renderItem={({ item, index }) => {
+              const isActive = index === activeCardIndex;
+              const isSelected = selectedRestaurant?.id === item.id;
+              const cuisine = item.cuisine?.[0] || "cake";
+              const rating = toNumber((item as any).rating ?? (item as any).averageRating, 4.2);
+              const isFreeMode = mealFilter === "free";
+
+              return (
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() => openRestaurantDetail(item)}
+                  style={{ width: CARD_WIDTH }}
+                >
+                  <View
+                    className={`rounded-3xl bg-white overflow-hidden ${isSelected ? "border-2 border-[#FFC107]" : "border border-gray-100"} ${isActive ? "scale-100 opacity-100" : "scale-95 opacity-80"}`}
+                  >
+                    {isFreeMode ? (
+                      <View className="flex-row items-center px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                        <View className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden mr-2 border border-white">
+                          <Image
+                            source={{ uri: (item as any).profile }}
+                            className="w-full h-full"
+                            resizeMode="cover"
+                          />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-700 flex-1" numberOfLines={1}>
+                          {item.restaurantName}
+                        </Text>
+                        <View className="bg-green-100 px-2 py-0.5 rounded-full">
+                          <Text className="text-[10px] font-bold text-green-700 uppercase">Free</Text>
+                        </View>
+                      </View>
+                    ) : null}
+
+                    <Image
+                      source={{ uri: isFreeMode ? ((item as any).image || (item as any).foodImage || (item as any).mealImage || (item as any).profile) : getRestaurantImage(item) }}
+                      className="w-full h-32"
+                      resizeMode="cover"
+                    />
+
+                    <View className="px-3 py-2.5">
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-base font-bold text-gray-900 flex-1 mr-2" numberOfLines={1}>
+                          {isFreeMode ? ((item as any).name || (item as any).title || (item as any).mealName) : item.restaurantName}
+                        </Text>
+                        {!isFreeMode && (
+                          <TouchableOpacity className="w-8 h-8 rounded-full border border-gray-200 items-center justify-center">
+                            <Ionicons name="heart-outline" size={15} color="#7C7C7C" />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+
+                      <View className="flex-row items-center mt-1">
+                        <Ionicons name="star" size={12} color="#F5C518" />
+                        <Text className="text-xs text-gray-600 ml-1">{rating.toFixed(1)}</Text>
+                        <Text className="text-xs text-gray-300 mx-2">|</Text>
+                        <Text className="text-xs text-gray-600">{isFreeMode ? "Free Meal" : cuisine}</Text>
+                        <Text className="text-xs text-gray-300 mx-2">|</Text>
+                        <Text className="text-xs text-gray-600">{isFreeMode ? "Limited" : "10min"}</Text>
+                      </View>
+
+                      <View className="flex-row items-center justify-between pt-3 border-t border-gray-50">
+                        <View className="flex-row items-center">
+                          <Ionicons name="navigate-outline" size={14} color="#FFC107" />
+                          <Text className="text-[11px] font-bold text-gray-700 ml-1">
+                            {isFreeMode
+                              ? `${item.freeTokenCount || 0} tokens`
+                              : formatRestaurantDistance(item.distance)}
+                          </Text>
+                          {isFreeMode && (item as any).originalPrice ? (
+                            <Text className="text-[10px] text-gray-400 line-through ml-3">
+                              ${(item as any).originalPrice}
+                            </Text>
+                          ) : null}
+                        </View>
+
+                        {isFreeMode ? (
+                          <TouchableOpacity
+                            className="bg-[#FFC107] px-5 py-2 rounded-2xl shadow-sm"
+                            onPress={() => openRestaurantDetail(item)}
+                          >
+                            <Text className="text-gray-900 font-black text-[11px] uppercase tracking-wide">
+                              View Details
+                            </Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <View className="flex-row items-center">
+                            <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+                            <Text className="text-[11px] font-bold text-gray-600 ml-1">
+                              10-15 min
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        )}
+      </View>
+    </View>
+  );
+}
