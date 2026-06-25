@@ -167,7 +167,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
       const currentState = get();
       if (
         currentState.restaurantRequestSeq === requestSeq &&
-        currentState.activeFeedMode === "all"
+        currentState.activeFeedMode === nextMode
       ) {
         set({ restaurantsLoading: false });
       }
@@ -251,7 +251,6 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
     try {
       const result = await restaurantService.claimFreeMeal(tokenId);
       console.log("[useRestaurantStore] claimToken success:", result);
-      set({ restaurantsLoading: false });
       return result;
     } catch (err: any) {
       console.error("[useRestaurantStore] claimToken error:", err);
@@ -259,10 +258,11 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
         ? err.message 
         : (err.message ?? "Failed to claim free meal");
       set({
-        restaurantsLoading: false,
         restaurantsError: message,
       });
       throw new Error(message);
+    } finally {
+      set({ restaurantsLoading: false });
     }
   },
 
@@ -270,17 +270,17 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
     set({ restaurantsLoading: true, restaurantsError: null });
     try {
       const result = await restaurantService.placeFreeOrder(data);
-      set({ restaurantsLoading: false });
       return result;
     } catch (err: any) {
       const message = err.message === "You are not logged in! Please log in to place an order."
         ? err.message
         : (err.message ?? "Failed to place free order");
       set({
-        restaurantsLoading: false,
         restaurantsError: message,
       });
       throw new Error(message);
+    } finally {
+      set({ restaurantsLoading: false });
     }
   },
 

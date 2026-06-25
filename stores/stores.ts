@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/utils/api";
+import { API_BASE_URL, fetchWithLogging } from "@/utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 
@@ -56,7 +56,7 @@ export const useStore = create((set, get) => ({
 
   // // this is for user profile
   // userProfile: async () => {
-  //   const response = await fetch(
+  //   const response = await fetchWithLogging(
   //     `${API_BASE_URL}/profile/me`,
   //     {
   //       method: "GET",
@@ -138,7 +138,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -185,7 +185,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -270,7 +270,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -322,7 +322,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify-email`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -382,7 +382,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/auth/verify-forgot-otp`,
         {
           method: "POST",
@@ -423,7 +423,7 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/auth/forgot-password`,
         {
           method: "POST",
@@ -470,7 +470,7 @@ export const useStore = create((set, get) => ({
         throw new Error("Please provide both newPassword and confirmPassword");
       }
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/auth/reset-password`,
         {
           method: "POST",
@@ -516,7 +516,7 @@ export const useStore = create((set, get) => ({
       // Check if data is FormData or regular object
       const isFormData = data instanceof FormData;
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/profile/me`, {
         method: "PATCH",
         headers: {
           ...(isFormData ? {} : { "Content-Type": "application/json" }),
@@ -575,7 +575,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) return null;
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/profile/me`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -625,7 +625,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/notifications`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/notifications`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -654,7 +654,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/profile/me`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -685,7 +685,7 @@ export const useStore = create((set, get) => ({
     try {
       const { accessToken } = get() as any;
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/feed`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/feed`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -747,7 +747,7 @@ export const useStore = create((set, get) => ({
 
       for (const endpoint of endpoints) {
         try {
-          const response = await fetch(endpoint, {
+          const response = await fetchWithLogging(endpoint, {
             method: "GET",
             headers,
           });
@@ -784,7 +784,7 @@ export const useStore = create((set, get) => ({
         headers["Authorization"] = `Bearer ${accessToken}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/categories`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/categories`, {
         method: "GET",
         headers,
       });
@@ -810,7 +810,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/customer/orders/current`,
         {
           method: "GET",
@@ -852,7 +852,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/customer/orders/previous?page=${page}&limit=${limit}`,
         {
           method: "GET",
@@ -889,7 +889,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/favorites/feed?page=${page}&limit=${limit}`,
         {
           method: "GET",
@@ -934,7 +934,7 @@ export const useStore = create((set, get) => ({
       if (!accessToken) throw new Error("No access token found");
 
       console.log("Adding favorite for foodId:", foodId);
-      const response = await fetch(`${API_BASE_URL}/api/v1/favorites`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/favorites`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -974,7 +974,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/favorites/${foodId}`,
         {
           method: "DELETE",
@@ -1017,7 +1017,7 @@ export const useStore = create((set, get) => ({
   //     const { accessToken } = get() as any;
   //     if (!accessToken) throw new Error("No access token found");
 
-  //     const response = await fetch(
+  //     const response = await fetchWithLogging(
   //       `${API_BASE_URL}/categories`,
   //       {
   //         method: "GET",
@@ -1058,7 +1058,7 @@ export const useStore = create((set, get) => ({
       console.log("Cancelling order at URL:", url);
       console.log("Payload:", JSON.stringify({ reason }));
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -1089,7 +1089,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations?limit=${limit}`,
         {
           method: "GET",
@@ -1120,7 +1120,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations`,
         {
           method: "POST",
@@ -1152,7 +1152,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`,
         {
           method: "GET",
@@ -1203,7 +1203,7 @@ export const useStore = create((set, get) => ({
 
       console.log("Sending POST to:", `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages`);
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages`,
         {
           method: "POST",
@@ -1267,7 +1267,7 @@ export const useStore = create((set, get) => ({
       }
       console.log("--------------------------------");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/message/customer-to-admin`,
         {
           method: "POST",
@@ -1323,7 +1323,7 @@ export const useStore = create((set, get) => ({
       const payload: any = { orderId, rating, comment };
       if (foodId) payload.foodId = foodId;
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1363,7 +1363,7 @@ export const useStore = create((set, get) => ({
 
       console.log("Fetching review from:", url);
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -1397,7 +1397,7 @@ export const useStore = create((set, get) => ({
       console.log("Updating review at:", url);
       console.log("Update Body:", body);
 
-      const response = await fetch(url, {
+      const response = await fetchWithLogging(url, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -1443,7 +1443,7 @@ export const useStore = create((set, get) => ({
 
       for (const endpoint of endpoints) {
         try {
-          const response = await fetch(endpoint, {
+          const response = await fetchWithLogging(endpoint, {
             method: "GET",
             headers,
           });
@@ -1491,7 +1491,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/reviews/food/${foodId}`,
         {
           method: "GET",
@@ -1555,7 +1555,7 @@ export const useStore = create((set, get) => ({
 
       console.log("Adding to cart:", payload);
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart/add`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1592,7 +1592,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -1626,7 +1626,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) return 0;
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart/count`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart/count`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -1650,7 +1650,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart/update`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart/update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -1684,7 +1684,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart/remove`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart/remove`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -1718,7 +1718,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/cart/clear`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/cart/clear`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -1749,7 +1749,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/stripe/create-payment-intent`,
         {
           method: "POST",
@@ -1786,7 +1786,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/donation/create-payment-intent`,
         {
           method: "POST",
@@ -1825,7 +1825,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/donation/confirm-payment`,
         {
           method: "POST",
@@ -1864,7 +1864,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
+      const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/donation/my-tokens`,
         {
           method: "GET",
@@ -1895,7 +1895,7 @@ export const useStore = create((set, get) => ({
     try {
       const { accessToken } = get() as any;
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/stripe/config`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/stripe/config`, {
         method: "GET",
         headers: {
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -1922,7 +1922,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/orders`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1974,7 +1974,7 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/support/tickets`, {
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/support/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2002,7 +2002,7 @@ export const useStore = create((set, get) => ({
     if (!stateName) return null;
     console.log("Fetching tax for state:", stateName);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/states/tax?state=${encodeURIComponent(stateName)}`);
+      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/states/tax?state=${encodeURIComponent(stateName)}`);
       const result = await response.json();
       console.log("fetchStateTax result:", JSON.stringify(result, null, 2));
       if (result.success && result.data) {

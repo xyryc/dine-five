@@ -13,7 +13,10 @@ export default function OrderSuccessScreen() {
     const params = useLocalSearchParams();
 
     // Get values from params
-    const deliveryAddress = (params.deliveryAddress as string) || '123 Main St, Apt 4B, New York, NY';
+    const restaurantAddress =
+        (params.restaurantAddress as string) ||
+        (params.pickupAddress as string) ||
+        'Restaurant address';
     const amountPaid = params.amount ? `$${params.amount}` : '$32.12';
     const isDonationSuccess = getSearchParam(params.type as string | string[]) === 'donation';
     const tokensCreated = Math.max(
@@ -67,7 +70,7 @@ export default function OrderSuccessScreen() {
                 <Text className="text-gray-500 text-center mb-12">
                     {isDonationSuccess
                         ? `${tokensCreated} ${donationMealLabel} can now help people in need.`
-                        : `Your order would be delivered in the${'\n'}30 mins atmost`}
+                        : `Your order will be ready for pickup in the${'\n'}next 30 mins`}
                 </Text>
 
                 {/* Details */}
@@ -125,11 +128,11 @@ export default function OrderSuccessScreen() {
                             <View className="flex-row justify-between items-start mt-4">
                                 <View className="flex-row items-center">
                                     <Ionicons name="location-outline" size={20} color="#666" style={{ marginRight: 8 }} />
-                                    <Text className="text-gray-500 text-base"> Delivery from</Text>
+                                    <Text className="text-gray-500 text-base">Pickup from</Text>
                                 </View>
                                 <View className="items-end flex-1 ml-4">
                                     {/* <Text className="text-gray-900 font-bold text-base text-right">Home</Text> */}
-                                    <Text className="text-gray-500 text-xs text-right" numberOfLines={2}>{deliveryAddress}</Text>
+                                    <Text className="text-gray-500 text-xs text-right" numberOfLines={2}>{restaurantAddress}</Text>
                                 </View>
                             </View>
 

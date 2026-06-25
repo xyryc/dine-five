@@ -64,9 +64,11 @@ export default function ProductDetails() {
     providerId,
   } = params;
   
-  const { claimToken, placeFreeOrder, getAvailableTokens, restaurantsLoading } = useRestaurantStore();
+  const { claimToken, placeFreeOrder, getAvailableTokens } = useRestaurantStore();
   const [currentTokenId, setCurrentTokenId] = useState<string | null>(firstParam(tokenId as string | string[] | undefined) || null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isClaimingMeal, setIsClaimingMeal] = useState(false);
+  const [isPlacingFreeOrder, setIsPlacingFreeOrder] = useState(false);
 
   const productId = firstParam(id as string | string[] | undefined) || firstParam(foodId as string | string[] | undefined) || "1";
 
@@ -168,6 +170,9 @@ export default function ProductDetails() {
   };
 
   const handleClaimMeal = async () => {
+    if (isClaimingMeal) return;
+
+    setIsClaimingMeal(true);
     try {
       console.log("[ProductDetails] Fetching available tokens...");
       const tokenResult = await getAvailableTokens();
@@ -191,15 +196,18 @@ export default function ProductDetails() {
     } catch (error: any) {
       console.error("[ProductDetails] Claim error:", error);
       Alert.alert("Claim Failed", error.message || "Could not claim free meal");
+    } finally {
+      setIsClaimingMeal(false);
     }
   };
 
   const handlePlaceFreeOrder = async () => {
     if (!currentTokenId) {
-      Alert.alert("Error", "Missing token information for free order");
+      Alert.alert("Error", "Missing token information for order");
       return;
     }
 
+    setIsPlacingFreeOrder(true);
     try {
       const result = await placeFreeOrder({
         tokenId: currentTokenId,
@@ -214,6 +222,8 @@ export default function ProductDetails() {
       ]);
     } catch (error: any) {
       Alert.alert("Order Failed", error.message || "Could not place free order");
+    } finally {
+      setIsPlacingFreeOrder(false);
     }
   };
 
@@ -364,7 +374,7 @@ export default function ProductDetails() {
             </Text>
             <View className="flex-row items-center  rounded-full px-2 py-1">
               <TouchableOpacity
-                onPress={() => quantity > 1 && setQuantity((q) => q - 1)}
+                onPress={() => !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)}
                 className="w-10 h-10 items-center justify-center bg-[#FFF3CD] rounded-full"
               >
                 <Text className="text-lg font-bold text-[#332701]">-</Text>
@@ -373,7 +383,7 @@ export default function ProductDetails() {
                 {quantity}
               </Text>
               <TouchableOpacity
-                onPress={() => setQuantity((q) => q + 1)}
+                onPress={() => !isFreeMeal && setQuantity((q) => q + 1)}
                 className="w-10 h-10  items-center justify-center bg-[#FFF3CD] rounded-full"
               >
                 <Text className="text-lg font-bold text-[#332701]">+</Text>
@@ -407,21 +417,21 @@ export default function ProductDetails() {
               currentTokenId ? (
                 <TouchableOpacity
                   onPress={handlePlaceFreeOrder}
-                  disabled={restaurantsLoading}
+                  disabled={isPlacingFreeOrder}
                   className="bg-green-500 px-8 py-4 rounded-2xl shadow-md min-w-[160px] items-center"
                 >
                   <Text className="text-white font-bold text-base">
-                    {restaurantsLoading ? "Processing..." : "Place Free Order"}
+                    {isPlacingFreeOrder ? "Processing..." : "Place Free Order"}
                   </Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
                   onPress={handleClaimMeal}
-                  disabled={restaurantsLoading}
+                  disabled={isClaimingMeal}
                   className="bg-[#FFC107] px-8 py-4 rounded-2xl shadow-md min-w-[160px] items-center"
                 >
                   <Text className="text-gray-900 font-bold text-base">
-                    {restaurantsLoading ? "Claiming..." : "Claim Now"}
+                    {isClaimingMeal ? "Claiming..." : "Claim Now"}
                   </Text>
                 </TouchableOpacity>
               )
@@ -437,6 +447,12 @@ export default function ProductDetails() {
             )}
           </View>
 
+          {isFreeMeal && (
+            <Text className="text-sm text-[#7A7A7A] mb-8">
+              One donated meal can be claimed once every 48 hours, and each token covers 1 meal only.
+            </Text>
+          )}
+
           {/* Success Modal */}
           <Modal
             animationType="fade"
@@ -451,7 +467,7 @@ export default function ProductDetails() {
                 </View>
                 <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">Claim Successful!</Text>
                 <Text className="text-gray-500 text-center mb-8 leading-5">
-                  You have successfully claimed this free meal. You can now place your order for free.
+                  You have successfully claimed this meal. You can now place 1 free order with this token.
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowSuccessModal(false)}

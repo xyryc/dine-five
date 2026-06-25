@@ -2,12 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
-import { AppState, Platform } from "react-native";
+import { AppState, AppStateStatus, Platform } from "react-native";
 
 import { useStore } from "@/stores/stores";
 
 const SEEN_NOTIFICATION_IDS_KEY = "seen_notification_ids";
-const POLL_INTERVAL_MS = 30000;
+const POLL_INTERVAL_MS = 10000;
 const MAX_STORED_IDS = 200;
 
 Notifications.setNotificationHandler({
@@ -108,49 +108,59 @@ export const useNotificationSync = () => {
 
     let isMounted = true;
     let intervalId: ReturnType<typeof setInterval> | null = null;
+    let isSyncing = false;
     let isFirstSync = true;
     let seenIds = new Set<string>();
 
     const syncNotifications = async () => {
-      if (!isMounted || AppState.currentState !== "active") return;
+      if (!isMounted || AppState.currentState !== "active" || isSyncing) return;
 
-      const payload = await fetchNotifications?.();
-      const items = toNotificationArray(payload);
-      const ids = items.map(getNotificationId).filter(Boolean);
+      isSyncing = true;
+      try {
+        const payload = await fetchNotifications?.();
+        const items = toNotificationArray(payload);
+        const ids = items.map(getNotificationId).filter(Boolean);
 
-      if (isFirstSync) {
-        ids.forEach((id) => seenIds.add(id));
-        isFirstSync = false;
-        await saveSeenNotificationIds(Array.from(seenIds));
-        return;
-      }
+        if (isFirstSync) {
+          ids.forEach((id) => seenIds.add(id));
+          isFirstSync = false;
+          await saveSeenNotificationIds(Array.from(seenIds));
+          return;
+        }
 
-      const freshItems = items.filter((item) => {
-        const id = getNotificationId(item);
-        return id && !seenIds.has(id);
-      });
-
-      for (const item of freshItems) {
-        const id = getNotificationId(item);
-        if (!id) continue;
-
-        seenIds.add(id);
-
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: pickString(item?.title, "New notification"),
-            body: pickString(item?.message, item?.body, "You have a new update."),
-            data: {
-              screen: "/screens/home/notifications",
-              notificationId: id,
-            },
-          },
-          trigger: null,
+        const freshItems = items.filter((item) => {
+          const id = getNotificationId(item);
+          return id && !seenIds.has(id);
         });
-      }
 
-      if (freshItems.length > 0) {
-        await saveSeenNotificationIds(Array.from(seenIds));
+        for (const item of freshItems) {
+          const id = getNotificationId(item);
+          if (!id) continue;
+
+          seenIds.add(id);
+
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: pickString(item?.title, "New notification"),
+              body: pickString(item?.message, item?.body, "You have a new update."),
+              data: {
+                screen: "/screens/home/notifications",
+                notificationId: id,
+                orderId: pickString(item?.orderId),
+                orderStatus: pickString(item?.orderStatus),
+              },
+            },
+            trigger: null,
+          });
+        }
+
+        if (freshItems.length > 0) {
+          await saveSeenNotificationIds(Array.from(seenIds));
+        }
+      } catch (error) {
+        console.log("notification sync error", error);
+      } finally {
+        isSyncing = false;
       }
     };
 
@@ -168,6 +178,15 @@ export const useNotificationSync = () => {
       }, POLL_INTERVAL_MS);
     };
 
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextState: AppStateStatus) => {
+        if (nextState === "active") {
+          void syncNotifications();
+        }
+      },
+    );
+
     const responseSubscription =
       Notifications.addNotificationResponseReceivedListener(() => {
         router.push("/screens/home/notifications");
@@ -177,6 +196,7 @@ export const useNotificationSync = () => {
 
     return () => {
       isMounted = false;
+      appStateSubscription.remove();
       responseSubscription.remove();
       if (intervalId) {
         clearInterval(intervalId);

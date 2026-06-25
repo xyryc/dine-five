@@ -23,6 +23,10 @@ export default function OrderDetailsScreen() {
   const { submitReview, fetchReviewByOrderId, updateReview, isLoading } = useStore() as any;
   const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
   const currentState = (params.state as string) || "pending"; // default to pending for demo
+  const pickupAddress =
+    (params.restaurantAddress as string) ||
+    (params.pickupAddress as string) ||
+    "Restaurant address";
 
   // State for Rating Modal
   const [rateModalVisible, setRateModalVisible] = useState(false);
@@ -331,7 +335,7 @@ export default function OrderDetailsScreen() {
               <Text className="text-gray-500 text-base">Pickup at</Text>
             </View>
             <Text className="text-gray-900 font-bold text-sm underline">
-              123 Main Street
+              {pickupAddress}
             </Text>
           </View>
 

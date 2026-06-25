@@ -346,6 +346,11 @@ function CheckoutContent() {
   const effectiveTotal =
     cartSubtotal + platformFee + stateTaxAmount + countyTaxAmount;
   const donationMealLabel = donationMealCount === 1 ? "Meal" : "Meals";
+  const pickupAddress =
+    cartRawData?.restaurantAddress ||
+    cartRawData?.items?.[0]?.foodId?.restaurantAddress ||
+    cartRawData?.items?.[0]?.food?.restaurantAddress ||
+    "Restaurant address";
 
   const handleDonationPayment = async () => {
     if (!Number.isFinite(donationMealCount) || donationMealCount < 1) {
@@ -556,7 +561,7 @@ function CheckoutContent() {
         items: formattedItems,
         totalPrice: effectiveTotal,
         paymentMethod: selectedCard,
-        logisticsType: "Delivery",
+        logisticsType: "Pickup",
       };
 
       console.log("Submitting Order Data:", JSON.stringify(orderData, null, 2));
@@ -571,15 +576,15 @@ function CheckoutContent() {
           firstItem?.foodId && typeof firstItem.foodId === "object"
             ? firstItem.foodId
             : firstItem?.food || {};
-        const deliveryAddr = "123 Main St, Apt 4B, New York, NY"; // This matches what we show in checkout
+        const restaurantAddress =
+          foodData.restaurantAddress || pickupAddress;
 
         router.push({
           pathname: "/screens/card/order-success",
           params: {
             restaurantName: foodData.restaurantName || "Restaurant",
-            restaurantAddress:
-              foodData.restaurantAddress || "Selected Location",
-            deliveryAddress: deliveryAddr,
+            restaurantAddress,
+            pickupAddress: restaurantAddress,
             amount: effectiveTotal.toFixed(2),
           },
         });
@@ -624,10 +629,10 @@ function CheckoutContent() {
               />
               <View className="flex-1">
                 <Text className="text-gray-500 text-sm mb-1">
-                  {/* Pickup from */} Delivery from
+                  Pickup from
                 </Text>
                 <Text className="text-gray-900 font-bold text-base">
-                  123 Main St, Apt 4B, New York, NY
+                  {pickupAddress}
                 </Text>
               </View>
             </View>

@@ -65,8 +65,13 @@ export interface NearbyResponse {
 }
 
 const BASE_URL = `${API_BASE_URL}/api/v1`;
+const REQUEST_TIMEOUT_MS = 15000;
 
 type RetryableError = Error & { retryable?: boolean };
+
+type RequestJsonOptions = RequestInit & {
+  timeoutMs?: number;
+};
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = (useStore.getState() as any).accessToken;
@@ -236,6 +241,63 @@ const normalizeNearbyResponse = (payload: any): NearbyResponse => {
   };
 };
 
+const parseJsonResponse = async (res: Response): Promise<any> => {
+  const responseText = await res.text();
+  if (!responseText) return null;
+
+  try {
+    return JSON.parse(responseText);
+  } catch {
+    return { message: responseText };
+  }
+};
+
+const requestJson = async (url: string, options: RequestJsonOptions = {}): Promise<any> => {
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs ?? REQUEST_TIMEOUT_MS;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const { timeoutMs: _timeoutMs, signal: _signal, ...fetchOptions } = options;
+
+  try {
+    const res = await fetch(url, {
+      ...fetchOptions,
+      signal: controller.signal,
+    });
+
+    const json = await parseJsonResponse(res);
+    if (!res.ok) {
+      throw new Error(
+        json?.message ||
+        json?.error?.message ||
+        json?.error ||
+        `Request failed with status ${res.status}`,
+      );
+    }
+
+    return json;
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      throw new Error(
+        `Backend did not respond at ${API_BASE_URL}. Check that foodbackend-main is running and the app is using the correct API URL.`,
+      );
+    }
+
+    if (
+      error?.name === "TypeError" &&
+      typeof error?.message === "string" &&
+      error.message.includes("Network request failed")
+    ) {
+      throw new Error(
+        `Cannot reach backend at ${API_BASE_URL}. Check server status and phone/emulator network.`,
+      );
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 export const restaurantService = {
   /**
    * POST /provider/nearby
@@ -372,16 +434,10 @@ export const restaurantService = {
     const url = `${API_BASE_URL}/api/v1/donation/claim/${tokenId}`;
     console.log("Claiming free meal:", url);
 
-    const res = await fetch(url, {
+    return requestJson(url, {
       method: "POST",
       headers,
     });
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.message || "Failed to claim free meal");
-    }
-    return json;
   },
 
   /**
@@ -400,17 +456,11 @@ export const restaurantService = {
     const url = `${API_BASE_URL}/api/v1/donation/place-free-order`;
     console.log("Placing free order:", url, data);
 
-    const res = await fetch(url, {
+    return requestJson(url, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
     });
-
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.message || "Failed to place free order");
-    }
-    return json;
   },
 
   /**
@@ -418,12 +468,9 @@ export const restaurantService = {
    */
   getAvailableTokens: async (): Promise<any> => {
     const url = `${API_BASE_URL}/api/v1/donation/available-count`;
-    const res = await fetch(url, {
+    return requestJson(url, {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json?.message || "Failed to fetch tokens");
-    return json;
   },
 };

@@ -93,10 +93,10 @@ export const extractHomeRestaurants = (
   };
 
   // Process direct restaurants first
-  feedRestaurants.forEach(item => processItem(item, true));
+  feedRestaurants.forEach((item: any) => processItem(item, true));
   
   // Then process foods to find any missing providers
-  feedFoods.forEach(item => processItem(item, false));
+  feedFoods.forEach((item: any) => processItem(item, false));
 
   return extractedRestaurants;
 };

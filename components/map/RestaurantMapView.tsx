@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -334,7 +335,7 @@ export default function RestaurantMapView({
       const result = await claimToken(tokenId);
       const newTokenId = result?.data?.token?.tokenId || tokenId;
 
-      Alert.alert("Success", result.message || "Free meal claimed successfully!", [
+      Alert.alert("Success", result.message || "Meal claimed successfully!", [
         {
           text: "Order Now",
           onPress: () => onOpenRestaurant?.({ ...item, tokenId: newTokenId } as any),
@@ -345,7 +346,7 @@ export default function RestaurantMapView({
       // Refresh the list to update available token count
       await fetchFreeMeals({ page: 1, limit: 20 });
     } catch (err: any) {
-      Alert.alert("Claim Failed", err.message || "Failed to claim free meal");
+      Alert.alert("Claim Failed", err.message || "Failed to claim meal");
     }
   };
 

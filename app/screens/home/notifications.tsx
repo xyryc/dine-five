@@ -6,6 +6,8 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
+  AppStateStatus,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -27,17 +29,45 @@ export default function NotificationScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
     const loadNotifications = async () => {
       const data = await fetchNotifications();
+      if (!isMounted) return;
+
       if (data) {
         setNotifications({
           newNotifications: data.newNotifications || [],
           oldNotifications: data.oldNotifications || [],
         });
       }
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
-    loadNotifications();
+
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextState: AppStateStatus) => {
+        if (nextState === "active") {
+          void loadNotifications();
+        }
+      },
+    );
+
+    void loadNotifications();
+    intervalId = setInterval(() => {
+      void loadNotifications();
+    }, 5000);
+
+    return () => {
+      isMounted = false;
+      appStateSubscription.remove();
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [fetchNotifications]);
 
   const formatTime = (dateString: string) => {

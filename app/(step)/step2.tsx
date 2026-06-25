@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-
 const step2 = () => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -29,8 +28,8 @@ const step2 = () => {
           className="flex-1"
         >
           {/* Skip button - adjusted for safe area top */}
-          <View 
-            style={{ top: Math.max(insets.top, 20) }} 
+          <View
+            style={{ top: Math.max(insets.top, 20) }}
             className="absolute right-4"
           >
             <TouchableOpacity onPress={() => router.push("/(step)/step4")}>
@@ -41,11 +40,11 @@ const step2 = () => {
       </View>
 
       {/* Bottom section - dynamic height and safe area padding */}
-      <View 
-        style={{ 
+      <View
+        style={{
           height: bottomSectionHeight + insets.bottom,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 24
-        }} 
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 24,
+        }}
         className="bg-white px-6 pt-8"
       >
         {/* Progress indicators above title */}
@@ -57,17 +56,19 @@ const step2 = () => {
         </View>
 
         {/* Title */}
-        <Text 
-          numberOfLines={2} 
-          adjustsFontSizeToFit 
+        <Text
+          numberOfLines={2}
+          adjustsFontSizeToFit
           className="text-3xl font-bold text-gray-900 mb-4 text-center"
         >
-          Good for You, Great for Local Shops
+          Good for You, Great Restaurants
         </Text>
 
         {/* Description */}
         <Text className="text-base text-gray-600 leading-relaxed mb-6 text-center">
-          In an expensive economy, we help local businesses thrive by recouping ingredient costs. You get a fresh meal; they keep their doors open. It's a win-win.
+          In an expensive economy, we help local restaurants thrive by recouping
+          ingredient costs. You get a fresh meal; they keep their doors open.
+          It's a win-win.
         </Text>
 
         {/* Next button - full width */}
