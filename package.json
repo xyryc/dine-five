@@ -73,5 +73,8 @@
       }
     }
   },
+  "overrides": {
+    "react-native": "0.81.5"
+  },
   "private": true
 }
