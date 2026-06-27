@@ -4,19 +4,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyOrdersScreen() {
   const router = useRouter();
-  const { fetchCurrentOrders, fetchPreviousOrders, isLoading } =
-    useStore() as any;
+  const { fetchCurrentOrders, fetchPreviousOrders } = useStore() as any;
   const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
   const [currentOrders, setCurrentOrders] = useState<any[]>([]);
   const [previousOrders, setPreviousOrders] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
+    setIsLoading(true);
     if (activeTab === "current") {
       const data = await fetchCurrentOrders();
       if (data) {
@@ -27,12 +28,13 @@ export default function MyOrdersScreen() {
       const result = await fetchPreviousOrders();
       if (result && result.data) setPreviousOrders(result.data);
     }
-  };
+    setIsLoading(false);
+  }, [activeTab, fetchCurrentOrders, fetchPreviousOrders]);
 
   useFocusEffect(
     useCallback(() => {
       loadOrders();
-    }, [activeTab]),
+    }, [loadOrders]),
   );
 
   const onRefresh = async () => {
@@ -150,8 +152,11 @@ export default function MyOrdersScreen() {
         className="flex-1 px-6"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        {isLoading && !refreshing ? (
+        {isLoading && !refreshing && ordersToShow.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-20">
             <Text className="text-gray-500">Loading orders...</Text>
           </View>
