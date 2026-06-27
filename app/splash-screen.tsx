@@ -16,7 +16,12 @@ const SplashScreen = () => {
 
       // Artificial delay to show the "DineFive" logo
       timer = setTimeout(() => {
-        if (auth && auth.user && auth.accessToken) {
+        if (auth && auth.user && auth.accessToken && auth.user.isVerified === false) {
+          router.replace({
+            pathname: "/(auth)/verify-otp",
+            params: { email: auth.user.email },
+          });
+        } else if (auth && auth.user && auth.accessToken) {
           router.replace("/(tabs)");
         } else {
           router.replace("/(step)/step1");
@@ -29,7 +34,7 @@ const SplashScreen = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [initializeAuth]);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" }}>

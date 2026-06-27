@@ -4,23 +4,59 @@ import { useStore } from "@/stores/stores";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ImageBackground,
+  Platform,
+  ScrollView,
   Text,
   View,
   KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from "react-native";
 
 const VerifyOTP = () => {
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const params = useLocalSearchParams<{ email?: string | string[] }>();
+  const email = useMemo(() => {
+    const value = params.email;
+    return Array.isArray(value) ? value[0] : value;
+  }, [params.email]);
   const [code, setCode] = useState("");
-  const { verifyOTP, isLoading } = useStore() as any;
+  const { verifyOTP, sendVerificationEmail, isLoading } = useStore() as any;
+
+  useEffect(() => {
+    if (!email) {
+      Alert.alert(
+        "Missing email",
+        "We could not find the email address for verification.",
+        [{ text: "Back to signup", onPress: () => router.replace("/(auth)/signup") }],
+      );
+      return;
+    }
+
+    const requestOtp = async () => {
+      const result = await sendVerificationEmail(email);
+      if (!result) {
+        Alert.alert(
+          "OTP not sent",
+          "We could not send the verification code. Please try again.",
+        );
+      }
+    };
+
+    requestOtp();
+  }, [email, sendVerificationEmail]);
 
   const handleVerifyOTP = async () => {
+    if (!email) {
+      Alert.alert(
+        "Missing email",
+        "We could not verify this account because the email address is missing.",
+      );
+      return;
+    }
+
     if (!code) {
       // Code খালি থাকলে কোনো alert না দেখিয়ে শুধু return
       return;

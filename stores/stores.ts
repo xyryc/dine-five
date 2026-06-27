@@ -152,7 +152,6 @@ export const useStore = create((set, get) => ({
         throw new Error(result.message || "Signup failed");
       }
 
-      // Check if data is nested or flat
       const userData = result.data?.user || result.user;
       const sessionData = result.data?.session || result.session;
 
@@ -171,11 +170,44 @@ export const useStore = create((set, get) => ({
         });
 
         return result.data || result;
-      } else {
-        throw new Error("Invalid response format: User data is missing");
       }
+
+      set({ isLoading: false });
+      return result.data || result;
     } catch (error: any) {
       console.log("signup error", error);
+      set({ error: error.message, isLoading: false });
+      return null;
+    }
+  },
+
+  sendVerificationEmail: async (email: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/auth/provider/register-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      const result = await response.json();
+      console.log(
+        "sendVerificationEmail full result:",
+        JSON.stringify(result, null, 2),
+      );
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to send verification email");
+      }
+
+      set({ isLoading: false });
+      return result;
+    } catch (error: any) {
+      console.log("sendVerificationEmail error", error);
       set({ error: error.message, isLoading: false });
       return null;
     }
@@ -322,6 +354,10 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
+      const currentUser = (get() as any).user;
+      const currentAccessToken = (get() as any).accessToken;
+      const currentRefreshToken = (get() as any).refreshToken;
+
       const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -352,17 +388,23 @@ export const useStore = create((set, get) => ({
         result.refreshToken ||
         result.data?.refreshToken;
 
-      if (userData && accessToken) {
+      const verifiedUser =
+        userData || (currentUser ? { ...currentUser, isVerified: true } : null);
+      const verifiedAccessToken = accessToken || currentAccessToken;
+      const verifiedRefreshToken = refreshToken || currentRefreshToken || null;
+
+      if (verifiedUser && verifiedAccessToken) {
+        const normalizedUser = { ...verifiedUser, isVerified: true };
         await (get() as any).persistAuthData(
-          userData,
-          accessToken,
-          refreshToken,
+          normalizedUser,
+          verifiedAccessToken,
+          verifiedRefreshToken,
         );
 
         set({
-          user: userData,
-          accessToken: accessToken,
-          refreshToken: refreshToken || null,
+          user: normalizedUser,
+          accessToken: verifiedAccessToken,
+          refreshToken: verifiedRefreshToken,
           isLoading: false,
         });
       } else {
@@ -1285,7 +1327,7 @@ export const useStore = create((set, get) => ({
       let result;
       try {
         result = JSON.parse(responseText);
-      } catch (e) {
+      } catch {
         throw new Error(`Server returned non-JSON: ${responseText.substring(0, 50)}`);
       }
 
@@ -1638,7 +1680,7 @@ export const useStore = create((set, get) => ({
         return result.data?.count || result.count || 0;
       }
       return 0;
-    } catch (error) {
+    } catch {
       // console.log("fetchCartCount error", error);
       return 0;
     }

@@ -13,13 +13,13 @@ import { useStore } from "@/stores/stores";
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  const { isInitialized, initializeAuth, accessToken } = useStore() as any;
+  const { isInitialized, initializeAuth, accessToken, user } = useStore() as any;
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     initializeAuth();
-  }, []);
+  }, [initializeAuth]);
 
   useEffect(() => {
     if (isInitialized) {
@@ -35,8 +35,19 @@ export default function RootLayout() {
     const inTabsGroup = group === "(tabs)";
     const inScreensGroup = group === "screens";
     const inSplashScreen = group === "splash-screen";
+    const isPendingVerification = Boolean(accessToken && user && user.isVerified === false);
 
     if (!isInitialized || inSplashScreen) return;
+
+    if (isPendingVerification) {
+      if (inTabsGroup || inScreensGroup || inStepGroup) {
+        router.replace({
+          pathname: "/(auth)/verify-otp",
+          params: { email: user?.email },
+        });
+      }
+      return;
+    }
 
     if (!accessToken) {
       if (inTabsGroup || inScreensGroup) {
@@ -47,7 +58,7 @@ export default function RootLayout() {
         router.replace("/(tabs)");
       }
     }
-  }, [accessToken, isInitialized, segments]);
+  }, [accessToken, isInitialized, router, segments, user]);
 
   useNotificationSync();
 
