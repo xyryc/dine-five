@@ -217,7 +217,7 @@ export default function ProductDetails() {
       });
 
       Alert.alert("Success", result.message || "Free order placed successfully!", [
-        { text: "View Orders", onPress: () => router.push("/(tabs)/card") },
+        { text: "View Orders", onPress: () => router.push("/screens/profile/my-orders") },
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (error: any) {

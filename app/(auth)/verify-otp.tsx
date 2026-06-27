@@ -4,7 +4,7 @@ import { useStore } from "@/stores/stores";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -23,36 +23,14 @@ const VerifyOTP = () => {
     return Array.isArray(value) ? value[0] : value;
   }, [params.email]);
   const [code, setCode] = useState("");
-  const { verifyOTP, sendVerificationEmail, isLoading } = useStore() as any;
-
-  useEffect(() => {
-    if (!email) {
-      Alert.alert(
-        "Missing email",
-        "We could not find the email address for verification.",
-        [{ text: "Back to signup", onPress: () => router.replace("/(auth)/signup") }],
-      );
-      return;
-    }
-
-    const requestOtp = async () => {
-      const result = await sendVerificationEmail(email);
-      if (!result) {
-        Alert.alert(
-          "OTP not sent",
-          "We could not send the verification code. Please try again.",
-        );
-      }
-    };
-
-    requestOtp();
-  }, [email, sendVerificationEmail]);
+  const { verifyOTP, isLoading } = useStore() as any;
 
   const handleVerifyOTP = async () => {
     if (!email) {
       Alert.alert(
         "Missing email",
         "We could not verify this account because the email address is missing.",
+        [{ text: "Back to signup", onPress: () => router.replace("/(auth)/signup") }],
       );
       return;
     }
