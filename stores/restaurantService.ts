@@ -93,16 +93,24 @@ const toNumber = (value: unknown, fallback = 0): number => {
   return fallback;
 };
 
-const isValidLatitude = (value: number) => Number.isFinite(value) && value >= -90 && value <= 90;
-const isValidLongitude = (value: number) => Number.isFinite(value) && value >= -180 && value <= 180;
+const isValidLatitude = (value: number) =>
+  Number.isFinite(value) && value >= -90 && value <= 90;
+const isValidLongitude = (value: number) =>
+  Number.isFinite(value) && value >= -180 && value <= 180;
 
 const extractCoordinates = (item: any): { lat: number; lng: number } | null => {
   const directLat = toNumber(
-    item?.location?.lat ?? item?.location?.latitude ?? item?.latitude ?? item?.lat,
+    item?.location?.lat ??
+      item?.location?.latitude ??
+      item?.latitude ??
+      item?.lat,
     NaN,
   );
   const directLng = toNumber(
-    item?.location?.lng ?? item?.location?.longitude ?? item?.longitude ?? item?.lng,
+    item?.location?.lng ??
+      item?.location?.longitude ??
+      item?.longitude ??
+      item?.lng,
     NaN,
   );
 
@@ -124,7 +132,10 @@ const extractCoordinates = (item: any): { lat: number; lng: number } | null => {
 };
 
 const normalizeDistanceKm = (raw: any): number => {
-  const fromMeters = toNumber(raw?.distanceMeters ?? raw?.distanceInMeters, NaN);
+  const fromMeters = toNumber(
+    raw?.distanceMeters ?? raw?.distanceInMeters,
+    NaN,
+  );
   if (Number.isFinite(fromMeters)) return Math.max(0, fromMeters / 1000);
 
   const unit = String(raw?.distanceUnit ?? raw?.unit ?? "").toLowerCase();
@@ -133,7 +144,8 @@ const normalizeDistanceKm = (raw: any): number => {
   if (!Number.isFinite(value)) return 0;
 
   if (unit.includes("meter") || unit === "m") return Math.max(0, value / 1000);
-  if (unit.includes("km") || unit.includes("kilometer")) return Math.max(0, value);
+  if (unit.includes("km") || unit.includes("kilometer"))
+    return Math.max(0, value);
 
   // Nearby API is radius-limited; very large values are usually meters.
   if (value > 30) return Math.max(0, value / 1000);
@@ -149,12 +161,20 @@ const normalizeRestaurant = (item: any, index: number): Restaurant => {
     : Array.isArray(item?.cuisines)
       ? item.cuisines
       : typeof item?.cuisine === "string"
-        ? item.cuisine.split(",").map((value: string) => value.trim()).filter(Boolean)
+        ? item.cuisine
+            .split(",")
+            .map((value: string) => value.trim())
+            .filter(Boolean)
         : [];
 
-  const rating = toNumber(item?.rating ?? item?.averageRating ?? item?.avgRating, 4.2);
+  const rating = toNumber(
+    item?.rating ?? item?.averageRating ?? item?.avgRating,
+    4.2,
+  );
   const deliveryTime = toNumber(
-    item?.deliveryTimeMinutes ?? item?.deliveryTime ?? item?.estimatedDeliveryMinutes,
+    item?.deliveryTimeMinutes ??
+      item?.deliveryTime ??
+      item?.estimatedDeliveryMinutes,
     5 + Math.min(15, Math.round(distanceKm * 2)),
   );
 
@@ -177,7 +197,12 @@ const normalizeRestaurant = (item: any, index: number): Restaurant => {
     phoneNumber: String(item?.phoneNumber ?? item?.phone ?? ""),
     contactEmail: String(item?.contactEmail ?? item?.email ?? ""),
     profile: normalizeImageUri(
-      item?.profile ?? item?.image ?? item?.imageUrl ?? item?.restaurantImage ?? item?.providerImage ?? "",
+      item?.profile ??
+        item?.image ??
+        item?.imageUrl ??
+        item?.restaurantImage ??
+        item?.providerImage ??
+        "",
     ),
     isVerify: Boolean(item?.isVerify ?? item?.isVerified ?? false),
     verificationStatus: String(item?.verificationStatus ?? ""),
@@ -188,21 +213,40 @@ const normalizeRestaurant = (item: any, index: number): Restaurant => {
     mealImage: normalizeImageUri(item?.image || item?.imageUrl || ""),
     foodId: String(item?.foodId ?? item?.id ?? item?._id ?? id),
     title: String(item?.title ?? item?.name ?? ""),
-    productDescription: String(item?.productDescription ?? item?.description ?? ""),
+    productDescription: String(
+      item?.productDescription ?? item?.description ?? "",
+    ),
     price: toNumber(item?.price ?? item?.finalPriceTag ?? item?.baseRevenue, 0),
-    finalPriceTag: toNumber(item?.finalPriceTag ?? item?.price ?? item?.baseRevenue, 0),
-    baseRevenue: toNumber(item?.baseRevenue ?? item?.price ?? item?.finalPriceTag, 0),
+    finalPriceTag: toNumber(
+      item?.finalPriceTag ?? item?.price ?? item?.baseRevenue,
+      0,
+    ),
+    baseRevenue: toNumber(
+      item?.baseRevenue ?? item?.price ?? item?.finalPriceTag,
+      0,
+    ),
     serviceFee: toNumber(item?.serviceFee, 0),
     providerName: String(item?.providerName ?? item?.provider ?? ""),
     providerRestaurantName: String(
-      item?.providerRestaurantName ?? item?.restaurantName ?? item?.provider ?? "",
+      item?.providerRestaurantName ??
+        item?.restaurantName ??
+        item?.provider ??
+        "",
     ),
-    providerImage: normalizeImageUri(item?.providerImage ?? item?.providerProfile ?? ""),
+    providerImage: normalizeImageUri(
+      item?.providerImage ?? item?.providerProfile ?? "",
+    ),
     restaurantImage: normalizeImageUri(
-      item?.restaurantImage ?? item?.providerImage ?? item?.providerProfile ?? "",
+      item?.restaurantImage ??
+        item?.providerImage ??
+        item?.providerProfile ??
+        "",
     ),
     originalPrice: toNumber(
-      item?.originalPrice ?? item?.finalPriceTag ?? item?.price ?? item?.baseRevenue,
+      item?.originalPrice ??
+        item?.finalPriceTag ??
+        item?.price ??
+        item?.baseRevenue,
       0,
     ),
     displayPrice: toNumber(item?.displayPrice ?? item?.price ?? 0, 0),
@@ -223,20 +267,25 @@ const normalizeNearbyResponse = (payload: any): NearbyResponse => {
           ? payload
           : [];
 
-  const normalized = rawData.map((item: any, index: number) => normalizeRestaurant(item, index));
+  const normalized = rawData.map((item: any, index: number) =>
+    normalizeRestaurant(item, index),
+  );
   const pagination = payload?.pagination ?? payload?.meta;
 
   return {
     success: Boolean(payload?.success ?? true),
     message: String(payload?.message ?? ""),
     data: normalized,
-    availableTokenCount: toNumber(payload?.meta?.availableTokenCount ?? payload?.availableTokenCount, 0),
+    availableTokenCount: toNumber(
+      payload?.meta?.availableTokenCount ?? payload?.availableTokenCount,
+      0,
+    ),
     pagination: pagination
       ? {
-        total: toNumber(pagination.total, normalized.length),
-        page: toNumber(pagination.page, 1),
-        limit: toNumber(pagination.limit, normalized.length || 20),
-      }
+          total: toNumber(pagination.total, normalized.length),
+          page: toNumber(pagination.page, 1),
+          limit: toNumber(pagination.limit, normalized.length || 20),
+        }
       : undefined,
   };
 };
@@ -252,7 +301,10 @@ const parseJsonResponse = async (res: Response): Promise<any> => {
   }
 };
 
-const requestJson = async (url: string, options: RequestJsonOptions = {}): Promise<any> => {
+const requestJson = async (
+  url: string,
+  options: RequestJsonOptions = {},
+): Promise<any> => {
   const controller = new AbortController();
   const timeoutMs = options.timeoutMs ?? REQUEST_TIMEOUT_MS;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -268,9 +320,9 @@ const requestJson = async (url: string, options: RequestJsonOptions = {}): Promi
     if (!res.ok) {
       throw new Error(
         json?.message ||
-        json?.error?.message ||
-        json?.error ||
-        `Request failed with status ${res.status}`,
+          json?.error?.message ||
+          json?.error ||
+          `Request failed with status ${res.status}`,
       );
     }
 
@@ -342,7 +394,10 @@ export const restaurantService = {
 
     for (const endpoint of endpoints) {
       for (const body of payloads) {
-        console.log("Nearby request payload:", JSON.stringify({ endpoint, body }));
+        // console.log(
+        //   "Nearby request payload:",
+        //   JSON.stringify({ endpoint, body }),
+        // );
         try {
           const res = await fetch(endpoint, {
             method: "POST",
@@ -358,7 +413,7 @@ export const restaurantService = {
             json = null;
           }
 
-          console.log("Nearby response status:", res.status);
+          // console.log("Nearby response status:", res.status);
 
           if (!res.ok) {
             const errorMessage =
@@ -395,7 +450,10 @@ export const restaurantService = {
   /**
    * GET /feed/free-meals
    */
-  getFreeMeals: async (params: { page?: number; limit?: number }): Promise<NearbyResponse> => {
+  getFreeMeals: async (params: {
+    page?: number;
+    limit?: number;
+  }): Promise<NearbyResponse> => {
     const page = params.page ?? 1;
     const limit = params.limit ?? 20;
     const url = `${API_BASE_URL}/api/v1/feed/free-meals?page=${page}&limit=${limit}`;
@@ -408,7 +466,7 @@ export const restaurantService = {
       });
 
       const json = await res.json();
-      console.log("Free meals response status:", res.status);
+      // console.log("Free meals response status:", res.status);
 
       if (!res.ok) {
         throw new Error(json?.message || "Failed to load free meals");
@@ -451,7 +509,9 @@ export const restaurantService = {
   }): Promise<any> => {
     const headers = getAuthHeaders();
     if (!headers["Authorization"]) {
-      throw new Error("You are not logged in! Please log in to place an order.");
+      throw new Error(
+        "You are not logged in! Please log in to place an order.",
+      );
     }
     const url = `${API_BASE_URL}/api/v1/donation/place-free-order`;
     console.log("Placing free order:", url, data);

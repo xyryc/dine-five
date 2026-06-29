@@ -158,13 +158,16 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/auth/signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+      );
 
-      console.log("Response status:", response.status);
+      // console.log("Response status:", response.status);
       const result = await response.json();
       console.log("Signup result:", JSON.stringify(result, null, 2));
 
@@ -226,7 +229,9 @@ export const useStore = create((set, get) => ({
       console.log("refreshSession result:", JSON.stringify(result, null, 2));
 
       if (!response.ok) {
-        throw new Error(result.message || "Session expired. Please login again.");
+        throw new Error(
+          result.message || "Session expired. Please login again.",
+        );
       }
 
       const session = result.data?.session || result.session || result.data;
@@ -316,11 +321,14 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+      );
 
       const result = await response.json();
 
@@ -401,14 +409,17 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken: data.idToken,
-          requestedRole: data.requestedRole || "CUSTOMER",
-        }),
-      });
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/auth/google`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idToken: data.idToken,
+            requestedRole: data.requestedRole || "CUSTOMER",
+          }),
+        },
+      );
 
       const result = await response.json();
       console.log("Google login result:", JSON.stringify(result, null, 2));
@@ -457,14 +468,17 @@ export const useStore = create((set, get) => ({
       const currentAccessToken = (get() as any).accessToken;
       const currentRefreshToken = (get() as any).refreshToken;
 
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/auth/verify-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email,
-          otp: data.code,
-        }),
-      });
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/auth/verify-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: data.email,
+            otp: data.code,
+          }),
+        },
+      );
 
       const result = await response.json();
       console.log("verifyOTP full result:", JSON.stringify(result, null, 2));
@@ -654,13 +668,16 @@ export const useStore = create((set, get) => ({
       // Check if data is FormData or regular object
       const isFormData = data instanceof FormData;
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/profile/me`, {
-        method: "PATCH",
-        headers: {
-          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/profile/me`,
+        {
+          method: "PATCH",
+          headers: {
+            ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          },
+          body: isFormData ? data : JSON.stringify(data),
         },
-        body: isFormData ? data : JSON.stringify(data),
-      });
+      );
 
       const result = await response.json();
       console.log("updateProfile result:", JSON.stringify(result, null, 2));
@@ -674,8 +691,10 @@ export const useStore = create((set, get) => ({
 
       if (updatedData) {
         const currentUser = (get() as any).user;
-        const { accessToken: currentAccessToken, refreshToken: currentRefreshToken } =
-          get() as any;
+        const {
+          accessToken: currentAccessToken,
+          refreshToken: currentRefreshToken,
+        } = get() as any;
 
         const mergedUser = { ...currentUser, ...updatedData };
 
@@ -706,11 +725,13 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/profile/me`, {
-        method: "GET",
-        headers: {
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/profile/me`,
+        {
+          method: "GET",
+          headers: {},
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -721,8 +742,10 @@ export const useStore = create((set, get) => ({
       if (latestUser) {
         const currentUser = (get() as any).user;
         const mergedUser = { ...currentUser, ...latestUser };
-        const { accessToken: currentAccessToken, refreshToken: currentRefreshToken } =
-          get() as any;
+        const {
+          accessToken: currentAccessToken,
+          refreshToken: currentRefreshToken,
+        } = get() as any;
 
         await (get() as any).persistAuthData(
           mergedUser,
@@ -751,14 +774,18 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/notifications`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/notifications`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -779,14 +806,18 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/profile/me`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/profile/me`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -809,12 +840,15 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/feed`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/feed`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -907,10 +941,13 @@ export const useStore = create((set, get) => ({
         headers["Authorization"] = `Bearer ${accessToken}`;
       }
 
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/categories`, {
-        method: "GET",
-        headers,
-      });
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/categories`,
+        {
+          method: "GET",
+          headers,
+        },
+      );
 
       const result = await response.json();
       set({ isLoading: false });
@@ -931,7 +968,8 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/customer/orders/current`,
@@ -967,7 +1005,8 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/customer/orders/previous?page=${page}&limit=${limit}`,
@@ -1003,7 +1042,8 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/favorites/feed?page=${page}&limit=${limit}`,
@@ -1046,16 +1086,20 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       console.log("Adding favorite for foodId:", foodId);
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/favorites`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/favorites`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ foodId }),
         },
-        body: JSON.stringify({ foodId }),
-      });
+      );
 
       const result = await response.json();
       console.log("addFavorite result:", result);
@@ -1086,7 +1130,8 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/favorites/${foodId}`,
@@ -1165,7 +1210,8 @@ export const useStore = create((set, get) => ({
 
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const url = `${API_BASE_URL}/api/v1/orders/${orderId}/cancel`;
       console.log("Cancelling order at URL:", url);
@@ -1200,7 +1246,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations?limit=${limit}`,
@@ -1231,7 +1278,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations`,
@@ -1263,7 +1311,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`,
@@ -1290,11 +1339,16 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  sendMessage: async (conversationId: string, message: string, attachments: any[] = []) => {
+  sendMessage: async (
+    conversationId: string,
+    message: string,
+    attachments: any[] = [],
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const isFormData = attachments.length > 0;
       let body: any;
@@ -1314,7 +1368,10 @@ export const useStore = create((set, get) => ({
         body = JSON.stringify({ message });
       }
 
-      console.log("Sending POST to:", `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages`);
+      console.log(
+        "Sending POST to:",
+        `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages`,
+      );
 
       const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/chat/conversations/${conversationId}/messages`,
@@ -1343,11 +1400,16 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  sendMessageToProvider: async (providerId: string, message: string, attachments: any[] = []) => {
+  sendMessageToProvider: async (
+    providerId: string,
+    message: string,
+    attachments: any[] = [],
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const isFormData = attachments.length > 0;
       let body: any;
@@ -1360,7 +1422,10 @@ export const useStore = create((set, get) => ({
         attachments.forEach((file, index) => {
           const fileName = file.uri.split("/").pop() || `image_${index}.jpg`;
           const extension = fileName.split(".").pop()?.toLowerCase() || "jpg";
-          const fileType = file.type === "video" ? "video/mp4" : `image/${extension === 'png' ? 'png' : 'jpeg'}`;
+          const fileType =
+            file.type === "video"
+              ? "video/mp4"
+              : `image/${extension === "png" ? "png" : "jpeg"}`;
 
           body.append("image", {
             uri: file.uri,
@@ -1399,7 +1464,9 @@ export const useStore = create((set, get) => ({
       try {
         result = JSON.parse(responseText);
       } catch {
-        throw new Error(`Server returned non-JSON: ${responseText.substring(0, 50)}`);
+        throw new Error(
+          `Server returned non-JSON: ${responseText.substring(0, 50)}`,
+        );
       }
 
       if (result.success && result.data?.imageUrl) {
@@ -1409,7 +1476,11 @@ export const useStore = create((set, get) => ({
       }
 
       if (!response.ok) {
-        throw new Error(result.message || result.error || "Failed to send message to provider");
+        throw new Error(
+          result.message ||
+            result.error ||
+            "Failed to send message to provider",
+        );
       }
 
       set({ isLoading: false });
@@ -1430,7 +1501,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const url = `${API_BASE_URL}/api/v1/reviews`;
       const payload: any = { orderId, rating, comment };
@@ -1465,7 +1537,8 @@ export const useStore = create((set, get) => ({
   fetchReviewByOrderId: async (identifier: string) => {
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       // Check if identifier is an orderId or a specific reviewId
       // For now, let's support both: filtering by orderId and direct fetch by reviewId
@@ -1502,7 +1575,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const url = `${API_BASE_URL}/api/v1/reviews/${reviewId}`;
       const body = JSON.stringify({ rating, comment });
@@ -1602,7 +1676,8 @@ export const useStore = create((set, get) => ({
   fetchReviewsByFoodId: async (foodId: string) => {
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await fetchWithLogging(
         `${API_BASE_URL}/api/v1/reviews/food/${foodId}`,
@@ -1631,7 +1706,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       // Construct payload for the API
       // Based on user request: { items: [{ foodId: "...", quantity: 1, price: 15 }] }
@@ -1668,13 +1744,16 @@ export const useStore = create((set, get) => ({
 
       console.log("Adding to cart:", payload);
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const result = await response.json();
       console.log("addToCart result:", JSON.stringify(result, null, 2));
@@ -1682,9 +1761,9 @@ export const useStore = create((set, get) => ({
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          result?.error?.message ||
-          result?.error ||
-          "Failed to add item to cart",
+            result?.error?.message ||
+            result?.error ||
+            "Failed to add item to cart",
         );
       }
 
@@ -1702,22 +1781,26 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          result?.error?.message ||
-          result?.error ||
-          "Failed to fetch cart",
+            result?.error?.message ||
+            result?.error ||
+            "Failed to fetch cart",
         );
       }
 
@@ -1737,11 +1820,13 @@ export const useStore = create((set, get) => ({
       const { accessToken } = get() as any;
       if (!accessToken && !(get() as any).refreshToken) return 0;
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart/count`, {
-        method: "GET",
-        headers: {
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart/count`,
+        {
+          method: "GET",
+          headers: {},
         },
-      });
+      );
 
       const result = await response.json();
       if (response.ok) {
@@ -1758,23 +1843,27 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart/update`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart/update`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ foodId, quantity }),
         },
-        body: JSON.stringify({ foodId, quantity }),
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          result?.error?.message ||
-          result?.error ||
-          "Failed to update cart",
+            result?.error?.message ||
+            result?.error ||
+            "Failed to update cart",
         );
       }
 
@@ -1791,23 +1880,27 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart/remove`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart/remove`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ foodId }),
         },
-        body: JSON.stringify({ foodId }),
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
         throw new Error(
           result?.message ||
-          result?.error?.message ||
-          result?.error ||
-          "Failed to remove item",
+            result?.error?.message ||
+            result?.error ||
+            "Failed to remove item",
         );
       }
 
@@ -1824,14 +1917,18 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/cart/clear`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/cart/clear`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -1854,7 +1951,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/stripe/create-payment-intent`,
@@ -1890,7 +1988,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/donation/create-payment-intent`,
@@ -1928,7 +2027,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/donation/confirm-payment`,
@@ -1966,7 +2066,8 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
       const response = await (get() as any).requestWithAuth(
         `${API_BASE_URL}/api/v1/donation/my-tokens`,
@@ -1979,7 +2080,10 @@ export const useStore = create((set, get) => ({
       );
 
       const result = await response.json();
-      console.log("fetchDonationTokens result:", JSON.stringify(result, null, 2));
+      console.log(
+        "fetchDonationTokens result:",
+        JSON.stringify(result, null, 2),
+      );
 
       if (!response.ok) {
         throw new Error(result?.message || "Failed to fetch donation tokens");
@@ -1996,11 +2100,13 @@ export const useStore = create((set, get) => ({
 
   fetchStripeConfig: async () => {
     try {
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/stripe/config`, {
-        method: "GET",
-        headers: {
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/stripe/config`,
+        {
+          method: "GET",
+          headers: {},
         },
-      });
+      );
 
       const result = await response.json();
       console.log("fetchStripeConfig result:", JSON.stringify(result, null, 2));
@@ -2020,15 +2126,19 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/orders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderData),
         },
-        body: JSON.stringify(orderData),
-      });
+      );
 
       const result = await response.json();
       console.log("createOrder result:", JSON.stringify(result, null, 2));
@@ -2071,18 +2181,25 @@ export const useStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { accessToken } = get() as any;
-      if (!accessToken && !(get() as any).refreshToken) throw new Error("No access token found");
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
 
-      const response = await (get() as any).requestWithAuth(`${API_BASE_URL}/api/v1/support/tickets`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/support/tickets`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(ticketData),
         },
-        body: JSON.stringify(ticketData),
-      });
+      );
 
       const result = await response.json();
-      console.log("createSupportTicket result:", JSON.stringify(result, null, 2));
+      console.log(
+        "createSupportTicket result:",
+        JSON.stringify(result, null, 2),
+      );
 
       if (!response.ok) {
         throw new Error(result.message || "Failed to create support ticket");
@@ -2100,7 +2217,9 @@ export const useStore = create((set, get) => ({
     if (!stateName) return null;
     console.log("Fetching tax for state:", stateName);
     try {
-      const response = await fetchWithLogging(`${API_BASE_URL}/api/v1/states/tax?state=${encodeURIComponent(stateName)}`);
+      const response = await fetchWithLogging(
+        `${API_BASE_URL}/api/v1/states/tax?state=${encodeURIComponent(stateName)}`,
+      );
       const result = await response.json();
       console.log("fetchStateTax result:", JSON.stringify(result, null, 2));
       if (result.success && result.data) {

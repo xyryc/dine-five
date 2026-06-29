@@ -63,7 +63,7 @@ const resolveApiBaseUrl = (): string => {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 
-console.log("🌐 API_BASE_URL:", API_BASE_URL);
+// console.log("🌐 API_BASE_URL:", API_BASE_URL);
 
 export const apiUrl = (path: string): string =>
   `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
@@ -76,7 +76,7 @@ export const fetchWithLogging = async (
   const timestamp = new Date().toISOString();
   const method = options?.method || "GET";
 
-  console.log(`\n📡 [${timestamp}] ${method} ${url}`);
+  // console.log(`\n📡 [${timestamp}] ${method} ${url}`);
 
   if (options?.body) {
     try {
@@ -87,17 +87,17 @@ export const fetchWithLogging = async (
     }
   }
 
-  if (options?.headers) {
-    console.log("📋 Headers:", options.headers);
-  }
+  // if (options?.headers) {
+  //   console.log("📋 Headers:", options.headers);
+  // }
 
   try {
     const response = await fetch(url, options);
     const clonedResponse = response.clone();
     const responseData = await clonedResponse.json().catch(() => null);
 
-    console.log(`✅ Response Status: ${response.status}`);
-    console.log("📥 Response Data:", responseData || "(no JSON)");
+    // console.log(`✅ Response Status: ${response.status}`);
+    // console.log("📥 Response Data:", responseData || "(no JSON)");
 
     return response;
   } catch (error) {

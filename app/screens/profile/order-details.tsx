@@ -310,7 +310,7 @@ export default function OrderDetailsScreen() {
         </View>
 
         {/* Estimated Time */}
-        <View className="flex-row justify-between items-center mb-6">
+        {/* <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center gap-2">
             <Ionicons name="time-outline" size={20} color="#666" />
             <Text className="text-gray-500">Estimated time</Text>
@@ -320,7 +320,7 @@ export default function OrderDetailsScreen() {
           >
             {currentState === "pending" ? "Pending" : "10-20 minutes"}
           </Text>
-        </View>
+        </View> */}
 
         {/* Timeline Card */}
         <View className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">

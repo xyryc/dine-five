@@ -4,7 +4,14 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Image } from "expo-image";
+import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import "../global.css";
+
+// Suppress Reanimated strict-mode warnings that come from third-party dependencies
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
+});
 
 import { useNotificationSync } from "@/hooks/useNotificationSync";
 import { useStore } from "@/stores/stores";
