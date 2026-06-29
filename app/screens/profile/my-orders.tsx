@@ -217,7 +217,7 @@ export default function MyOrdersScreen() {
                   <View className="flex-row justify-between mb-0.5">
                     <Text className="text-sm text-[#7A7A7A]">Items</Text>
                     <Text className="text-sm font-medium text-[#1F2A33]">
-                      {order.items?.length || 0} items
+                      {order.items?.[0]?.quantity || 0} items
                     </Text>
                   </View>
 

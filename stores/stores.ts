@@ -1205,6 +1205,40 @@ export const useStore = create((set, get) => ({
   //   }
   // },
 
+  fetchOrderById: async (orderId: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const { accessToken } = get() as any;
+      if (!accessToken && !(get() as any).refreshToken)
+        throw new Error("No access token found");
+
+      const response = await (get() as any).requestWithAuth(
+        `${API_BASE_URL}/api/v1/orders/${orderId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const result = await response.json();
+      console.log("fetchOrderById result:", JSON.stringify(result, null, 2));
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch order details");
+      }
+
+      set({ isLoading: false });
+      return result.data || result;
+    } catch (error: any) {
+      console.log("fetchOrderById error", error);
+      set({ error: error.message, isLoading: false });
+      return null;
+    }
+  },
+
   cancelOrder: async (orderId: string, reason?: string) => {
     set({ isLoading: true, error: null });
 

@@ -20,8 +20,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function OrderDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { submitReview, fetchReviewByOrderId, updateReview, isLoading } = useStore() as any;
+  const { submitReview, fetchReviewByOrderId, updateReview, fetchOrderById, isLoading } = useStore() as any;
   const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
+  const [orderData, setOrderData] = useState<any>(null);
+  const [orderLoading, setOrderLoading] = useState(true);
   const currentState = (params.state as string) || "pending"; // default to pending for demo
   const pickupAddress =
     (params.restaurantAddress as string) ||
@@ -32,6 +34,23 @@ export default function OrderDetailsScreen() {
   const [rateModalVisible, setRateModalVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+
+  useEffect(() => {
+    const loadOrder = async () => {
+      const orderId = (params.orderId as string) || (params._id as string);
+      if (orderId) {
+        const result = await fetchOrderById(orderId);
+        if (result) {
+          setOrderData(result);
+          console.log("Order items:", result.items);
+          console.log("Subtotal:", result.subtotal);
+        }
+      }
+      setOrderLoading(false);
+    };
+
+    loadOrder();
+  }, [params.orderId, params._id]);
 
   useEffect(() => {
     const checkExistingReview = async () => {
@@ -285,14 +304,31 @@ export default function OrderDetailsScreen() {
         {/* Restaurant Card & Cancel Button */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center gap-3">
-            <View className="w-12 h-12 bg-gray-900 rounded-full items-center justify-center">
+          <View className="w-12 h-12 bg-gray-900 rounded-full items-center justify-center overflow-hidden">
+            {orderData?.providerId?.restaurantPic ? (
+              <Image
+                source={{ uri: orderData?.providerId?.restaurantPic }}
+                className="w-full h-full rounded-full"
+                resizeMode="cover"
+              />
+            ) : (
               <Ionicons name="restaurant" size={20} color="#FFC107" />
-            </View>
+            )}
+          </View>
+
             <View>
               <Text className="text-base font-bold text-gray-900">
-                Restaurant Food
+                {orderData?.providerId?.restaurantName}
               </Text>
-              <Text className="text-gray-500 text-sm">Jan 12, 2026</Text>
+              <Text className="text-gray-500 text-sm">
+                {orderData?.createdAt
+                  ? new Date(orderData.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "Jan 12, 2026"}
+              </Text>
             </View>
           </View>
 
@@ -332,37 +368,88 @@ export default function OrderDetailsScreen() {
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center gap-2">
               <Ionicons name="location-outline" size={20} color="#666" />
-              <Text className="text-gray-500 text-base">Pickup at</Text>
+              <Text className="text-gray-500 text-base">
+                {orderData?.logisticsType === "Delivery" ? "Deliver to" : "Pickup at"}
+              </Text>
             </View>
             <Text className="text-gray-900 font-bold text-sm underline">
-              {pickupAddress}
+              {orderData?.providerId?.restaurantAddress || pickupAddress}
             </Text>
           </View>
 
+          {orderData?.logisticsType && (
+            <View className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <Ionicons name={
+                  orderData.logisticsType === "Delivery"
+                    ? "bicycle-outline"
+                    : "walk-outline"
+                } size={20} color="#666" />
+                <Text className="text-gray-500 text-base">Logistics</Text>
+              </View>
+              <Text className="text-gray-900 font-bold text-sm">
+                {orderData.logisticsType}
+              </Text>
+            </View>
+          )}
+
+          {orderData?.paymentMethod && (
+            <View className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="card-outline" size={20} color="#666" />
+                <Text className="text-gray-500 text-base">Payment</Text>
+              </View>
+              <Text className="text-gray-900 font-bold text-sm">
+                {orderData.paymentMethod}
+              </Text>
+            </View>
+          )}
+
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center gap-2">
-              <Ionicons name="card-outline" size={20} color="#666" />
+              <Ionicons name="receipt-outline" size={20} color="#666" />
               <Text className="text-gray-500 text-base">Amount Paid</Text>
             </View>
-            <Text className="text-gray-900 font-bold text-base">$32.12</Text>
+            <Text className="text-gray-900 font-bold text-base">
+              ${orderData?.subtotal?.toFixed(2) || "0.00"}
+            </Text>
           </View>
         </View>
 
         {/* Order Items */}
         <Text className="font-bold text-gray-900 mb-4">Your Order</Text>
-        <View className="flex-row gap-4 mb-10">
-          {[1, 2, 3].map((i) => (
-            <View key={i} className="items-center">
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150",
-                }}
-                className="w-16 h-16 rounded-xl mb-1"
-                resizeMode="cover"
-              />
-              <Text className="text-sm text-gray-500">x2</Text>
-            </View>
-          ))}
+        <View className="flex-row flex-wrap gap-4 mb-10">
+          {orderLoading ? (
+            <Text className="text-gray-400 text-sm">Loading order items...</Text>
+          ) : orderData?.items?.length > 0 ? (
+            orderData.items.map((item: any, index: number) => {
+              const imageUri = item?.foodId?.image || item?.image || "";
+              const qty = item?.quantity || 1;
+              return (
+                <View key={item._id || index} className="items-center">
+                  <Image
+                    source={{ uri: imageUri }}
+                    className="w-16 h-16 rounded-xl mb-1"
+                    resizeMode="cover"
+                  />
+                  <Text className="text-sm text-gray-500">x{qty}</Text>
+                </View>
+              );
+            })
+          ) : (
+            [1, 2, 3].map((i) => (
+              <View key={i} className="items-center">
+                <Image
+                  source={{
+                    uri: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150",
+                  }}
+                  className="w-16 h-16 rounded-xl mb-1"
+                  resizeMode="cover"
+                />
+                <Text className="text-sm text-gray-500">x2</Text>
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
 
