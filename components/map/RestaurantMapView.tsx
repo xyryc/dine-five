@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
+import * as Location from "expo-location";
 import { Restaurant, useRestaurantStore } from "../../stores/useRestaurantStore";
 import {
   buildRestaurantSearchHaystack,
@@ -96,6 +97,104 @@ export default function RestaurantMapView({
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [mealFilter, setMealFilter] = useState<"all" | "free">("all");
+
+  const [addressLabel, setAddressLabel] = useState("3067 Fifth Ave");
+
+  useEffect(() => {
+    let isMounted = true;
+    const updateAddressLabel = async () => {
+      if (!location) return;
+      try {
+        const result = await Location.reverseGeocodeAsync({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+        if (!isMounted) return;
+        const place = result?.[0];
+        if (place) {
+          const label = place.street || place.district || place.subregion || place.city || place.name || "Selected Location";
+          setAddressLabel(label);
+        }
+      } catch (err) {
+        console.log("Reverse geocoding error:", err);
+      }
+    };
+    updateAddressLabel();
+    return () => {
+      isMounted = false;
+    };
+  }, [location]);
+
+  const handleAutoLocate = async () => {
+    await fetchLocation();
+    const { location: updatedLocation } = useRestaurantStore.getState();
+    if (updatedLocation && mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: updatedLocation.latitude,
+        longitude: updatedLocation.longitude,
+        latitudeDelta: 0.002,
+        longitudeDelta: 0.002,
+      }, 1000);
+    }
+  };
+
+  const handlePickerPress = () => {
+    Alert.prompt(
+      "Set Location",
+      "Enter an address, city, or place name:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Search",
+          onPress: async (address) => {
+            if (!address) return;
+            try {
+              const results = await Location.geocodeAsync(address);
+              if (results && results.length > 0) {
+                const newLoc = {
+                  latitude: results[0].latitude,
+                  longitude: results[0].longitude,
+                };
+                
+                // Update store location
+                useRestaurantStore.setState({ location: newLoc });
+                
+                // Animate map to location
+                mapRef.current?.animateToRegion({
+                  ...newLoc,
+                  latitudeDelta: 0.002,
+                  longitudeDelta: 0.002,
+                }, 1000);
+                
+                // Fetch for the new location
+                if (mealFilter === "free") {
+                  fetchFreeMeals({ page: 1, limit: 20 });
+                } else {
+                  fetchNearbyRestaurants({
+                    latitude: newLoc.latitude,
+                    longitude: newLoc.longitude,
+                    radius: radiusMeters,
+                    cuisine: cuisineFilter,
+                    sortBy: "distance",
+                    page: 1,
+                    limit: 20,
+                  });
+                }
+              } else {
+                Alert.alert("Location Not Found", "Could not resolve the address.");
+              }
+            } catch (err) {
+              Alert.alert("Error", "Failed to resolve address.");
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
 
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
@@ -433,13 +532,16 @@ export default function RestaurantMapView({
             </View>
 
             {/* auto locate. also picker button */}
+            <TouchableOpacity onPress={handleAutoLocate} className="p-1">
+              <Ionicons name="locate-outline" size={20} color="#FFC107" />
+            </TouchableOpacity>
             <View className="w-[1px] h-5 bg-gray-200 mx-2" />
-            <View className="flex-row items-center">
+            <TouchableOpacity onPress={handlePickerPress} className="flex-row items-center">
               <Ionicons name="location-sharp" size={18} color="#9CA3AF" />
-              <Text className="ml-1 text-[14px] text-[#9CA3AF] font-medium">
-                3067 Fifth Ave
+              <Text className="ml-1 text-[14px] text-[#9CA3AF] font-medium max-w-[120px]" numberOfLines={1}>
+                {addressLabel}
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 
