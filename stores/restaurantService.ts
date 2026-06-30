@@ -51,6 +51,7 @@ export interface NearbyParams {
   page?: number;
   limit?: number;
   freeNearYou?: boolean;
+  search?: string;
 }
 
 export interface NearbyResponse {
@@ -386,9 +387,12 @@ export const restaurantService = {
     if (params.cuisine) {
       queryParams.set("cuisine", params.cuisine);
     }
+    if (params.search) {
+      queryParams.set("search", params.search);
+    }
 
     const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
-    console.log("[restaurantService] getNearby:", url);
+    console.log("🚀 CALLING API ENDPOINT (getNearby):", url);
 
     try {
       const res = await fetch(url, {
@@ -415,7 +419,7 @@ export const restaurantService = {
 
       return normalizeNearbyResponse(json);
     } catch (error: any) {
-      console.log("[restaurantService] getNearby error:", error);
+      console.log("❌ getNearby error:", error);
       throw error;
     }
   },
@@ -431,6 +435,7 @@ export const restaurantService = {
     latitude?: number;
     longitude?: number;
     radius?: number;
+    search?: string;
   }): Promise<NearbyResponse> => {
     const FALLBACK = { latitude: 23.780704, longitude: 90.407756 };
     const lat = params.latitude ?? FALLBACK.latitude;
@@ -450,8 +455,12 @@ export const restaurantService = {
       freeNearYou: "true",
     });
 
+    if (params.search) {
+      queryParams.set("search", params.search);
+    }
+
     const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
-    console.log("[restaurantService] getFreeMeals:", url);
+    console.log("🚀 CALLING API ENDPOINT (getFreeMeals):", url);
 
     try {
       const res = await fetch(url, {

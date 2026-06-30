@@ -28,7 +28,7 @@ interface RestaurantState {
   availableTokenCount: number;
   fetchLocation: () => Promise<void>;
   fetchNearbyRestaurants: (params: NearbyParams) => Promise<void>;
-  fetchFreeMeals: (params: { page?: number; limit?: number }) => Promise<void>;
+  fetchFreeMeals: (params: { page?: number; limit?: number; search?: string }) => Promise<void>;
   setActiveFeedMode: (mode: FeedMode) => void;
   setHomeRestaurants: (restaurants: Restaurant[]) => void;
   setSelectedRestaurant: (restaurant: Restaurant | null) => void;
@@ -174,7 +174,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
     }
   },
 
-  fetchFreeMeals: async (params: { page?: number; limit?: number }) => {
+  fetchFreeMeals: async (params: { page?: number; limit?: number; search?: string }) => {
     const requestSeq = get().restaurantRequestSeq + 1;
 
     set({

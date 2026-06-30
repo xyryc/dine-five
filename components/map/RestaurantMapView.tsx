@@ -27,7 +27,7 @@ const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_GAP = 12;
 const CARD_SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
-const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
+const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
 
 const toNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -97,6 +97,18 @@ export default function RestaurantMapView({
   const [searchText, setSearchText] = useState("");
   const [mealFilter, setMealFilter] = useState<"all" | "free">("all");
 
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
+
   const userLat = location?.latitude ?? 23.780704;
   const userLng = location?.longitude ?? 90.407756;
   const hasLocation = !!location && !locationLoading;
@@ -111,7 +123,7 @@ export default function RestaurantMapView({
     const loadData = async () => {
       if (mealFilter === "free") {
         console.log("[RestaurantMapView] Fetching free meals (donated-foods/nearby?freeNearYou=true)...");
-        await fetchFreeMeals({ page: 1, limit: 20 });
+        await fetchFreeMeals({ page: 1, limit: 20, search: debouncedSearchText || undefined });
         return;
       }
 
@@ -124,6 +136,7 @@ export default function RestaurantMapView({
         sortBy: "distance",
         page: 1,
         limit: 20,
+        search: debouncedSearchText || undefined,
       });
     };
 
@@ -135,6 +148,7 @@ export default function RestaurantMapView({
     userLng,
     radiusMeters,
     cuisineFilter,
+    debouncedSearchText,
   ]);
 
   // Auto-zoom to user location when it's first loaded
@@ -156,7 +170,7 @@ export default function RestaurantMapView({
   }, [restaurants, mealFilter]);
 
   const filteredRestaurants = useMemo(() => {
-    const normalizedQuery = normalizeRestaurantSearchQuery(searchText);
+    const normalizedQuery = normalizeRestaurantSearchQuery(debouncedSearchText);
     if (!normalizedQuery) return allRestaurants;
 
     const queryTokens = normalizedQuery.split(" ").filter(Boolean);
@@ -171,7 +185,7 @@ export default function RestaurantMapView({
     });
     console.log(`[RestaurantMapView] Filter: ${mealFilter}, Items: ${list.length}`);
     return list;
-  }, [allRestaurants, searchText, mealFilter]);
+  }, [allRestaurants, debouncedSearchText, mealFilter]);
 
   useEffect(() => {
     if (filteredRestaurants.length === 0) {

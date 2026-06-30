@@ -42,6 +42,8 @@ export const buildRestaurantSearchHaystack = (restaurant: Restaurant): string =>
     restaurant.phoneNumber,
     (restaurant as any).providerName,
     (restaurant as any).name,
+    restaurant.title,
+    restaurant.mealName,
     Array.isArray(restaurant.cuisine) ? restaurant.cuisine.join(" ") : "",
   ];
 
