@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -60,7 +60,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const avatarUri = getUserAvatarUri(user);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchProfile?.();
   }, [fetchProfile]);
 

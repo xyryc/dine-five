@@ -458,7 +458,7 @@ export const restaurantService = {
     const limit = params.limit ?? 20;
     const url = `${API_BASE_URL}/api/v1/feed/free-meals?page=${page}&limit=${limit}`;
 
-    console.log("Free meals request:", url);
+    // console.log("Free meals request:", url);
     try {
       const res = await fetch(url, {
         method: "GET",
