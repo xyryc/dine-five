@@ -430,7 +430,7 @@ function CheckoutContent() {
       const paidTotal = toNumber(latestBreakdown?.total, donationTotal);
 
       router.push({
-        pathname: "/screens/card/order-success",
+        pathname: "/screens/cart/order-success",
         params: {
           type: "donation",
           mealCount: String(tokensCreated),
@@ -580,7 +580,7 @@ function CheckoutContent() {
           foodData.restaurantAddress || pickupAddress;
 
         router.push({
-          pathname: "/screens/card/order-success",
+          pathname: "/screens/cart/order-success",
           params: {
             restaurantName: foodData.restaurantName || "Restaurant",
             restaurantAddress,
@@ -781,7 +781,7 @@ function CheckoutContent() {
         onConfirm={(mealCount: number) => {
           setIsDonateModalVisible(false);
           router.push({
-            pathname: "/screens/card/checkout",
+            pathname: "/screens/cart/checkout",
             params: {
               mealCount: String(mealCount),
               type: "donation",

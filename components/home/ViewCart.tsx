@@ -14,7 +14,7 @@ export const ViewCart = ({ count, total }: ViewCartProps) => {
     return (
         <View className="absolute bottom-24 left-4 right-4 z-50">
             <TouchableOpacity
-                onPress={() => router.push('/(tabs)/card')}
+                onPress={() => router.push('/(tabs)/cart')}
                 activeOpacity={0.9}
                 className="flex-row items-center justify-between bg-[#EFEEEA] rounded-full pl-6 pr-2 py-2 shadow-xl border border-white/50"
             >

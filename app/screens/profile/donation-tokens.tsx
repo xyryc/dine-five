@@ -499,7 +499,7 @@ export default function DonationTokensScreen() {
               <TouchableOpacity
                 onPress={() =>
                   router.push({
-                    pathname: "/screens/card/checkout",
+                    pathname: "/screens/cart/checkout",
                     params: { mealCount: "1", type: "donation" },
                   } as any)
                 }

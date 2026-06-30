@@ -1,4 +1,4 @@
-import { CartItem } from "@/components/card/CartItem";
+import { CartItem } from "@/components/cart/CartItem";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
@@ -109,7 +109,7 @@ export default function ConfirmOrderScreen() {
       Alert.alert("Error", "Your cart is empty");
       return;
     }
-    router.push("/screens/card/checkout");
+    router.push("/screens/cart/checkout");
   };
 
   const deliveryFee = 3.99;

@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   Switch,
@@ -179,7 +180,7 @@ const extractTaxRateFromPayload = (
   );
 };
 
-export default function CardScreen() {
+export default function CartScreen() {
   const router = useRouter();
   const {
     fetchCart,
@@ -420,7 +421,8 @@ export default function CardScreen() {
     return (
       <SafeAreaView className="flex-1 bg-[#FDFBF7] justify-center items-center">
         <StatusBar style="dark" />
-        <Text>Loading Cart...</Text>
+        <ActivityIndicator size="large" color="#FFC107" />
+        <Text className="mt-4 text-gray-500 text-sm">Loading Cart...</Text>
       </SafeAreaView>
     );
   }
@@ -653,7 +655,7 @@ export default function CardScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push("/screens/card/checkout")}
+            onPress={() => router.push("/screens/cart/checkout")}
             className="flex-1 h-11 rounded-xl items-center justify-center"
             style={{ backgroundColor: "#F5C518" }}
           >

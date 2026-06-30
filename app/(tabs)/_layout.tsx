@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const TAB_CONFIG = [
   { name: "index",    type: "ionicons" as const,    icon: "home-outline" as any,     activeIcon: "home" as any },
   { name: "location", type: "ionicons" as const,    icon: "location-outline" as any, activeIcon: "location" as any },
-  { name: "card",     type: "ionicons" as const,    icon: "cart-outline" as any,     activeIcon: "cart" as any },
+  { name: "cart",     type: "ionicons" as const,    icon: "cart-outline" as any,     activeIcon: "cart" as any },
   { name: "profile",  type: "fontawesome" as const, icon: "user-o" as any,           activeIcon: "user" as any },
 ] as const;
 
@@ -147,7 +147,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index"           options={{ title: "Home" }} />
       <Tabs.Screen name="location"        options={{ title: "Location" }} />
-      <Tabs.Screen name="card"            options={{ title: "Cart" }} />
+      <Tabs.Screen name="cart"            options={{ title: "Cart" }} />
       <Tabs.Screen name="profile"         options={{ title: "Profile" }} />
       <Tabs.Screen name="hotel-details"   options={{ href: null }} />
       <Tabs.Screen name="product-details" options={{ href: null }} />

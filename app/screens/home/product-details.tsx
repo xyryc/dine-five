@@ -232,7 +232,7 @@ export default function ProductDetails() {
       const result = await addToCart(product, quantity);
       if (result) {
         // Only navigate if successful
-        router.push("/(tabs)/card");
+        router.push("/(tabs)/cart");
       } else {
         const latestError = (useStore.getState() as any)?.error;
         Alert.alert("Failed", latestError || "Failed to add to cart. Please try again.");

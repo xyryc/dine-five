@@ -25,7 +25,7 @@ const MENU_ITEMS = [
     id: "cart",
     title: "Cart",
     icon: "cart-outline",
-    route: "/(tabs)/card",
+    route: "/(tabs)/cart",
   },
   {
     id: "payment",

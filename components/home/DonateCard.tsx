@@ -10,7 +10,7 @@ export const DonateCard = () => {
   const handleConfirm = (mealCount: number) => {
     setModalVisible(false);
     router.push({
-      pathname: "/screens/card/checkout",
+      pathname: "/screens/cart/checkout",
       params: {
         mealCount: String(mealCount),
         type: "donation",
