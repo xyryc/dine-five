@@ -45,11 +45,12 @@ export interface Restaurant {
 export interface NearbyParams {
   latitude: number;
   longitude: number;
-  radius?: number; // meters
+  radius?: number; // meters — converted to km for the API
   cuisine?: string;
   sortBy?: "distance" | "rating";
   page?: number;
   limit?: number;
+  freeNearYou?: boolean;
 }
 
 export interface NearbyResponse {
@@ -270,21 +271,27 @@ const normalizeNearbyResponse = (payload: any): NearbyResponse => {
   const normalized = rawData.map((item: any, index: number) =>
     normalizeRestaurant(item, index),
   );
-  const pagination = payload?.pagination ?? payload?.meta;
+
+  // The donated-foods API returns token count inside `meta`
+  const tokenCount = toNumber(
+    payload?.meta?.availableTokenCount ??
+    payload?.availableTokenCount ??
+    payload?.meta?.freeTokenCount,
+    0,
+  );
+
+  const paginationRaw = payload?.pagination;
 
   return {
     success: Boolean(payload?.success ?? true),
     message: String(payload?.message ?? ""),
     data: normalized,
-    availableTokenCount: toNumber(
-      payload?.meta?.availableTokenCount ?? payload?.availableTokenCount,
-      0,
-    ),
-    pagination: pagination
+    availableTokenCount: tokenCount,
+    pagination: paginationRaw
       ? {
-          total: toNumber(pagination.total, normalized.length),
-          page: toNumber(pagination.page, 1),
-          limit: toNumber(pagination.limit, normalized.length || 20),
+          total: toNumber(paginationRaw.total, normalized.length),
+          page: toNumber(paginationRaw.page, 1),
+          limit: toNumber(paginationRaw.limit, normalized.length || 20),
         }
       : undefined,
   };
@@ -352,113 +359,100 @@ const requestJson = async (
 
 export const restaurantService = {
   /**
-   * POST /provider/nearby
-   * Backend expects radius in kilometers (max 100).
+   * GET /provider/donated-foods/nearby
+   * Used for both "Meal near you" (freeNearYou=false) and
+   * "Free meal near you" (freeNearYou=true).
+   * Backend expects radius in km (max 100).
    */
   getNearby: async (params: NearbyParams): Promise<NearbyResponse> => {
     const radiusMeters = Math.max(10, Math.round(params.radius ?? 1000));
     const radiusKm = Math.min(100, Number((radiusMeters / 1000).toFixed(2)));
-    const common = {
-      sortBy: params.sortBy ?? "distance",
-      page: params.page ?? 1,
-      limit: params.limit ?? 20,
-      ...(params.cuisine ? { cuisine: params.cuisine } : {}),
-    };
+    const page = params.page ?? 1;
+    const limit = params.limit ?? 20;
+    const sortBy = params.sortBy ?? "distance";
 
-    const payloads: Record<string, any>[] = [
-      {
-        latitude: params.latitude,
-        longitude: params.longitude,
-        radius: radiusKm,
-        radiusKm,
-        radiusMeters,
-        ...common,
-      },
-      {
-        lat: params.latitude,
-        lng: params.longitude,
-        radius: radiusKm,
-        radiusKm,
-        radiusMeters,
-        ...common,
-      },
-    ];
+    const queryParams = new URLSearchParams({
+      latitude: String(params.latitude),
+      longitude: String(params.longitude),
+      radius: String(radiusKm),
+      page: String(page),
+      limit: String(limit),
+      sortBy,
+    });
 
-    const endpoints = [
-      `${BASE_URL}/provider/nearby`,
-      `${BASE_URL}/providers/nearby`,
-      `${BASE_URL}/restaurants/nearby`,
-    ];
-
-    let lastError: Error | null = null;
-
-    for (const endpoint of endpoints) {
-      for (const body of payloads) {
-        // console.log(
-        //   "Nearby request payload:",
-        //   JSON.stringify({ endpoint, body }),
-        // );
-        try {
-          const res = await fetch(endpoint, {
-            method: "POST",
-            headers: getAuthHeaders(),
-            body: JSON.stringify(body),
-          });
-
-          const responseText = await res.text();
-          let json: any = null;
-          try {
-            json = responseText ? JSON.parse(responseText) : null;
-          } catch {
-            json = null;
-          }
-
-          // console.log("Nearby response status:", res.status);
-
-          if (!res.ok) {
-            const errorMessage =
-              json?.message ||
-              json?.error?.message ||
-              responseText ||
-              `Request failed with status ${res.status}`;
-
-            const error = new Error(errorMessage) as RetryableError;
-            // Retry only when endpoint is missing/not allowed; otherwise stop immediately.
-            error.retryable = res.status === 404 || res.status === 405;
-            throw error;
-          }
-
-          const normalized = normalizeNearbyResponse(json);
-          if (!normalized.success && normalized.data.length === 0) {
-            lastError = new Error(normalized.message || "Unknown API error");
-            continue;
-          }
-
-          return normalized;
-        } catch (error: any) {
-          if (error && typeof error === "object" && error.retryable === false) {
-            throw error;
-          }
-          lastError = error;
-        }
-      }
+    if (params.freeNearYou) {
+      queryParams.set("freeNearYou", "true");
+    }
+    if (params.cuisine) {
+      queryParams.set("cuisine", params.cuisine);
     }
 
-    console.log("Nearby request error:", lastError);
-    throw lastError || new Error("Failed to load nearby restaurants");
+    const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
+    console.log("[restaurantService] getNearby:", url);
+
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      const responseText = await res.text();
+      let json: any = null;
+      try {
+        json = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        json = null;
+      }
+
+      if (!res.ok) {
+        throw new Error(
+          json?.message ||
+          json?.error?.message ||
+          responseText ||
+          `Request failed with status ${res.status}`,
+        );
+      }
+
+      return normalizeNearbyResponse(json);
+    } catch (error: any) {
+      console.log("[restaurantService] getNearby error:", error);
+      throw error;
+    }
   },
+
   /**
-   * GET /feed/free-meals
+   * GET /provider/donated-foods/nearby?freeNearYou=true
+   * Alias that explicitly sets freeNearYou=true using the current user location
+   * from the store so callers don't have to pass coordinates.
    */
   getFreeMeals: async (params: {
     page?: number;
     limit?: number;
+    latitude?: number;
+    longitude?: number;
+    radius?: number;
   }): Promise<NearbyResponse> => {
+    const FALLBACK = { latitude: 23.780704, longitude: 90.407756 };
+    const lat = params.latitude ?? FALLBACK.latitude;
+    const lng = params.longitude ?? FALLBACK.longitude;
+    const radiusMeters = Math.max(10, Math.round(params.radius ?? 100000));
+    const radiusKm = Math.min(100, Number((radiusMeters / 1000).toFixed(2)));
     const page = params.page ?? 1;
     const limit = params.limit ?? 20;
-    const url = `${API_BASE_URL}/api/v1/feed/free-meals?page=${page}&limit=${limit}`;
 
-    // console.log("Free meals request:", url);
+    const queryParams = new URLSearchParams({
+      latitude: String(lat),
+      longitude: String(lng),
+      radius: String(radiusKm),
+      page: String(page),
+      limit: String(limit),
+      sortBy: "distance",
+      freeNearYou: "true",
+    });
+
+    const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
+    console.log("[restaurantService] getFreeMeals:", url);
+
     try {
       const res = await fetch(url, {
         method: "GET",
@@ -466,17 +460,14 @@ export const restaurantService = {
       });
 
       const json = await res.json();
-      // console.log("Free meals response status:", res.status);
 
       if (!res.ok) {
         throw new Error(json?.message || "Failed to load free meals");
       }
 
-      // Free meals are usually product objects, but we need to normalize them to Restaurant-like objects for the map view.
-      // We'll extract restaurant/provider info from the meal object.
       return normalizeNearbyResponse(json);
     } catch (error: any) {
-      console.log("Free meals request error:", error);
+      console.log("[restaurantService] getFreeMeals error:", error);
       throw error;
     }
   },

@@ -185,7 +185,14 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
     });
 
     try {
-      const response = await restaurantService.getFreeMeals(params);
+      // Pass user location so the service can hit donated-foods/nearby with freeNearYou=true
+      const { location, radiusMeters } = get();
+      const response = await restaurantService.getFreeMeals({
+        ...params,
+        latitude: location?.latitude ?? FALLBACK_LOCATION.latitude,
+        longitude: location?.longitude ?? FALLBACK_LOCATION.longitude,
+        radius: radiusMeters,
+      });
       const restaurants = response.data ?? [];
       const total = response.pagination?.total ?? restaurants.length;
 

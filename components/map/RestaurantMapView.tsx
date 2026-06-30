@@ -14,9 +14,7 @@ import {
   View,
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
-import { useStore } from "../../stores/stores";
 import { Restaurant, useRestaurantStore } from "../../stores/useRestaurantStore";
-import { extractHomeRestaurants } from "../../utils/homeFeedRestaurants";
 import {
   buildRestaurantSearchHaystack,
   formatRestaurantDistance,
@@ -29,7 +27,7 @@ const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_GAP = 12;
 const CARD_SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
-const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000];
+const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
 
 const toNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -79,7 +77,6 @@ export default function RestaurantMapView({
     location,
     locationLoading,
     restaurants,
-    homeRestaurants,
     restaurantsLoading,
     restaurantsError,
     selectedRestaurant,
@@ -90,13 +87,11 @@ export default function RestaurantMapView({
     fetchLocation,
     fetchNearbyRestaurants,
     fetchFreeMeals,
-    setHomeRestaurants,
     setSelectedRestaurant,
     setActiveFeedMode,
     setRadiusMeters,
     claimToken,
   } = useRestaurantStore();
-  const fetchHomeFeed = useStore((state: any) => state.fetchHomeFeed);
 
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [searchText, setSearchText] = useState("");
@@ -113,35 +108,14 @@ export default function RestaurantMapView({
   useEffect(() => {
     if (!hasLocation) return;
 
-    let isCancelled = false;
-
     const loadData = async () => {
       if (mealFilter === "free") {
-        console.log("[RestaurantMapView] Fetching free meals...");
+        console.log("[RestaurantMapView] Fetching free meals (donated-foods/nearby?freeNearYou=true)...");
         await fetchFreeMeals({ page: 1, limit: 20 });
         return;
       }
 
-      // If we have home restaurants already, don't fetch nearby again unless needed
-      if (homeRestaurants.length > 0) return;
-
-      console.log("[RestaurantMapView] Fetching home feed and nearby...");
-      try {
-        const homeFeed = await fetchHomeFeed?.({ page: 1, limit: 20 });
-        if (isCancelled) return;
-
-        const extractedProviders = extractHomeRestaurants(homeFeed);
-        if (extractedProviders.length > 0) {
-          setHomeRestaurants(extractedProviders);
-          // fetchNearbyRestaurants will be called by the next effect run if needed
-          // or we can call it here if we want to combine them
-        }
-      } catch (error) {
-        console.log("Location home provider load error", error);
-      }
-
-      if (isCancelled) return;
-
+      console.log("[RestaurantMapView] Fetching nearby donated foods...");
       fetchNearbyRestaurants({
         latitude: userLat,
         longitude: userLng,
@@ -154,10 +128,6 @@ export default function RestaurantMapView({
     };
 
     loadData();
-
-    return () => {
-      isCancelled = true;
-    };
   }, [
     mealFilter,
     hasLocation,
@@ -165,7 +135,6 @@ export default function RestaurantMapView({
     userLng,
     radiusMeters,
     cuisineFilter,
-    // homeRestaurants.length omitted to prevent loop if setHomeRestaurants is called
   ]);
 
   // Auto-zoom to user location when it's first loaded
@@ -183,20 +152,8 @@ export default function RestaurantMapView({
   }, [location, locationLoading]);
 
   const allRestaurants = useMemo(() => {
-    if (mealFilter === "free") return restaurants;
-
-    // Combine nearby restaurants and home restaurants, avoiding duplicates by id/providerId
-    const combined = [...restaurants];
-    homeRestaurants.forEach((hr) => {
-      const exists = combined.some(
-        (r) => (r.id === hr.id) || (r.providerId === hr.providerId)
-      );
-      if (!exists) {
-        combined.push(hr);
-      }
-    });
-    return combined;
-  }, [restaurants, homeRestaurants, mealFilter]);
+    return restaurants;
+  }, [restaurants, mealFilter]);
 
   const filteredRestaurants = useMemo(() => {
     const normalizedQuery = normalizeRestaurantSearchQuery(searchText);
@@ -313,10 +270,6 @@ export default function RestaurantMapView({
   };
 
   const handleRadiusPress = (radius: number) => {
-    if (mealFilter === "all" && homeRestaurants.length > 0) {
-      return;
-    }
-
     if (radius !== radiusMeters) {
       setRadiusMeters(radius);
       setSelectedRestaurant(null);
@@ -350,8 +303,7 @@ export default function RestaurantMapView({
     }
   };
 
-  const isShowingHomeProviders =
-    mealFilter === "all" && homeRestaurants.length > 0;
+  const isShowingHomeProviders = false;
 
   if (locationLoading) {
     return (
@@ -465,6 +417,8 @@ export default function RestaurantMapView({
                 className="flex-1 ml-2 text-[15px] text-gray-700"
               />
             </View>
+
+            {/* auto locate. also picker button */}
             <View className="w-[1px] h-5 bg-gray-200 mx-2" />
             <View className="flex-row items-center">
               <Ionicons name="location-sharp" size={18} color="#9CA3AF" />
@@ -510,7 +464,6 @@ export default function RestaurantMapView({
             {isShowingHomeProviders
               ? `${filteredRestaurants.length} providers available`
               : `${filteredRestaurants.length} found within ${formatRadius(radiusMeters)}`}
-            {mealFilter === "free" ? ` | ${(availableTokenCount || total || 0)} Tokens Available` : ""}
           </Text>
         )}
       </View>
@@ -533,16 +486,6 @@ export default function RestaurantMapView({
               });
 
               if (!hasLocation) return;
-
-              try {
-                const homeFeed = await fetchHomeFeed?.({ page: 1, limit: 20 });
-                const extractedProviders = extractHomeRestaurants(homeFeed);
-                if (extractedProviders.length > 0) {
-                  setHomeRestaurants(extractedProviders);
-                }
-              } catch (error) {
-                console.log("Meal near you load error", error);
-              }
 
               fetchNearbyRestaurants({
                 latitude: userLat,
@@ -687,42 +630,24 @@ export default function RestaurantMapView({
                         <Text className="text-xs text-gray-600 ml-1">{rating.toFixed(1)}</Text>
                         <Text className="text-xs text-gray-300 mx-2">|</Text>
                         <Text className="text-xs text-gray-600">{isFreeMode ? "Free Meal" : cuisine}</Text>
-                        <Text className="text-xs text-gray-300 mx-2">|</Text>
-                        <Text className="text-xs text-gray-600">{isFreeMode ? "Limited" : "10min"}</Text>
                       </View>
 
                       <View className="flex-row items-center justify-between pt-3 border-t border-gray-50">
                         <View className="flex-row items-center">
                           <Ionicons name="navigate-outline" size={14} color="#FFC107" />
                           <Text className="text-[11px] font-bold text-gray-700 ml-1">
-                            {isFreeMode
-                              ? `${item.freeTokenCount || 0} tokens`
-                              : formatRestaurantDistance(item.distance)}
+                            {formatRestaurantDistance(item.distance)}
                           </Text>
-                          {isFreeMode && (item as any).originalPrice ? (
-                            <Text className="text-[10px] text-gray-400 line-through ml-3">
-                              ${(item as any).originalPrice}
-                            </Text>
-                          ) : null}
                         </View>
 
-                        {isFreeMode ? (
-                          <TouchableOpacity
-                            className="bg-[#FFC107] px-5 py-2 rounded-2xl shadow-sm"
-                            onPress={() => openRestaurantDetail(item)}
-                          >
-                            <Text className="text-gray-900 font-black text-[11px] uppercase tracking-wide">
-                              View Details
-                            </Text>
-                          </TouchableOpacity>
-                        ) : (
-                          <View className="flex-row items-center">
-                            <Ionicons name="time-outline" size={14} color="#9CA3AF" />
-                            <Text className="text-[11px] font-bold text-gray-600 ml-1">
-                              10-15 min
-                            </Text>
-                          </View>
-                        )}
+                        <TouchableOpacity
+                           className="bg-[#FFC107] px-5 py-2 rounded-2xl shadow-sm"
+                           onPress={() => openRestaurantDetail(item)}
+                         >
+                           <Text className="text-gray-900 font-black text-[11px] uppercase tracking-wide">
+                             View Details
+                           </Text>
+                         </TouchableOpacity>
                       </View>
                     </View>
                   </View>
