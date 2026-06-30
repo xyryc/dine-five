@@ -188,7 +188,7 @@ function Section({
 
   return (
     <View className="mb-6">
-      <View className="flex-row justify-between items-center px-4 mb-3">
+      <View className="flex-row justify-between items-center px-4 mb-2">
         <Text className="text-lg font-bold text-gray-900">{title}</Text>
         <TouchableOpacity>
           <Text className="text-sm font-semibold" style={{ color: "#F5C518" }}>

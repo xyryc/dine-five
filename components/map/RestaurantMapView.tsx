@@ -515,7 +515,7 @@ export default function RestaurantMapView({
         )}
       </View>
 
-      <View className="absolute bottom-32 left-0 right-0">
+      <View className="absolute bottom-36 left-0 right-0">
         <View className="flex-row justify-center gap-3 px-4 mb-4">
           <TouchableOpacity
             onPress={async () => {

@@ -1,3 +1,4 @@
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
@@ -8,10 +9,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Tab definitions ────────────────────────────────────────────────────────
 const TAB_CONFIG = [
-  { name: "index",    icon: "home-outline" as const,     activeIcon: "home" as const },
-  { name: "location", icon: "location-outline" as const, activeIcon: "location" as const },
-  { name: "card",     icon: "cart-outline" as const,     activeIcon: "cart" as const },
-  { name: "profile",  icon: "person-outline" as const,   activeIcon: "person" as const },
+  { name: "index",    type: "ionicons" as const,    icon: "home-outline" as any,     activeIcon: "home" as any },
+  { name: "location", type: "ionicons" as const,    icon: "location-outline" as any, activeIcon: "location" as any },
+  { name: "card",     type: "ionicons" as const,    icon: "cart-outline" as any,     activeIcon: "cart" as any },
+  { name: "profile",  type: "fontawesome" as const, icon: "user-o" as any,           activeIcon: "user" as any },
 ] as const;
 
 const BAR_HEIGHT = 64;
@@ -96,6 +97,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             if (!config) return null;
             const isFocused = activeIdx === idx;
 
+            const IconComponent = config.type === "fontawesome" ? FontAwesome : Ionicons;
+            const iconSize = config.type === "fontawesome" ? 21 : 22; // adjust FontAwesome user-o alignment slightly
+
             return (
               <Pressable
                 key={route.key}
@@ -120,9 +124,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                   descriptors[route.key].options.title ?? config.name
                 }
               >
-                <Ionicons
+                <IconComponent
                   name={isFocused ? config.activeIcon : config.icon}
-                  size={22}
+                  size={iconSize}
                   color={isFocused ? "#E8A020" : "#ABABAB"}
                 />
               </Pressable>
