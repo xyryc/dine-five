@@ -13,7 +13,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow app to use your location to find nearby restaurants."
       },
-      "bundleIdentifier": "com.mdalifk2002.DineFive"
+      "bundleIdentifier": "com.dinefive.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "backgroundImage": "./assets/icon.png",
         "monochromeImage": "./assets/icon.png"
       },
-      "package": "com.mdalifk2002.DineFive",
+      "package": "com.dinefive.app",
       "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {

@@ -1,21 +1,27 @@
 import { signInWithGoogle } from "@/services/socialAuth";
 import { useStore } from "@/stores/stores";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function GoogleLogin() {
   const [isBusy, setIsBusy] = useState(false);
   const { googleLogin } = useStore() as any;
+  const { height, width } = useWindowDimensions();
+
+  // Calculate dynamic dimensions consistent with standard GradientButton
+  const buttonHeight = Math.min(Math.max(height * 0.055, 42), 56);
+  const fontSize = Math.min(Math.max(width * 0.042, 15), 18);
 
   async function handleGoogleSignIn() {
     if (isBusy) return;
@@ -50,118 +56,76 @@ export default function GoogleLogin() {
 
   return (
     <View style={styles.outerContainer}>
-      {/* Fancy Background Elements from user's code */}
-      <View style={styles.backgroundCircleOne} />
-      <View style={styles.backgroundCircleTwo} />
-
-      <View style={styles.buttonStack}>
-        <Pressable
-          onPress={handleGoogleSignIn}
-          disabled={isBusy}
-          style={({ pressed }) => [
-            styles.providerButton,
-            styles.googleButtonBorder,
-            pressed && styles.pressed,
-            isBusy && styles.disabledButton,
-          ]}
-        >
-          <View style={styles.buttonContent}>
-            {isBusy ? (
-              <ActivityIndicator color="#1F1F1F" />
-            ) : (
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
-            )}
-            <Text style={styles.providerButtonText}>
-              {isBusy ? "Processing..." : "Continue with Google"}
-            </Text>
-          </View>
-        </Pressable>
-      </View>
-
-
+      <Pressable
+      className="border border-gray-300 py-2.5 px-2 rounded-full"
+        onPress={handleGoogleSignIn}
+        disabled={isBusy}
+        style={({ pressed }) => [
+          styles.providerButton,
+          { height: buttonHeight },
+          pressed && styles.pressed,
+          isBusy && styles.disabledButton,
+        ]}
+      >
+        <View style={styles.buttonContent}>
+          {isBusy ? (
+            <ActivityIndicator color="#374151" />
+          ) : (
+            <Image
+              source={require("@/assets/images/google.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          )}
+          <Text style={[styles.providerButtonText, { fontSize }]}>
+            {isBusy ? "Processing..." : "Continue with Google"}
+          </Text>
+        </View>
+      </Pressable>
     </View>
   );
 }
 
-const typeFace = Platform.select({
-  ios: "Georgia",
-  android: "serif",
-  default: "serif",
-});
-
 const styles = StyleSheet.create({
   outerContainer: {
-    width: '100%',
-    marginTop: 20,
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: 24,
-    padding: 10, // for border effect
-  },
-  buttonStack: {
-    width: '100%',
+    width: "100%",
+    marginTop: 14,
   },
   providerButton: {
     borderRadius: 16,
-    minHeight: 64,
     justifyContent: "center",
-    paddingHorizontal: 46,
-    paddingVertical: 18,
+    alignItems: "center",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  googleButtonBorder: {
     borderWidth: 1,
     borderColor: "#E5E7EB",
+    // Soft, premium shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    columnGap: 36,
+    columnGap: 12,
+  },
+  logo: {
+    width: 24,
+    height: 24,
   },
   providerButtonText: {
-    fontSize: 16,
     fontWeight: "600",
     color: "#374151",
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
-  },
-  footnote: {
-    marginTop: 12,
-    color: "#6B7280",
-    fontSize: 11,
-    textAlign: 'center',
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
   },
   pressed: {
-    opacity: 0.9,
+    opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
   disabledButton: {
     opacity: 0.6,
   },
-  // Background circles adapted from user design
-  backgroundCircleOne: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F4A261",
-    top: -30,
-    right: -20,
-    opacity: 0.1,
-  },
-  backgroundCircleTwo: {
-    position: "absolute",
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#2A9D8F",
-    bottom: -40,
-    left: -30,
-    opacity: 0.1,
-  },
 });
+
