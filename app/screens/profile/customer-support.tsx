@@ -17,12 +17,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStore } from "../../../stores/stores";
 
 export default function CustomerSupportScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
   const {
     fetchMessages,
@@ -389,30 +390,42 @@ export default function CustomerSupportScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FDFBF7]">
+    <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top"]}>
       <StatusBar style="dark" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-center pt-4 pb-6 relative px-6">
+      <View className="flex-row items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100 bg-white">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute left-6 z-10 w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm"
+          activeOpacity={0.7}
+          className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
         >
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
-        <Text className="text-2xl font-bold text-gray-900">
-          Customer Support
-        </Text>
+        
+        <View className="items-center">
+          <Text className="text-base font-bold text-gray-900">
+            Support Chat
+          </Text>
+          <View className="flex-row items-center mt-0.5">
+            <View className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+            <Text className="text-[11px] font-semibold text-gray-400">
+              Agent Online
+            </Text>
+          </View>
+        </View>
+
+        <View className="w-10" />
       </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "padding"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
         className="flex-1"
       >
         <ScrollView
           ref={scrollViewRef}
-          className="flex-1 px-6"
+          className="flex-1 px-4"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingVertical: 20 }}
@@ -426,57 +439,60 @@ export default function CustomerSupportScreen() {
               <View
                 className={`flex-row ${msg.isSupport ? "justify-start" : "justify-end"}`}
               >
-                <View
-                  className={`max-w-[80%] ${msg.isSupport ? "order-2" : "order-1"}`}
-                >
+                <View className="max-w-[78%]">
                   <View
-                    className={`rounded-2xl px-4 py-3 ${msg.isSupport
-                      ? "bg-white rounded-tl-none shadow-sm"
-                      : "bg-[#F3F4F6] rounded-tr-none"
-                      }`}
+                    className={`rounded-2xl px-4 py-3 border ${
+                      msg.isSupport
+                        ? "bg-white border-gray-100 rounded-tl-none shadow-xs"
+                        : "bg-[#FFF8E7] border-[#FFE8B5] rounded-tr-none shadow-xs"
+                    }`}
                   >
-                    <Text className="text-gray-700 leading-5">{msg.text}</Text>
-                    {msg.sending && (
-                      <ActivityIndicator
-                        size="small"
-                        color="#FFC107"
-                        style={{ marginTop: 4 }}
-                      />
-                    )}
+                    <View className="flex-row items-center gap-x-2">
+                      <Text className="text-[15px] font-medium text-gray-800 leading-5 flex-shrink">
+                        {msg.text}
+                      </Text>
+
+                      {msg.sending && (
+                        <ActivityIndicator
+                          size="small"
+                          color="#E29E10"
+                          style={{ transform: [{ scale: 0.8 }] }}
+                        />
+                      )}
+                    </View>
 
                     {/* Message Attachments */}
                     {msg.attachments && msg.attachments.length > 0 && (
-                      <View className="mt-2">
-                        {msg.attachments.map(
-                          (attachment: any, index: number) => (
-                            <View key={index} className="mb-2">
-                              {attachment.type === "image" ? (
-                                <Image
+                      <View className="mt-2.5 flex-row flex-wrap gap-2">
+                        {msg.attachments.map((attachment: any, index: number) => (
+                          <View key={index} className="rounded-xl overflow-hidden border border-gray-100 shadow-xs">
+                            {attachment.type === "image" ? (
+                              <Image
+                                source={{ uri: attachment.uri }}
+                                className="h-36 w-36"
+                                resizeMode="cover"
+                              />
+                            ) : (
+                              <View className="relative">
+                                <Video
                                   source={{ uri: attachment.uri }}
-                                  className=" h-32 w-32 rounded-xl"
-                                  resizeMode="cover"
+                                  className="w-36 h-36"
+                                  useNativeControls
+                                  resizeMode={ResizeMode.COVER}
+                                  isLooping
+                                  shouldPlay={false}
                                 />
-                              ) : (
-                                <View className="relative">
-                                  <Video
-                                    source={{ uri: attachment.uri }}
-                                    className="w-44 h-44 rounded-xl"
-                                    useNativeControls
-                                    resizeMode={ResizeMode.COVER}
-                                    isLooping
-                                    shouldPlay={false}
-                                  />
-                                </View>
-                              )}
-                            </View>
-                          ),
-                        )}
+                              </View>
+                            )}
+                          </View>
+                        ))}
                       </View>
                     )}
                   </View>
                   <Text
-                    className={`text-xs text-gray-500 mt-1 ${msg.isSupport ? "text-left" : "text-right"
-                      }`}
+                    className={`text-[10px] font-bold text-gray-400 mt-1.5 ml-1 ${
+                      msg.isSupport ? "text-left" : "text-right"
+                    }`}
                   >
                     {msg.time}
                   </Text>
@@ -488,33 +504,34 @@ export default function CustomerSupportScreen() {
           {/* WhatsApp-style Attachment Preview Above Send Button */}
           {attachments.length > 0 && (
             <View className="mb-4">
-              <View className="bg-white rounded-2xl p-3 shadow-sm">
-                <View className="flex-row flex-wrap gap-2">
+              <View className="bg-white rounded-3xl p-4 border border-gray-100 shadow-md">
+                <View className="flex-row flex-wrap gap-3">
                   {attachments.map((attachment, index) => (
                     <View key={index} className="relative">
                       {attachment.type === "image" ? (
                         <Image
                           source={{ uri: attachment.uri }}
-                          className="w-16 h-16 rounded-lg"
+                          className="w-16 h-16 rounded-xl border border-gray-100"
                           resizeMode="cover"
                         />
                       ) : (
                         <View className="relative">
                           <Video
                             source={{ uri: attachment.uri }}
-                            className="w-20 h-20 rounded-lg"
+                            className="w-16 h-16 rounded-xl"
                             resizeMode={ResizeMode.COVER}
                             shouldPlay={false}
                             isMuted
                           />
-                          <View className="absolute inset-0 bg-black bg-opacity-30 rounded-lg items-center justify-center">
+                          <View className="absolute inset-0 bg-black/30 rounded-xl items-center justify-center">
                             <Ionicons name="play" size={12} color="white" />
                           </View>
                         </View>
                       )}
                       <TouchableOpacity
                         onPress={() => removeAttachment(index)}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full items-center justify-center"
+                        activeOpacity={0.8}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center border border-white shadow-xs"
                       >
                         <Ionicons name="close" size={10} color="white" />
                       </TouchableOpacity>
@@ -527,7 +544,7 @@ export default function CustomerSupportScreen() {
 
           {/* Typing indicator placeholder (only shown if loading) */}
           {isLoading && messages.length === 0 && (
-            <View className="self-start bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm mb-4">
+            <View className="self-start bg-white rounded-2xl rounded-tl-none px-4 py-3 border border-gray-100 shadow-xs mb-4">
               <View className="flex-row gap-1">
                 <View className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
                 <View className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
@@ -541,37 +558,44 @@ export default function CustomerSupportScreen() {
         </ScrollView>
 
         {/* Input Field */}
-        <View className="px-6 pb-6 bg-white border-t border-gray-100">
+        <View 
+          className="p-4 bg-white border-t border-gray-100"
+          style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 12 }}
+        >
           <View className="flex-row items-center gap-3">
             <TouchableOpacity
               onPress={showMediaOptions}
-              className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center"
+              activeOpacity={0.7}
+              className="w-11 h-11 bg-gray-50 rounded-full items-center justify-center border border-gray-100"
             >
-              <Ionicons name="add" size={24} color="#6B7280" />
+              <Ionicons name="add" size={24} color="#E29E10" />
             </TouchableOpacity>
-            <View className="flex-1 bg-gray-50 rounded-full px-4 py-3">
+            
+            <View className="flex-1 bg-gray-50 rounded-3xl px-4 py-2.5 border border-gray-100 max-h-24">
               <TextInput
                 value={message}
                 onChangeText={setMessage}
-                placeholder="Type here..."
+                placeholder="Type your message..."
                 placeholderTextColor="#9CA3AF"
-                className="text-gray-900"
+                className="text-gray-900 text-[15px] font-medium p-0"
                 multiline
               />
             </View>
+
             <TouchableOpacity
               onPress={handleSendMessage}
-              className={`w-10 h-10 rounded-full items-center justify-center shadow-sm ${message.trim() || attachments.length > 0
-                ? "bg-[#FFC107]"
-                : "bg-gray-300"
-                }`}
+              activeOpacity={0.8}
+              disabled={!message.trim() && attachments.length === 0}
+              className={`w-11 h-11 rounded-full items-center justify-center shadow-md ${
+                message.trim() || attachments.length > 0
+                  ? "bg-[#E29E10]"
+                  : "bg-gray-200"
+              }`}
             >
               <Ionicons
                 name="send"
                 size={18}
-                color={
-                  message.trim() || attachments.length > 0 ? "#fff" : "#8E8E93"
-                }
+                color="#ffffff"
               />
             </TouchableOpacity>
           </View>
