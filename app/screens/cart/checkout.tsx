@@ -7,6 +7,7 @@ import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -609,41 +610,43 @@ function CheckoutContent() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FDFBF7]">
+    <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top", "bottom"]}>
       <StatusBar style="dark" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-center pt-2 pb-6 relative px-4">
+      <View className="flex-row items-center justify-between px-6 pt-3 pb-4 border-b border-gray-100 bg-white">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute left-4 z-10 w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm"
+          activeOpacity={0.7}
+          className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
         >
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">
+        <Text className="text-lg font-bold text-gray-900">
           {isDonationCheckout ? "Donate Meals" : "Checkout"}
         </Text>
+        <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-6">
-        {/* Pickup Address */}
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        className="flex-1 px-4 mt-4"
+      >
+        {/* Pickup Address Card */}
         {!isDonationCheckout && (
-          <View className="mb-6">
+          <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-4">
             <View className="flex-row items-start">
-              <Ionicons
-                name="location-outline"
-                size={24}
-                color="#666"
-                style={{ marginTop: 2, marginRight: 12 }}
-              />
+              <View className="w-10 h-10 bg-[#E0F2F1] rounded-2xl items-center justify-center mr-4 border border-[#B2DFDB]">
+                <Ionicons name="location-outline" size={18} color="#26A69A" />
+              </View>
               <View className="flex-1">
-                <Text className="text-gray-500 text-sm mb-1">
+                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                   Pickup from
                 </Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-48 rounded animate-pulse mt-1" />
+                  <View className="bg-gray-100 h-5 w-48 rounded animate-pulse mt-1" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
+                  <Text className="text-base font-bold text-gray-800">
                     {pickupAddress}
                   </Text>
                 )}
@@ -652,167 +655,159 @@ function CheckoutContent() {
           </View>
         )}
 
-        {/* Payment Method */}
+        {/* Payment Method Card */}
         <TouchableOpacity
           onPress={() => {
             if (!isDonationCheckout && !isCheckoutLoading) {
               setModalVisible(true);
             }
           }}
-          className="mb-8"
+          disabled={isDonationCheckout || isCheckoutLoading}
+          activeOpacity={0.7}
+          className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-4"
         >
           <View className="flex-row items-center justify-between">
-            <View className="flex-row items-start">
-              <Ionicons
-                name="card-outline"
-                size={24}
-                color="#666"
-                style={{ marginTop: 2, marginRight: 12 }}
-              />
-              <View>
-                <Text className="text-gray-500 text-sm mb-1">
+            <View className="flex-row items-start flex-1 mr-2">
+              <View className="w-10 h-10 bg-[#FFF8E7] rounded-2xl items-center justify-center mr-4 border border-[#FFE8B5]">
+                <Ionicons name="card-outline" size={18} color="#E29E10" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                   Payment Method
                 </Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-32 rounded animate-pulse mt-1" />
+                  <View className="bg-gray-100 h-5 w-32 rounded animate-pulse mt-1" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
-                    {isDonationCheckout ? "Stripe checkout" : selectedCard}
+                  <Text className="text-base font-bold text-gray-800">
+                    {isDonationCheckout ? "Stripe Checkout" : selectedCard}
                   </Text>
                 )}
               </View>
             </View>
             {!isDonationCheckout && !isCheckoutLoading && (
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={16} color="#CCCCCC" />
             )}
           </View>
         </TouchableOpacity>
 
-        {/* Summary */}
-        <View className="mt-4 pt-6 border-t border-gray-100">
+        {/* Summary Card */}
+        <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-6">
+          <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-0.5">
+            Order Summary
+          </Text>
+
           {isDonationCheckout ? (
-            <>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Meals</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {donationMealCount}
-                </Text>
+            <View className="gap-y-2.5">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Meals</Text>
+                <Text className="text-sm font-bold text-gray-800">{donationMealCount}</Text>
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Price per meal</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(donationPricePerMeal)}
-                </Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Price per meal</Text>
+                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPricePerMeal)}</Text>
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Meal subtotal</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(donationSubtotal)}
-                </Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Meal subtotal</Text>
+                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationSubtotal)}</Text>
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Platform Fee</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(donationPlatformFee)}
-                </Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
+                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPlatformFee)}</Text>
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">
-                  State Tax
-                  {donationBreakdown?.state ? ` (${donationBreakdown.state})` : ""}
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">
+                  State Tax{donationBreakdown?.state ? ` (${donationBreakdown.state})` : ""}
                 </Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(donationStateTax)}
-                </Text>
+                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationStateTax)}</Text>
               </View>
-              <View className="flex-row justify-between text-lg pt-4 border-t border-gray-100">
-                <Text className="text-gray-900 text-lg font-bold">Total</Text>
-                <Text className="text-gray-900 text-xl font-bold">
-                  {formatMoney(donationTotal)}
-                </Text>
+              
+              <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
+                <Text className="text-base font-bold text-gray-900">Total</Text>
+                <Text className="text-lg font-extrabold text-[#E29E10]">{formatMoney(donationTotal)}</Text>
               </View>
-            </>
+            </View>
           ) : (
-            <>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Item subtotal</Text>
+            <View className="gap-y-2.5">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Item subtotal</Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
-                    {formatMoney(cartSubtotal)}
-                  </Text>
+                  <Text className="text-sm font-bold text-gray-800">{formatMoney(cartSubtotal)}</Text>
                 )}
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">Platform Fee</Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
-                    {formatMoney(platformFee)}
-                  </Text>
+                  <Text className="text-sm font-bold text-gray-800">{formatMoney(platformFee)}</Text>
                 )}
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">
-                  State Tax
-                </Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">State Tax</Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
-                    {formatTaxRate(effectiveStateTaxRate)}
-                  </Text>
+                  <Text className="text-sm font-bold text-gray-800">{formatTaxRate(effectiveStateTaxRate)}</Text>
                 )}
               </View>
-              <View className="flex-row justify-between mb-4">
-                <Text className="text-gray-500 text-base">County Tax</Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-sm font-medium text-gray-500">County Tax</Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                 ) : (
-                  <Text className="text-gray-900 font-bold text-base">
-                    {formatTaxRate(countyTaxRate)}
-                  </Text>
+                  <Text className="text-sm font-bold text-gray-800">{formatTaxRate(countyTaxRate)}</Text>
                 )}
               </View>
 
-              <View className="flex-row justify-between text-lg pt-4 border-t border-gray-100">
-                <Text className="text-gray-900 text-lg font-bold">Total</Text>
+              <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
+                <Text className="text-base font-bold text-gray-900">Total</Text>
                 {isCheckoutLoading ? (
-                  <View className="bg-gray-200 h-6 w-20 rounded animate-pulse" />
+                  <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
                 ) : (
-                  <Text className="text-gray-900 text-xl font-bold">
-                    {formatMoney(effectiveTotal)}
-                  </Text>
+                  <Text className="text-lg font-extrabold text-[#E29E10]">{formatMoney(effectiveTotal)}</Text>
                 )}
               </View>
-            </>
+            </View>
           )}
         </View>
       </ScrollView>
 
-      {/* Footer */}
-      <View className="absolute bottom-4 left-0 right-0 bg-[#FDFBF7] px-4 py-4 border-t border-gray-100">
-
+      {/* Footer / Confirmation Bar */}
+      <View className="border-t border-gray-100 bg-white p-6">
         <TouchableOpacity
           onPress={handlePlaceOrder}
           disabled={isLoading || isCheckoutLoading}
-          className={`bg-yellow-400 w-full py-4 rounded-2xl shadow-md items-center justify-center ${(isLoading || isCheckoutLoading) ? "opacity-50" : ""}`}
+          activeOpacity={0.8}
+          className="h-14 rounded-2xl overflow-hidden shadow-md"
+          style={{ opacity: (isLoading || isCheckoutLoading) ? 0.6 : 1 }}
         >
-          {isLoading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text className="text-gray-900 font-bold text-lg">
-              {isCheckoutLoading ? (
-                "Loading Order Details..."
-              ) : isDonationCheckout ? (
-                `Donate ${donationMealCount} ${donationMealLabel} ${formatMoney(donationTotal)}`
-              ) : (
-                `Place Order ${formatMoney(effectiveTotal)}`
-              )}
-            </Text>
-          )}
+          <LinearGradient
+            colors={["#F5C518", "#E29E10"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              height: '100%',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text className="text-white font-bold text-base">
+                {isCheckoutLoading ? (
+                  "Loading Order Details..."
+                ) : isDonationCheckout ? (
+                  `Donate ${donationMealCount} ${donationMealLabel} • ${formatMoney(donationTotal)}`
+                ) : (
+                  `Place Order • ${formatMoney(effectiveTotal)}`
+                )}
+              </Text>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
       </View>
 
@@ -850,15 +845,18 @@ function CheckoutContent() {
             {CARDS.map((card, index) => (
               <TouchableOpacity
                 key={index}
+                activeOpacity={0.8}
                 onPress={() => setSelectedCard(card)}
-                className="flex-row items-center justify-between bg-gray-50 p-4 rounded-xl mb-3"
+                className="flex-row items-center justify-between bg-gray-50 border border-gray-100/50 p-4 rounded-2xl mb-3"
               >
-                <Text className="text-gray-900 font-medium">{card}</Text>
+                <Text className="text-gray-900 font-semibold text-sm">{card}</Text>
                 <View
-                  className={`w-5 h-5 rounded-full border-2 items-center justify-center ${selectedCard === card ? "border-[#FFC107]" : "border-gray-300"}`}
+                  className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+                    selectedCard === card ? "border-[#E29E10]" : "border-gray-300"
+                  }`}
                 >
                   {selectedCard === card && (
-                    <View className="w-2.5 h-2.5 rounded-full bg-[#FFC107]" />
+                    <View className="w-2.5 h-2.5 rounded-full bg-[#E29E10]" />
                   )}
                 </View>
               </TouchableOpacity>
@@ -866,9 +864,22 @@ function CheckoutContent() {
 
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              className="bg-yellow-400 w-full py-4 rounded-2xl shadow-md mt-6 items-center"
+              activeOpacity={0.8}
+              className="h-14 rounded-2xl overflow-hidden mt-6 shadow-sm"
             >
-              <Text className="text-gray-900 font-bold text-lg">Confirm</Text>
+              <LinearGradient
+                colors={["#F5C518", "#E29E10"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text className="text-white font-bold text-base">Confirm</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>

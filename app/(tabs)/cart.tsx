@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 const toNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -473,82 +474,89 @@ export default function CartScreen() {
   const total = subtotal + platformFee + stateTaxAmount + countyTaxAmount;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F6F2]">
+    <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top"]}>
       <StatusBar style="dark" />
 
-      <View className="flex-row items-center justify-center pt-2 pb-4 relative px-4">
+      {/* Header */}
+      <View className="flex-row items-center justify-center pt-3 pb-4 border-b border-gray-100/50 bg-white">
         <View className="flex-row items-center gap-2">
-          <Ionicons name="cart-outline" size={19} color="#111827" />
-          <Text className="text-[20px] font-semibold text-gray-900">Cart</Text>
+          <Ionicons name="cart-outline" size={20} color="#1F2937" />
+          <Text className="text-lg font-bold text-gray-900">My Cart</Text>
         </View>
       </View>
 
       <ScrollView
-        className="flex-1 px-3"
+        className="flex-1 px-4 mt-4"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 210 }}
+        contentContainerStyle={{ paddingBottom: 230 }}
       >
-        <View className="bg-white rounded-2xl border border-[#ECEAE2] overflow-hidden">
-          <View className="px-4 pt-4 pb-3">
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 mr-3">
-                {restaurantProfile ? (
-                  <Image
-                    source={{ uri: restaurantProfile }}
-                    className="w-10 h-10"
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View className="w-10 h-10 items-center justify-center">
-                    <Ionicons
-                      name="restaurant-outline"
-                      size={16}
-                      color="#6B7280"
-                    />
-                  </View>
-                )}
-              </View>
-              <View className="flex-1">
-                <Text className="text-[16px] font-semibold text-gray-900">
-                  {restaurantName}
-                </Text>
-                <View className="flex-row items-center mt-0.5">
-                  <Ionicons name="location-outline" size={12} color="#6B7280" />
-                  <Text
-                    className="text-[12px] text-gray-500 ml-1"
-                    numberOfLines={1}
-                  >
-                    {restaurantAddress}
-                  </Text>
-                </View>
-                {/* - {etaText} */}
-                <Text className="text-[12px] text-gray-500 mt-1">
-                  Pickup - {distanceMiles}
+        {/* Restaurant Info Card */}
+        <View className="bg-white rounded-3xl border border-gray-100/80 overflow-hidden shadow-sm mb-4">
+          <View className="p-4 flex-row items-center">
+            <View className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 justify-center items-center">
+              {restaurantProfile ? (
+                <Image
+                  source={{ uri: restaurantProfile }}
+                  className="w-12 h-12"
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="restaurant" size={20} color="#9CA3AF" />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-900">
+                {restaurantName}
+              </Text>
+              <Text className="text-xs font-semibold text-[#E29E10] mt-0.5">
+                Pickup • {distanceMiles}
+              </Text>
+              <View className="flex-row items-center mt-1">
+                <Ionicons name="location-outline" size={12} color="#9CA3AF" />
+                <Text className="text-[11px] text-gray-400 ml-1 font-medium" numberOfLines={1}>
+                  {restaurantAddress}
                 </Text>
               </View>
             </View>
           </View>
+        </View>
 
-          <View className="border-t border-[#ECEAE2] px-4 py-2 bg-[#FAF9F5] flex-row">
-            <Text className="w-8 text-[12px] text-gray-400">Qty</Text>
-            <Text className="flex-1 text-[12px] text-gray-400">Item</Text>
-            <Text className="w-16 text-right text-[12px] text-gray-400">
-              Price
-            </Text>
-          </View>
-
-          {cartItems.map((item) => (
+        {/* Cart Items Card */}
+        <View className="bg-white rounded-3xl border border-gray-100/80 overflow-hidden shadow-sm mb-4">
+          {cartItems.map((item, index) => (
             <View
               key={item.cartItemId || item.id}
-              className="px-4 py-3 border-b border-[#EFEDE5]"
+              className={`flex-row items-center p-4 ${
+                index < cartItems.length - 1 ? "border-b border-gray-50" : ""
+              }`}
             >
-              <View className="flex-row items-start">
-                <Text className="w-8 text-[13px] text-gray-800">
-                  {String(item.quantity).padStart(2, "0")}
+              {/* Item Image */}
+              <View className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 justify-center items-center">
+                {item.image ? (
+                  <Image
+                    source={{ uri: item.image }}
+                    className="w-16 h-16"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Ionicons name="fast-food-outline" size={24} color="#9CA3AF" />
+                )}
+              </View>
+
+              {/* Item Details */}
+              <View className="flex-1 justify-center mr-2">
+                <Text className="text-sm font-bold text-gray-900" numberOfLines={2}>
+                  {item.name}
                 </Text>
+                <Text className="text-sm font-semibold text-[#E29E10] mt-1">
+                  {formatMoney(toNumber(item.price, 0))}
+                </Text>
+              </View>
+
+              {/* Quantity Selector */}
+              <View className="flex-row items-center bg-gray-50 border border-gray-100/50 rounded-2xl p-1 gap-x-2">
                 <TouchableOpacity
-                  className="flex-1 pr-2"
-                  onLongPress={() =>
+                  onPress={() =>
                     handleUpdateQuantity(
                       item.foodId,
                       item.cartItemId,
@@ -556,125 +564,168 @@ export default function CartScreen() {
                       item.quantity,
                     )
                   }
+                  activeOpacity={0.7}
+                  className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
                 >
-                  <Text className="text-[14px] text-gray-800">{item.name}</Text>
+                  <Ionicons name="remove" size={14} color="#1F2937" />
                 </TouchableOpacity>
-                <Text className="w-16 text-right text-[14px] font-medium text-gray-900">
-                  {formatMoney(
-                    toNumber(item.price, 0) *
-                    Math.max(1, toNumber(item.quantity, 1)),
-                  )}
+
+                <Text className="text-sm font-extrabold text-gray-800 min-w-[20px] text-center">
+                  {item.quantity}
                 </Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    handleUpdateQuantity(
+                      item.foodId,
+                      item.cartItemId,
+                      1,
+                      item.quantity,
+                    )
+                  }
+                  activeOpacity={0.7}
+                  className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
+                >
+                  <Ionicons name="add" size={14} color="#1F2937" />
+                </TouchableOpacity>
               </View>
             </View>
           ))}
+        </View>
 
-          <View className="bg-[#EEF0F4] px-4 py-3 flex-row items-center">
-            <Ionicons name="restaurant-outline" size={15} color="#4B5563" />
-            <Text className="flex-1 ml-2 text-[13px] text-gray-700">
-              Include utensils, napkins, etc
-            </Text>
-            <Switch
-              value={includeUtensils}
-              onValueChange={setIncludeUtensils}
-              trackColor={{ false: "#D1D5DB", true: "#111827" }}
-              thumbColor="#fff"
-            />
+        {/* Utensils Option Card */}
+        <View className="bg-white rounded-3xl border border-gray-100/80 p-4 shadow-sm flex-row items-center justify-between mb-4">
+          <View className="flex-row items-center flex-1 mr-3">
+            <View className="w-10 h-10 bg-[#FFF8E7] rounded-2xl items-center justify-center mr-3 border border-[#FFE8B5]">
+              <Ionicons name="restaurant-outline" size={18} color="#E29E10" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-sm font-bold text-gray-800">
+                Include utensils
+              </Text>
+              <Text className="text-xs text-gray-400 font-medium mt-0.5">
+                Napkins, forks, straws, etc.
+              </Text>
+            </View>
           </View>
+          <Switch
+            value={includeUtensils}
+            onValueChange={setIncludeUtensils}
+            trackColor={{ false: "#E5E7EB", true: "#E29E10" }}
+            thumbColor="#fff"
+          />
+        </View>
 
-          <View className="px-4 py-3">
-            <View className="flex-row justify-between py-1">
-              <Text className="text-[14px] text-gray-600">Item subtotal</Text>
+        {/* Price Breakdown Card */}
+        <View className="bg-white rounded-3xl border border-gray-100/80 p-5 shadow-sm">
+          <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-0.5">
+            Bill Details
+          </Text>
+
+          <View className="gap-y-2.5">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-sm font-medium text-gray-500">Item subtotal</Text>
               {loading ? (
-                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-[14px] text-gray-700">
-                  {formatMoney(subtotal)}
-                </Text>
+                <Text className="text-sm font-semibold text-gray-800">{formatMoney(subtotal)}</Text>
               )}
             </View>
 
-            <View className="flex-row justify-between py-1">
-              <Text className="text-[14px] text-gray-600">Platform fee</Text>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-sm font-medium text-gray-500">Platform fee</Text>
               {loading ? (
-                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-[14px] text-gray-700">
-                  {formatMoney(platformFee)}
-                </Text>
+                <Text className="text-sm font-semibold text-gray-800">{formatMoney(platformFee)}</Text>
               )}
             </View>
-            <View className="flex-row justify-between py-1">
-              <Text className="text-[14px] text-gray-600">
-                {resolvedStateName ? `State tax` : "State tax"}
-              </Text>
+
+            <View className="flex-row justify-between items-center">
+              <Text className="text-sm font-medium text-gray-500">State tax</Text>
               {loading ? (
-                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-[14px] text-gray-700">
-                  {formatTaxRate(stateTaxRate)}
-                </Text>
+                <Text className="text-sm font-semibold text-gray-800">{formatTaxRate(stateTaxRate)}</Text>
               )}
             </View>
-            <View className="flex-row justify-between py-1">
-              <Text className="text-[14px] text-gray-600">County Tax</Text>
+
+            <View className="flex-row justify-between items-center">
+              <Text className="text-sm font-medium text-gray-500">County tax</Text>
               {loading ? (
-                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-[14px] text-gray-700">
-                  {formatTaxRate(countyTaxRate)}
-                </Text>
+                <Text className="text-sm font-semibold text-gray-800">{formatTaxRate(countyTaxRate)}</Text>
               )}
             </View>
-            <View className="flex-row justify-between pt-2 mt-1 border-t border-[#EFEDE5]">
-              <Text className="text-[16px] font-semibold text-gray-900">
-                Total
-              </Text>
+
+            <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
+              <Text className="text-base font-bold text-gray-900">Total Amount</Text>
               {loading ? (
-                <View className="bg-gray-200 h-5 w-20 rounded animate-pulse" />
+                <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
               ) : (
-                <Text className="text-[16px] font-semibold text-gray-900">
-                  {formatMoney(total)}
-                </Text>
+                <Text className="text-base font-extrabold text-gray-900">{formatMoney(total)}</Text>
               )}
             </View>
           </View>
         </View>
       </ScrollView>
 
+      {/* Floating Bottom action bar */}
       <View
-        className="absolute left-3 right-3 bg-[#F7F6F2] pt-2"
-        style={{ bottom: insets.bottom > 0 ? insets.bottom + 80 : 80 }}
+        className="absolute left-4 right-4 bg-white border border-gray-100/50 rounded-3xl p-4 shadow-xl"
+        style={{
+          bottom: insets.bottom > 0 ? insets.bottom + 65 : 65,
+          zIndex: 10,
+          elevation: 10,
+        }}
       >
-        <TouchableOpacity
-          className="self-start flex-row items-center mb-3"
-          onPress={async () => {
-            await clearCart?.();
-            await loadCart(false);
-          }}
-        >
-          <Ionicons name="close" size={15} color="#F59E0B" />
-          <Text className="text-[13px] text-amber-500 ml-1">Empty bag</Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center justify-between mb-3.5 px-1">
+          <TouchableOpacity
+            className="flex-row items-center"
+            activeOpacity={0.7}
+            onPress={async () => {
+              await clearCart?.();
+              await loadCart(false);
+            }}
+          >
+            <Ionicons name="trash-outline" size={14} color="#EF4444" />
+            <Text className="text-[12px] font-bold text-red-500 ml-1">Clear Cart</Text>
+          </TouchableOpacity>
+          
+          <Text className="text-base font-extrabold text-gray-900">
+            Total: {formatMoney(total)}
+          </Text>
+        </View>
 
-        <View className="flex-row gap-2 mb-5">
+        <View className="flex-row gap-x-3">
           <TouchableOpacity
             onPress={() => router.push("/(tabs)")}
-            className="flex-1 h-11 rounded-xl border border-[#E5E7EB] bg-white items-center justify-center flex-row"
+            activeOpacity={0.8}
+            className="flex-1 h-12 rounded-2xl border border-gray-200 bg-white items-center justify-center flex-row"
           >
-            <Ionicons name="add" size={16} color="#111827" />
-            <Text className="text-[13px] font-medium text-gray-800 ml-1">
-              Add more items
+            <Ionicons name="add" size={18} color="#1F2937" />
+            <Text className="text-sm font-bold text-gray-800 ml-1">
+              Add More
             </Text>
           </TouchableOpacity>
+          
           <TouchableOpacity
             onPress={() => router.push("/screens/cart/checkout")}
-            className="flex-1 h-11 rounded-xl items-center justify-center"
-            style={{ backgroundColor: "#F5C518" }}
+            activeOpacity={0.8}
+            className="flex-1 h-12 rounded-2xl overflow-hidden"
           >
-            <Text className="text-[13px] font-semibold text-gray-900">
-              Continue to checkout
-            </Text>
+            <LinearGradient
+              colors={["#F5C518", "#E29E10"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}
+            >
+              <Text className="text-sm font-bold text-white">
+                Checkout
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color="#ffffff" style={{ marginLeft: 4 }} />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
