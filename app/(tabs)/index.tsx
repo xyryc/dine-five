@@ -3,6 +3,7 @@ import { DonateCard } from "@/components/home/DonateCard";
 import { HomeHeader } from "@/components/home/HomeHeader";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { SearchBar } from "@/components/home/SearchBar";
+import { RestaurantSection } from "@/components/home/RestaurantSection";
 import { useStore } from "@/stores/stores";
 import {
   type Restaurant,
@@ -10,19 +11,15 @@ import {
 } from "@/stores/useRestaurantStore";
 import { extractHomeRestaurants } from "@/utils/homeFeedRestaurants";
 import { getUserAvatarUri, normalizeImageUri } from "@/utils/userAvatar";
-import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   ActivityIndicator,
-  Image,
-  Modal,
   RefreshControl,
   ScrollView,
   Text,
-  TouchableOpacity,
   View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,7 +31,7 @@ type BannerData = {
   image: string;
 };
 
-type RestaurantSection = {
+type RestaurantSectionData = {
   title: string;
   items: Restaurant[];
 };
@@ -100,119 +97,6 @@ const formatDistance = (distanceKm?: number) => {
   return `${distanceKm.toFixed(1)} mi`;
 };
 
-const getCuisineLabel = (restaurant: Restaurant) =>
-  restaurant.cuisine?.filter(Boolean).join(" • ") || "Restaurant";
-
-function RestaurantCard({
-  restaurant,
-  onOpen,
-}: {
-  restaurant: Restaurant;
-  onOpen: () => void;
-}) {
-  const distanceLabel = formatDistance(restaurant.distance);
-  const rating = (restaurant.rating ?? 4.2).toFixed(1);
-  const cuisineLabel = getCuisineLabel(restaurant);
-  const deliveryMin =
-    restaurant.deliveryTimeMinutes ??
-    Math.max(5, Math.min(30, Math.round(restaurant.distance * 2) + 5));
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.92}
-      onPress={onOpen}
-      className="w-56 mr-4 bg-white rounded-[10px] p-1.5  border border-gray-50"
-    >
-      <View className="rounded-[12px] overflow-hidden bg-gray-50 mb-3.5 relative">
-        {restaurant.profile ? (
-          <Image
-            source={{ uri: restaurant.profile }}
-            className="w-full h-40"
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="w-full h-40 items-center justify-center bg-gray-50">
-            <Ionicons name="restaurant-outline" size={32} color="#D1D5DB" />
-          </View>
-        )}
-
-        <View className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-[#F5C518]">
-          <Text className="text-[10px] font-black text-gray-900">
-            {restaurant.availableFoods > 0
-              ? `${restaurant.availableFoods} items`
-              : "Open"}
-          </Text>
-        </View>
-
-        <TouchableOpacity className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md items-center justify-center shadow-sm">
-          <Ionicons name="heart-outline" size={15} color="#374151" />
-        </TouchableOpacity>
-      </View>
-
-      <View className="px-1 pb-1">
-        <Text className="text-sm font-bold text-gray-900" numberOfLines={1}>
-          {restaurant.restaurantName}
-        </Text>
-
-        <View className="flex-row items-center mt-1 gap-1 flex-wrap">
-          <Ionicons name="star" size={11} color="#F5C518" />
-          <Text className="text-[11px] font-bold text-gray-700">{rating}</Text>
-          <Text className="text-[10px] text-gray-300">•</Text>
-          <Text className="text-[11px] text-gray-500 flex-1" numberOfLines={1}>
-            {cuisineLabel}
-          </Text>
-          <Text className="text-[11px] font-medium text-gray-500">{deliveryMin}min</Text>
-        </View>
-
-        <View className="flex-row items-center mt-1">
-          <Ionicons name="location-sharp" size={10} color="#9CA3AF" />
-          <Text className="text-[10px] text-gray-400 ml-0.5" numberOfLines={1}>
-            {distanceLabel || "Nearby"}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function Section({
-  title,
-  restaurants,
-  onOpenRestaurant,
-}: {
-  title: string;
-  restaurants: Restaurant[];
-  onOpenRestaurant: (restaurant: Restaurant) => void;
-}) {
-  if (!restaurants.length) return null;
-
-  return (
-    <View className="mb-6">
-      <View className="flex-row justify-between items-center px-4 mb-2">
-        <Text className="text-lg font-bold text-gray-900">{title}</Text>
-        <TouchableOpacity>
-          <Text className="text-sm font-semibold" style={{ color: "#F5C518" }}>
-            View all
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-      >
-        {restaurants.map((restaurant) => (
-          <RestaurantCard
-            key={restaurant.providerId}
-            restaurant={restaurant}
-            onOpen={() => onOpenRestaurant(restaurant)}
-          />
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
 
 
 
@@ -262,7 +146,6 @@ export default function HomeScreen() {
   }, [extractedHomeRestaurants, setHomeRestaurants]);
 
   const [searchText, setSearchText] = React.useState("");
-  const [filterModalVisible, setFilterModalVisible] = React.useState(false);
   const [activeCategory, setActiveCategory] = React.useState("All");
   const [bannerPayload, setBannerPayload] = React.useState<any>(null);
   const [dynamicCategories, setDynamicCategories] = React.useState<any[]>([]);
@@ -450,7 +333,7 @@ export default function HomeScreen() {
     });
   }, [activeCategory, restaurants, searchText]);
 
-  const sections = React.useMemo<RestaurantSection[]>(() => {
+  const sections = React.useMemo<RestaurantSectionData[]>(() => {
     if (!filteredRestaurants.length) return [];
 
     if (filteredRestaurants.length <= 4) {
@@ -572,26 +455,7 @@ export default function HomeScreen() {
           <SearchBar searchText={searchText} onSearch={setSearchText} />
           <PromoBanner deals={promoDeals ?? [FALLBACK_PROMO]} />
 
-          {!isInitialLoading && filteredRestaurants.length > 0 && (
-            <View className="mt-4">
-              {/* <View className="flex-row justify-between items-center px-4 mb-3">
-                <Text className="text-base font-bold text-gray-900">Start the Dayttyt</Text>
-              </View> */}
-              {/* <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 16 }}
-              >
-                {filteredRestaurants.map((restaurant) => (
-                  <RestaurantCard
-                    key={restaurant.providerId}
-                    restaurant={restaurant}
-                    onOpen={() => openRestaurantDetail(restaurant)}
-                  />
-                ))}
-              </ScrollView> */}
-            </View>
-          )}
+
 
           <Categories
             activeCategory={activeCategory}
@@ -610,7 +474,7 @@ export default function HomeScreen() {
 
           {!isInitialLoading &&
             sections.map((section) => (
-              <Section
+              <RestaurantSection
                 key={section.title}
                 title={section.title}
                 restaurants={section.items}
@@ -634,50 +498,7 @@ export default function HomeScreen() {
             </View>
           )}
         </ScrollView>
-
-        <Modal
-          animationType="fade"
-          transparent
-          visible={filterModalVisible}
-          onRequestClose={() => setFilterModalVisible(false)}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => setFilterModalVisible(false)}
-            className="flex-1 bg-black/40 items-center justify-center"
-          >
-            <View className="bg-white m-4 p-4 rounded-2xl w-3/4 shadow-xl">
-              <Text className="text-lg font-bold text-gray-900 mb-4 text-center">
-                Filter Options
-              </Text>
-              <TouchableOpacity
-                onPress={() => setFilterModalVisible(false)}
-                className="p-3 rounded-xl mb-2 flex-row justify-between items-center"
-                style={{
-                  backgroundColor: "#FFF7E0",
-                  borderWidth: 1,
-                  borderColor: "#F5C518",
-                }}
-              >
-                <Text className="font-semibold" style={{ color: "#B45309" }}>
-                  Restaurants
-                </Text>
-                <Ionicons
-                  name="checkmark-circle"
-                  size={20}
-                  color="#F5C518"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setFilterModalVisible(false)}
-                className="mt-4 p-3 rounded-xl bg-gray-900"
-              >
-                <Text className="text-white text-center font-bold">Close</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </View>
+        </View>
     </View>
   );
 }

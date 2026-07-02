@@ -390,7 +390,10 @@ export default function RestaurantDetailScreen() {
             </TouchableOpacity>
 
             <View className="flex-row gap-3">
-              <TouchableOpacity className="w-9 h-9 rounded-full bg-white/20 items-center justify-center">
+              <TouchableOpacity 
+                onPress={() => router.push("/(tabs)/cart")}
+                className="w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+              >
                 <Ionicons name="bag-outline" size={18} color="#fff" />
               </TouchableOpacity>
               <TouchableOpacity className="w-9 h-9 rounded-full bg-white/20 items-center justify-center">
