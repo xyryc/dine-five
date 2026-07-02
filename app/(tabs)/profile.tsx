@@ -4,123 +4,253 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const MENU_ITEMS = [
-  {
-    id: "account",
-    title: "My Account",
-    icon: "person-outline",
-    route: "/screens/profile/my-account",
-  },
-  {
-    id: "orders",
-    title: "My Orders",
-    icon: "reader-outline", // list icon lookalike
-    route: "/screens/profile/my-orders",
-  },
-  {
-    id: "cart",
-    title: "Cart",
-    icon: "cart-outline",
-    route: "/(tabs)/cart",
-  },
-  {
-    id: "payment",
-    title: "Payment",
-    icon: "card-outline",
-    route: "/screens/profile/payment",
-  },
-  {
-    id: "favorite",
-    title: "Favorite",
-    icon: "heart-outline",
-    route: "/screens/profile/favorite",
-  },
-  {
-    id: "donate",
-    title: "Donate a meal",
-    icon: "basket-outline",
-    route: "/screens/profile/donation-tokens",
-  },
-
-  {
-    id: "settings",
-    title: "Settings",
-    icon: "settings-outline",
-    route: "/screens/profile/settings",
-  },
-
-];
-
 export default function ProfileScreen() {
-  const { user, fetchProfile } = useStore() as any;
+  const { user, fetchProfile, favorites, fetchFavorites, logout } = useStore() as any;
   const router = useRouter();
+
   const avatarUri = getUserAvatarUri(user);
   const avatarSource = avatarUri ? { uri: avatarUri } : require("@/assets/images/user-icon.jpg");
 
   useEffect(() => {
     fetchProfile?.();
-  }, [fetchProfile]);
+    fetchFavorites?.();
+  }, [fetchProfile, fetchFavorites]);
 
-  const handleItemPress = (item: typeof MENU_ITEMS[0]) => {
-    router.push(item.route as any);
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to log out of your account?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await logout?.();
+          },
+        },
+      ]
+    );
   };
 
+  const menuSections = [
+    {
+      title: "Account & Activity",
+      items: [
+        {
+          id: "account",
+          title: "My Account",
+          icon: "person-outline",
+          color: "#E29E10",
+          bgColor: "#FFF8E7",
+          route: "/screens/profile/my-account",
+        },
+        {
+          id: "orders",
+          title: "My Orders",
+          icon: "receipt-outline",
+          color: "#FF7043",
+          bgColor: "#FEEBE6",
+          route: "/screens/profile/my-orders",
+        },
+        {
+          id: "favorite",
+          title: "Favorites List",
+          icon: "heart-outline",
+          color: "#EC407A",
+          bgColor: "#FCE4EC",
+          route: "/screens/profile/favorite",
+        },
+      ],
+    },
+    {
+      title: "Payments & Donations",
+      items: [
+        {
+          id: "donate",
+          title: "Donate a Meal",
+          icon: "gift-outline",
+          color: "#26A69A",
+          bgColor: "#E0F2F1",
+          route: "/screens/profile/donation-tokens",
+        },
+        {
+          id: "payment",
+          title: "Payment Methods",
+          icon: "card-outline",
+          color: "#4CAF50",
+          bgColor: "#E8F5E9",
+          route: "/screens/profile/payment",
+        },
+        {
+          id: "cart",
+          title: "View Cart",
+          icon: "cart-outline",
+          color: "#FFC107",
+          bgColor: "#FFFDE7",
+          route: "/(tabs)/cart",
+        },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        {
+          id: "settings",
+          title: "Settings",
+          icon: "settings-outline",
+          color: "#78909C",
+          bgColor: "#ECEFF1",
+          route: "/screens/profile/settings",
+        },
+      ],
+    },
+  ];
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top"]}>
       <StatusBar style="dark" />
-
       <ScrollView
-        className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 60 }}
       >
-        {/* Profile Header */}
-        <View className=" mb-10 mt-4 flex-row items-center gap-4">
-          <View className="w-20 h-20 rounded-full mb-4 overflow-hidden shadow-sm">
-            <Image
-              source={avatarSource}
-              style={{ height: "100%", width: "100%", borderRadius: 100 }}
-              contentFit="scale-down"
-            />
-          </View>
-          <View>
-            <Text className="text-2xl font-bold text-gray-900 ">
-              {user?.name || user?.fullName || "User"}
-            </Text>
-            <Text className="text-gray-500 text-base  mt-1">
-              {user?.email || "No email provided"}
-            </Text>
-          </View>
-        </View>
+        {/* Banner Cover with Gradient */}
+        <View className="relative h-44 overflow-hidden mb-24">
+          <LinearGradient
+            colors={["#F5C518", "#E29E10"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          {/* Subtle light reflections */}
+          <View className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+          <View className="absolute -bottom-20 -left-10 w-60 h-60 bg-white/5 rounded-full" />
 
-        {/* Genearl Section */}
-        <Text className="text-[#70756B] text-sm font-normal mb-4">General</Text>
-
-        {/* Menu List */}
-        <View className="space-y-6">
-          {MENU_ITEMS.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => handleItemPress(item)}
-              className="flex-row items-center justify-between py-2"
+          {/* Profile Card Container (centered absolute overlap) */}
+          <View 
+            className="absolute left-6 right-6 bg-white p-5 rounded-3xl shadow-xl flex-row items-center gap-4 border border-gray-100"
+            style={{ top: 70 }}
+          >
+            <View 
+              className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-white"
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
+                elevation: 4,
+              }}
             >
-              <View className="flex-row items-center gap-4">
-                <View className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm">
-                  <Ionicons name={item.icon as any} size={20} color="#000" />
-                </View>
-                <Text className="text-sm font-normal text-[#1F2A33]">
-                  {item.title}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          ))}
+              <Image
+                source={avatarSource}
+                style={{ height: "100%", width: "100%", borderRadius: 999 }}
+                contentFit="cover"
+              />
+            </View>
+            <View className="flex-1">
+              <Text numberOfLines={1} className="text-xl font-extrabold text-gray-900 leading-6">
+                {user?.name || user?.fullName || "User"}
+              </Text>
+              <Text numberOfLines={1} className="text-sm font-medium text-gray-400 mt-1 leading-4">
+                {user?.email || "No email provided"}
+              </Text>
+            </View>
+          </View>
         </View>
 
+        {/* Stats Row */}
+        <View className="flex-row justify-between px-6 mb-8 gap-3">
+          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
+            <View className="w-9 h-9 rounded-full bg-[#FFF0F3] items-center justify-center mb-1">
+              <Ionicons name="heart" size={18} color="#FF4D6D" />
+            </View>
+            <Text className="text-base font-bold text-gray-900">
+              {favorites?.length || 0}
+            </Text>
+            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+              Saved
+            </Text>
+          </View>
+
+          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
+            <View className="w-9 h-9 rounded-full bg-[#FFF7E6] items-center justify-center mb-1">
+              <Ionicons name="bag" size={18} color="#FF9F1C" />
+            </View>
+            <Text className="text-base font-bold text-gray-900">
+              {user?.orderCount || 6}
+            </Text>
+            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+              Orders
+            </Text>
+          </View>
+
+          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
+            <View className="w-9 h-9 rounded-full bg-[#E6F8F6] items-center justify-center mb-1">
+              <Ionicons name="gift" size={18} color="#2EC4B6" />
+            </View>
+            <Text className="text-base font-bold text-gray-900">
+              {user?.donationCount || 2}
+            </Text>
+            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+              Donated
+            </Text>
+          </View>
+        </View>
+
+        {/* Menu Sections */}
+        <View className="px-6 space-y-6">
+          {menuSections.map((section) => (
+            <View key={section.title} className="space-y-2">
+              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">
+                {section.title}
+              </Text>
+              <View className="bg-white rounded-2xl overflow-hidden border border-gray-50 shadow-sm">
+                {section.items.map((item, index) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => router.push(item.route as any)}
+                    activeOpacity={0.7}
+                    className={`flex-row items-center justify-between p-4 ${
+                      index < section.items.length - 1 ? "border-b border-gray-50" : ""
+                    }`}
+                  >
+                    <View className="flex-row items-center gap-4">
+                      <View 
+                        className="w-9 h-9 rounded-xl items-center justify-center"
+                        style={{ backgroundColor: item.bgColor }}
+                      >
+                        <Ionicons name={item.icon as any} size={18} color={item.color} />
+                      </View>
+                      <Text className="text-[15px] font-semibold text-gray-800">
+                        {item.title}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color="#CCCCCC" />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          ))}
+
+          {/* Logout Section */}
+          <View className="pt-4">
+            <TouchableOpacity
+              onPress={handleLogout}
+              activeOpacity={0.8}
+              className="flex-row items-center justify-center gap-2 bg-[#FFF5F5] border border-[#FED7D7] py-4 rounded-2xl shadow-sm"
+            >
+              <Ionicons name="log-out-outline" size={20} color="#E53E3E" />
+              <Text className="text-[#E53E3E] font-bold text-base">
+                Log Out
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
