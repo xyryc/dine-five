@@ -13,7 +13,7 @@ export const SearchBar = ({
 }) => {
     return (
         <View className="px-4 mt-3">
-            <View className="flex-row items-center bg-white rounded-2xl border border-[#EBEBEB] h-11 px-3 shadow-sm">
+            <View className="flex-row items-center bg-white rounded-2xl border border-[#EBEBEB] px-3 shadow-sm">
                 <Ionicons name="search-outline" size={18} color="#9CA3AF" />
                 <TextInput
                     placeholder="Search dishes, restaurants"

@@ -445,7 +445,7 @@ export default function RestaurantDetailScreen() {
             >
               <Ionicons name="star" size={13} color="#F5C518" />
               <Text className="text-xs font-semibold text-gray-700">
-                {restaurantRating} � ratings
+                {restaurantRating} Ratings
               </Text>
             </View>
             <View
@@ -454,7 +454,7 @@ export default function RestaurantDetailScreen() {
             >
               <Ionicons name="bicycle-outline" size={13} color="#6B7280" />
               <Text className="text-xs font-semibold text-gray-700">
-                Pickup � {restaurantDistance}
+                Pickup {restaurantDistance}
               </Text>
             </View>
           </View>
@@ -462,7 +462,7 @@ export default function RestaurantDetailScreen() {
 
         <View className="mx-4 mt-4 mb-3">
           <View
-            className="flex-row items-center rounded-full px-4 h-10"
+            className="flex-row items-center rounded-full px-4"
             style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
           >
             <Ionicons name="search-outline" size={16} color="#9CA3AF" />
