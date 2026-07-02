@@ -52,7 +52,7 @@ export default function FavoriteScreen() {
             activeOpacity={0.9}
             onPress={() => {
                 router.push({
-                    pathname: "/(tabs)/product-details",
+                    pathname: "/screens/home/product-details",
                     params: {
                         id: item.food.foodId,
                         name: item.food.title,

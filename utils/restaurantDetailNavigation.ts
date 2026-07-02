@@ -62,7 +62,7 @@ export const buildRestaurantDetailHref = (restaurant: Restaurant) => {
 
   if (isFreeMealItem) {
     return {
-      pathname: "/(tabs)/product-details",
+      pathname: "/screens/home/product-details",
       params: {
         id: restaurant.foodId || restaurant.id,
         foodId: restaurant.foodId || restaurant.id,
@@ -101,7 +101,7 @@ export const buildRestaurantDetailHref = (restaurant: Restaurant) => {
     : "";
 
   return {
-    pathname: "/(tabs)/hotel-details",
+    pathname: "/screens/home/restaurant-details",
     params: {
       id: restaurant.providerId,
       providerId: restaurant.providerId,

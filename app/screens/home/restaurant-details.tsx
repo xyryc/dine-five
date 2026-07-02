@@ -336,7 +336,7 @@ export default function RestaurantDetailScreen() {
   const openFoodDetail = React.useCallback(
     (item: MenuItemType) => {
       router.push({
-        pathname: "/(tabs)/product-details",
+        pathname: "/screens/home/product-details",
         params: {
           id: item.id,
           foodId: item.id,

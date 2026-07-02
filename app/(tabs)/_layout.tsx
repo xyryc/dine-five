@@ -149,8 +149,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="location"        options={{ title: "Location" }} />
       <Tabs.Screen name="cart"            options={{ title: "Cart" }} />
       <Tabs.Screen name="profile"         options={{ title: "Profile" }} />
-      <Tabs.Screen name="hotel-details"   options={{ href: null }} />
-      <Tabs.Screen name="product-details" options={{ href: null }} />
     </Tabs>
   );
 }

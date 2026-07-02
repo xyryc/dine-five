@@ -522,7 +522,7 @@ export default function HomeScreen() {
   const openRestaurantDetail = React.useCallback(
     (restaurant: Restaurant) => {
       router.push({
-        pathname: "/(tabs)/hotel-details",
+        pathname: "/screens/home/restaurant-details",
         params: {
           id: restaurant.providerId,
           providerId: restaurant.providerId,
