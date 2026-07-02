@@ -162,10 +162,9 @@ export default function RestaurantMapView({
   const routeBannerAnim = useRef(new Animated.Value(80)).current;
   const flatListRef = useRef<FlatList<Restaurant>>(null);
 
-  // ── Init location ────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchLocation();
-  }, []);
+  }, [fetchLocation]);
 
   // ── Fetch restaurants ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -207,14 +206,13 @@ export default function RestaurantMapView({
     }
   }, [activeCardIndex, restaurants, selectedRestaurant]);
 
-  // Show / hide route banner
   useEffect(() => {
     Animated.spring(routeBannerAnim, {
       toValue: selectedRestaurant ? 0 : 80,
       useNativeDriver: true,
       friction: 8,
     }).start();
-  }, [selectedRestaurant]);
+  }, [selectedRestaurant, routeBannerAnim]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
@@ -246,7 +244,6 @@ export default function RestaurantMapView({
     );
   };
 
-  /** Called by FlatList when the centered card changes while scrolling */
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0 && viewableItems[0].index != null) {
@@ -255,7 +252,7 @@ export default function RestaurantMapView({
         setSelectedRestaurant(restaurants[idx] ?? null);
       }
     },
-    [restaurants]
+    [restaurants, setSelectedRestaurant]
   );
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 });

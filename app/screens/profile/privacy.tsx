@@ -43,17 +43,17 @@ export default function PrivacyScreen() {
 
                 <Text className="text-base font-bold text-gray-800 mb-2">4. Disclaimers</Text>
                 <Text className="text-gray-500 leading-6 mb-6">
-                    The service is provided on an "as is" and "as available" basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
+                    The service is provided on an &quot;as is&quot; and &quot;as available&quot; basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
                 </Text>
 
                 <Text className="text-base font-bold text-gray-800 mb-2">5. Disclaimers</Text>
                 <Text className="text-gray-500 leading-6 mb-6">
-                    The service is provided on an "as is" and "as available" basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
+                    The service is provided on an &quot;as is&quot; and &quot;as available&quot; basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
                 </Text>
 
                 <Text className="text-base font-bold text-gray-800 mb-2">6. Disclaimers</Text>
                 <Text className="text-gray-500 leading-6 mb-12">
-                    The service is provided on an "as is" and "as available" basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
+                    The service is provided on an &quot;as is&quot; and &quot;as available&quot; basis. [Your Company Name] makes no warranties, expressed or implied, regarding the operation.
                 </Text>
             </ScrollView>
         </SafeAreaView>

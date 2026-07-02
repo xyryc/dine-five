@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -13,7 +12,6 @@ export const Categories = ({
   activeCategory: string;
   onCategoryChange: (cat: string) => void;
 }) => {
-  const router = useRouter();
   const categoryList =
     categories && categories.length > 0
       ? ["All", ...Array.from(new Set(categories.filter(Boolean).map((item) => item.trim()))).filter((item) => item !== "All")]

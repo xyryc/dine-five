@@ -49,7 +49,7 @@ export default function AddCardScreen() {
                     onPress: () => router.back()
                 }
             ]);
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Failed to add card');
         }
     };

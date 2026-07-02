@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const step3 = () => {
+const Step3 = () => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const bottomSectionHeight = height * 0.4;
@@ -66,7 +66,7 @@ const step3 = () => {
 
         {/* Description */}
         <Text className="text-base text-gray-600 leading-relaxed mb-6 text-center">
-          We believe high-quality dining shouldn't be a luxury. Access top-tier ingredients and chef-prepared dishes without the "inflation tax."
+          We believe high-quality dining shouldn&apos;t be a luxury. Access top-tier ingredients and chef-prepared dishes without the &quot;inflation tax.&quot;
         </Text>
 
         {/* Next button - full width */}
@@ -82,4 +82,4 @@ const step3 = () => {
   );
 };
 
-export default step3;
+export default Step3;

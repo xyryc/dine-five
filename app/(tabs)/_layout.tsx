@@ -57,7 +57,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       stiffness: 200,
       mass: 0.65,
     }).start();
-  }, [activeIdx, tabWidth]);
+  }, [activeIdx, tabWidth, targetX, translateX]);
 
   return (
     <View

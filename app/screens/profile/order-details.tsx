@@ -50,6 +50,7 @@ export default function OrderDetailsScreen() {
     };
 
     loadOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.orderId, params._id]);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function OrderDetailsScreen() {
     ) {
       setRateModalVisible(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.autoRate, currentState, params._id, params.orderId]);
 
 
@@ -182,19 +184,6 @@ export default function OrderDetailsScreen() {
 
   const getTimeline = () => {
     // Simplified timeline logic for demo
-    const steps = [
-      { title: "Order prepared", active: currentState !== "pending" }, // vaguely mapping to images
-      {
-        title: "Order is ready for pickup",
-        active: ["ready", "ready_for_pickup", "picked_up"].includes(
-          currentState,
-        ),
-      },
-      {
-        title: "Order picked up",
-        active: ["picked_up", "delivered"].includes(currentState),
-      },
-    ];
 
     // Designing the specific "Preparing your order" card look from Image 2
     // Or "Ready for pickup" card from Image 3
@@ -243,7 +232,7 @@ export default function OrderDetailsScreen() {
                 Please head to the counter to collect your food.
               </Text>
               <TouchableOpacity className="mt-3 border border-gray-200 rounded-xl py-3 w-48 items-center bg-white shadow-sm">
-                <Text className="font-bold text-gray-900">I'm here</Text>
+                <Text className="font-bold text-gray-900">I&apos;m here</Text>
               </TouchableOpacity>
             </View>
           ) : (

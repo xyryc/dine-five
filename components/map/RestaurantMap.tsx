@@ -60,7 +60,7 @@ export const RestaurantMap = () => {
   // ─── Init location ───────────────────────────────────────────────────────────
   useEffect(() => {
     fetchLocation();
-  }, []);
+  }, [fetchLocation]);
 
   // ─── Fetch when location, filter, or radius changes ──────────────────────────
   useEffect(() => {
@@ -74,7 +74,7 @@ export const RestaurantMap = () => {
       page: 1,
       limit: 20,
     });
-  }, [hasLocation, userLat, userLng, cuisineFilter, radiusMeters]);
+  }, [hasLocation, userLat, userLng, cuisineFilter, radiusMeters, fetchNearbyRestaurants]);
 
   // Auto-zoom to user location when it's first loaded
   const hasAutoZoomed = useRef(false);

@@ -463,10 +463,6 @@ export default function CartScreen() {
     ? `${(firstItem.distanceKm * 0.621371).toFixed(1)} mi`
     : pickString(cartMeta?.distance, "3.1 mi");
 
-  const etaText = Number.isFinite(firstItem?.etaMinutes)
-    ? `${Math.max(1, Math.round(firstItem.etaMinutes - 2))}-${Math.round(firstItem.etaMinutes + 2)} min`
-    : pickString(cartMeta?.eta, "20-22 min");
-
   const platformFee = cartItems.reduce((acc, item) => {
     return acc + (item.serviceFee || 0) * (item.quantity || 1);
   }, 0);
@@ -589,41 +585,58 @@ export default function CartScreen() {
           <View className="px-4 py-3">
             <View className="flex-row justify-between py-1">
               <Text className="text-[14px] text-gray-600">Item subtotal</Text>
-              <Text className="text-[14px] text-gray-700">
-                {formatMoney(subtotal)}
-              </Text>
+              {loading ? (
+                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+              ) : (
+                <Text className="text-[14px] text-gray-700">
+                  {formatMoney(subtotal)}
+                </Text>
+              )}
             </View>
-
-
-
 
             <View className="flex-row justify-between py-1">
               <Text className="text-[14px] text-gray-600">Platform fee</Text>
-              <Text className="text-[14px] text-gray-700">
-                {formatMoney(platformFee)}
-              </Text>
+              {loading ? (
+                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+              ) : (
+                <Text className="text-[14px] text-gray-700">
+                  {formatMoney(platformFee)}
+                </Text>
+              )}
             </View>
             <View className="flex-row justify-between py-1">
               <Text className="text-[14px] text-gray-600">
                 {resolvedStateName ? `State tax` : "State tax"}
               </Text>
-              <Text className="text-[14px] text-gray-700">
-                {formatTaxRate(stateTaxRate)}
-              </Text>
+              {loading ? (
+                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+              ) : (
+                <Text className="text-[14px] text-gray-700">
+                  {formatTaxRate(stateTaxRate)}
+                </Text>
+              )}
             </View>
             <View className="flex-row justify-between py-1">
               <Text className="text-[14px] text-gray-600">County Tax</Text>
-              <Text className="text-[14px] text-gray-700">
-                {formatTaxRate(countyTaxRate)}
-              </Text>
+              {loading ? (
+                <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+              ) : (
+                <Text className="text-[14px] text-gray-700">
+                  {formatTaxRate(countyTaxRate)}
+                </Text>
+              )}
             </View>
             <View className="flex-row justify-between pt-2 mt-1 border-t border-[#EFEDE5]">
               <Text className="text-[16px] font-semibold text-gray-900">
                 Total
               </Text>
-              <Text className="text-[16px] font-semibold text-gray-900">
-                {formatMoney(total)}
-              </Text>
+              {loading ? (
+                <View className="bg-gray-200 h-5 w-20 rounded animate-pulse" />
+              ) : (
+                <Text className="text-[16px] font-semibold text-gray-900">
+                  {formatMoney(total)}
+                </Text>
+              )}
             </View>
           </View>
         </View>

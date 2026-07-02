@@ -83,15 +83,12 @@ export default function RestaurantMapView({
     selectedRestaurant,
     cuisineFilter,
     radiusMeters,
-    total,
-    availableTokenCount,
     fetchLocation,
     fetchNearbyRestaurants,
     fetchFreeMeals,
     setSelectedRestaurant,
     setActiveFeedMode,
     setRadiusMeters,
-    claimToken,
   } = useRestaurantStore();
 
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -186,7 +183,7 @@ export default function RestaurantMapView({
               } else {
                 Alert.alert("Location Not Found", "Could not resolve the address.");
               }
-            } catch (err) {
+            } catch {
               Alert.alert("Error", "Failed to resolve address.");
             }
           },
@@ -248,6 +245,8 @@ export default function RestaurantMapView({
     radiusMeters,
     cuisineFilter,
     debouncedSearchText,
+    fetchFreeMeals,
+    fetchNearbyRestaurants,
   ]);
 
   // Auto-zoom to user location when it's first loaded
@@ -266,7 +265,7 @@ export default function RestaurantMapView({
 
   const allRestaurants = useMemo(() => {
     return restaurants;
-  }, [restaurants, mealFilter]);
+  }, [restaurants]);
 
   const filteredRestaurants = useMemo(() => {
     const normalizedQuery = normalizeRestaurantSearchQuery(debouncedSearchText);
@@ -310,7 +309,7 @@ export default function RestaurantMapView({
         setActiveCardIndex(0);
         try {
           flatListRef.current?.scrollToIndex({ index: 0, animated: true });
-        } catch (err) { }
+        } catch { }
       }
       return;
     }
@@ -319,8 +318,9 @@ export default function RestaurantMapView({
       setActiveCardIndex(selectedIndex);
       try {
         flatListRef.current?.scrollToIndex({ index: selectedIndex, animated: true });
-      } catch (err) { }
+      } catch { }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredRestaurants, selectedRestaurant?.id]); // Only depend on list and selected ID
 
   useEffect(() => {
@@ -351,7 +351,7 @@ export default function RestaurantMapView({
       setActiveCardIndex(index);
       try {
         flatListRef.current?.scrollToIndex({ index, animated: true });
-      } catch (err) {
+      } catch {
         // List might not be ready
       }
     }
@@ -389,32 +389,7 @@ export default function RestaurantMapView({
     }
   };
 
-  const handleClaimFreeMeal = async (item: Restaurant) => {
-    // Usually tokenId is required, but if not present, we try foodId or id
-    const tokenId = (item as any).tokenId || (item as any).foodId || item.id;
-    if (!tokenId) {
-      Alert.alert("Error", "Missing token information");
-      return;
-    }
 
-    try {
-      const result = await claimToken(tokenId);
-      const newTokenId = result?.data?.token?.tokenId || tokenId;
-
-      Alert.alert("Success", result.message || "Meal claimed successfully!", [
-        {
-          text: "Order Now",
-          onPress: () => onOpenRestaurant?.({ ...item, tokenId: newTokenId } as any),
-        },
-        { text: "Later", style: "cancel" },
-      ]);
-
-      // Refresh the list to update available token count
-      await fetchFreeMeals({ page: 1, limit: 20 });
-    } catch (err: any) {
-      Alert.alert("Claim Failed", err.message || "Failed to claim meal");
-    }
-  };
 
   const isShowingHomeProviders = false;
 

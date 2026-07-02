@@ -91,7 +91,7 @@ const ForgotPassword = () => {
                 Forgot Password?
               </Text>
               <Text className="text-gray-600 text-center mb-6">
-                Don't worry! It happens. Please enter the email address
+                Don&apos;t worry! It happens. Please enter the email address
                 associated with your account.
               </Text>
 

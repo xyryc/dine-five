@@ -29,7 +29,6 @@ export default function CustomerSupportScreen() {
     fetchConversations,
     createConversation,
     createSupportTicket,
-    sendMessage,
     sendMessageToProvider,
     user,
     isLoading,
@@ -57,7 +56,7 @@ export default function CustomerSupportScreen() {
       }, 100);
       setPrevMessageCount(messages.length);
     }
-  }, [messages.length]);
+  }, [messages.length, prevMessageCount]);
 
   useEffect(() => {
     loadData();
@@ -70,6 +69,7 @@ export default function CustomerSupportScreen() {
     }, 3000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, user]);
 
   const loadData = async () => {

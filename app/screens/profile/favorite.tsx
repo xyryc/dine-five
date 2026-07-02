@@ -1,6 +1,5 @@
 import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/stores/stores";
-import { Product } from "@/utils/favoriteStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -17,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoriteScreen() {
     const router = useRouter();
-    const { fetchFavorites, addToCart, removeFavorite, isLoading } =
+    const { fetchFavorites, removeFavorite, isLoading } =
         useStore() as any;
     const [favorites, setFavorites] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -31,6 +30,7 @@ export default function FavoriteScreen() {
 
     useEffect(() => {
         loadFavorites();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onRefresh = async () => {
@@ -45,18 +45,6 @@ export default function FavoriteScreen() {
             // Refresh list after removing favorite
             loadFavorites();
         }
-    };
-
-    const handleAddToCart = (item: any) => {
-        const product: Product = {
-            id: item.food.foodId,
-            name: item.food.title,
-            price: item.food.finalPriceTag.toString(),
-            image: item.food.image,
-            rating: item.food.averageRating || 4.7,
-            reviews: item.food.totalReviews || 2500,
-        };
-        addToCart(product, 1);
     };
 
     const renderItem = ({ item }: { item: any }) => (

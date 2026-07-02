@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const step1 = () => {
+const Step1 = () => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   
@@ -84,4 +84,4 @@ const step1 = () => {
   );
 };
 
-export default step1;
+export default Step1;

@@ -2,7 +2,6 @@ import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
 import {
   useLocalSearchParams,
-  usePathname,
   useRouter,
 } from "expo-router";
 import { StatusBar } from "expo-status-bar";

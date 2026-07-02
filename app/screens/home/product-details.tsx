@@ -61,7 +61,6 @@ export default function ProductDetails() {
     restaurantName,
     restaurantProfile,
     tokenId,
-    providerId,
   } = params;
   
   const { claimToken, placeFreeOrder, getAvailableTokens } = useRestaurantStore();
@@ -84,7 +83,7 @@ export default function ProductDetails() {
   useEffect(() => {
     console.log("[ProductDetails] Mounted with params:", params);
     console.log("[ProductDetails] isFreeMeal detection:", isFreeMeal);
-  }, []);
+  }, [isFreeMeal, params]);
 
   const normalizedProductImage = normalizeImageUri(image as string | string[] | undefined);
   const normalizedRestaurantProfile = normalizeImageUri(

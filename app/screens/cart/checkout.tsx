@@ -176,6 +176,7 @@ function CheckoutContent() {
   const [selectedCard, setSelectedCard] = useState("Mastercard - Daniel Jones");
   const [cartSubtotal, setCartSubtotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(true);
   const [cartRawData, setCartRawData] = useState<any>(null);
   const [stateTaxRate, setStateTaxRate] = useState(0);
   const [donationBreakdown, setDonationBreakdown] =
@@ -200,41 +201,49 @@ function CheckoutContent() {
   const CARDS = ["Mastercard - Daniel Jones", "Visa - Daniel Jones"];
 
   const loadCartData = useCallback(async () => {
+    setIsCheckoutLoading(true);
     if (isDonationCheckout) {
       setCartRawData(null);
       setCartSubtotal(0);
+      setIsCheckoutLoading(false);
       return;
     }
 
-    const cartData = await fetchCart();
-    const root = cartData?.items
-      ? cartData
-      : cartData?.data?.items
-        ? cartData.data
-        : null;
+    try {
+      const cartData = await fetchCart();
+      const root = cartData?.items
+        ? cartData
+        : cartData?.data?.items
+          ? cartData.data
+          : null;
 
-    if (root) {
-      setCartRawData(root);
-      const items = Array.isArray(root.items) ? root.items : [];
-      const computedSubtotal = items.reduce((acc: number, item: any) => {
-        const foodData =
-          item?.foodId && typeof item.foodId === "object"
-            ? item.foodId
-            : item?.food && typeof item.food === "object"
-              ? item.food
-              : null;
-        const price = toNumber(
-          item.baseRevenue ??
-          foodData?.baseRevenue ??
-          item.price ??
-          foodData?.price ??
-          foodData?.finalPriceTag,
-          0,
-        );
-        const quantity = Math.max(1, Math.floor(toNumber(item.quantity, 1)));
-        return acc + price * quantity;
-      }, 0);
-      setCartSubtotal(computedSubtotal);
+      if (root) {
+        setCartRawData(root);
+        const items = Array.isArray(root.items) ? root.items : [];
+        const computedSubtotal = items.reduce((acc: number, item: any) => {
+          const foodData =
+            item?.foodId && typeof item.foodId === "object"
+              ? item.foodId
+              : item?.food && typeof item.food === "object"
+                ? item.food
+                : null;
+          const price = toNumber(
+            item.baseRevenue ??
+            foodData?.baseRevenue ??
+            item.price ??
+            foodData?.price ??
+            foodData?.finalPriceTag,
+            0,
+          );
+          const quantity = Math.max(1, Math.floor(toNumber(item.quantity, 1)));
+          return acc + price * quantity;
+        }, 0);
+        setCartSubtotal(computedSubtotal);
+      }
+    } catch (err) {
+      console.log("loadCartData error:", err);
+    } finally {
+      setIsCheckoutLoading(false);
     }
   }, [fetchCart, isDonationCheckout]);
 
@@ -631,9 +640,13 @@ function CheckoutContent() {
                 <Text className="text-gray-500 text-sm mb-1">
                   Pickup from
                 </Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {pickupAddress}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-48 rounded animate-pulse mt-1" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {pickupAddress}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -642,7 +655,7 @@ function CheckoutContent() {
         {/* Payment Method */}
         <TouchableOpacity
           onPress={() => {
-            if (!isDonationCheckout) {
+            if (!isDonationCheckout && !isCheckoutLoading) {
               setModalVisible(true);
             }
           }}
@@ -660,12 +673,16 @@ function CheckoutContent() {
                 <Text className="text-gray-500 text-sm mb-1">
                   Payment Method
                 </Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {isDonationCheckout ? "Stripe checkout" : selectedCard}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-32 rounded animate-pulse mt-1" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {isDonationCheckout ? "Stripe checkout" : selectedCard}
+                  </Text>
+                )}
               </View>
             </View>
-            {!isDonationCheckout && (
+            {!isDonationCheckout && !isCheckoutLoading && (
               <Ionicons name="chevron-forward" size={20} color="#999" />
             )}
           </View>
@@ -719,36 +736,56 @@ function CheckoutContent() {
             <>
               <View className="flex-row justify-between mb-4">
                 <Text className="text-gray-500 text-base">Item subtotal</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(cartSubtotal)}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {formatMoney(cartSubtotal)}
+                  </Text>
+                )}
               </View>
               <View className="flex-row justify-between mb-4">
                 <Text className="text-gray-500 text-base">Platform Fee</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatMoney(platformFee)}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {formatMoney(platformFee)}
+                  </Text>
+                )}
               </View>
               <View className="flex-row justify-between mb-4">
                 <Text className="text-gray-500 text-base">
                   State Tax
                 </Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatTaxRate(effectiveStateTaxRate)}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {formatTaxRate(effectiveStateTaxRate)}
+                  </Text>
+                )}
               </View>
               <View className="flex-row justify-between mb-4">
                 <Text className="text-gray-500 text-base">County Tax</Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  {formatTaxRate(countyTaxRate)}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-5 w-16 rounded animate-pulse" />
+                ) : (
+                  <Text className="text-gray-900 font-bold text-base">
+                    {formatTaxRate(countyTaxRate)}
+                  </Text>
+                )}
               </View>
 
               <View className="flex-row justify-between text-lg pt-4 border-t border-gray-100">
                 <Text className="text-gray-900 text-lg font-bold">Total</Text>
-                <Text className="text-gray-900 text-xl font-bold">
-                  {formatMoney(effectiveTotal)}
-                </Text>
+                {isCheckoutLoading ? (
+                  <View className="bg-gray-200 h-6 w-20 rounded animate-pulse" />
+                ) : (
+                  <Text className="text-gray-900 text-xl font-bold">
+                    {formatMoney(effectiveTotal)}
+                  </Text>
+                )}
               </View>
             </>
           )}
@@ -760,16 +797,20 @@ function CheckoutContent() {
 
         <TouchableOpacity
           onPress={handlePlaceOrder}
-          disabled={isLoading}
-          className={`bg-yellow-400 w-full py-4 rounded-2xl shadow-md items-center justify-center ${isLoading ? "opacity-70" : ""}`}
+          disabled={isLoading || isCheckoutLoading}
+          className={`bg-yellow-400 w-full py-4 rounded-2xl shadow-md items-center justify-center ${(isLoading || isCheckoutLoading) ? "opacity-50" : ""}`}
         >
           {isLoading ? (
             <ActivityIndicator color="#000" />
           ) : (
             <Text className="text-gray-900 font-bold text-lg">
-              {isDonationCheckout
-                ? `Donate ${donationMealCount} ${donationMealLabel} ${formatMoney(donationTotal)}`
-                : `Place Order ${formatMoney(effectiveTotal)}`}
+              {isCheckoutLoading ? (
+                "Loading Order Details..."
+              ) : isDonationCheckout ? (
+                `Donate ${donationMealCount} ${donationMealLabel} ${formatMoney(donationTotal)}`
+              ) : (
+                `Place Order ${formatMoney(effectiveTotal)}`
+              )}
             </Text>
           )}
         </TouchableOpacity>

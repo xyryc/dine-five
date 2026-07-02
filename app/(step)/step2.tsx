@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const step2 = () => {
+const Step2 = () => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const bottomSectionHeight = height * 0.4;
@@ -68,7 +68,7 @@ const step2 = () => {
         <Text className="text-base text-gray-600 leading-relaxed mb-6 text-center">
           In an expensive economy, we help local restaurants thrive by recouping
           ingredient costs. You get a fresh meal; they keep their doors open.
-          It's a win-win.
+          It&apos;s a win-win.
         </Text>
 
         {/* Next button - full width */}
@@ -84,4 +84,4 @@ const step2 = () => {
   );
 };
 
-export default step2;
+export default Step2;

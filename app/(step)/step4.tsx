@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const step4 = () => {
+const Step4 = () => {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const bottomSectionHeight = height * 0.4;
@@ -67,7 +67,7 @@ const step4 = () => {
         <Text className="text-base text-gray-600 leading-relaxed mb-6 text-center px-2">
           No pick up fees. No hidden markups. No long waits. Simply browse
           available meals, reserve your favorite, and pick it up fresh from the
-          restaurant when it's ready.
+          restaurant when it&apos;s ready.
         </Text>
 
         {/* Get Started button */}
@@ -83,4 +83,4 @@ const step4 = () => {
   );
 };
 
-export default step4;
+export default Step4;
