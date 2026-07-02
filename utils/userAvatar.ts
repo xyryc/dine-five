@@ -1,7 +1,6 @@
 import { API_BASE_URL } from "@/utils/api";
 
-export const DEFAULT_USER_AVATAR =
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500";
+export const DEFAULT_USER_AVATAR = "";
 
 const pickString = (...values: unknown[]): string => {
   for (const value of values) {

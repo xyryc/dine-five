@@ -59,6 +59,7 @@ export default function ProfileScreen() {
   const { user, fetchProfile } = useStore() as any;
   const router = useRouter();
   const avatarUri = getUserAvatarUri(user);
+  const avatarSource = avatarUri ? { uri: avatarUri } : require("@/assets/images/user-icon.jpg");
 
   useEffect(() => {
     fetchProfile?.();
@@ -81,9 +82,9 @@ export default function ProfileScreen() {
         <View className=" mb-10 mt-4 flex-row items-center gap-4">
           <View className="w-20 h-20 rounded-full mb-4 overflow-hidden shadow-sm">
             <Image
-              source={{ uri: avatarUri }}
-              style={{ height: 80, width: 80, borderRadius: 100 }}
-              contentFit="cover"
+              source={avatarSource}
+              style={{ height: "100%", width: "100%", borderRadius: 100 }}
+              contentFit="scale-down"
             />
           </View>
           <View>

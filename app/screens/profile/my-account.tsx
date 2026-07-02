@@ -32,6 +32,9 @@ export default function MyAccountScreen() {
   const avatarUri = selectedImage
     ? normalizeImageUri(selectedImage) || selectedImage
     : getUserAvatarUri(user);
+  const avatarSource = (avatarUri && !avatarLoadFailed)
+    ? { uri: avatarUri }
+    : require("@/assets/images/user-icon.jpg");
 
   React.useEffect(() => {
     fetchProfile?.();
@@ -60,8 +63,10 @@ export default function MyAccountScreen() {
     email: user?.email || "michael.mitc@example.com",
     phone: user?.phone || "555-0128",
     phonePrefix: "+1",
-    dob: "12-10-1996",
-    address: "King kong",
+    bio: user?.bio || user?.Boi || "",
+    city: user?.city || "",
+    state: user?.state || "",
+    address: user?.address || "",
   });
 
   // Keep form synced with store user data
@@ -72,7 +77,9 @@ export default function MyAccountScreen() {
         name: user?.name || user?.fullName || prev.name,
         email: user.email || prev.email,
         phone: user.phone || prev.phone,
-        dob: user.dob || prev.dob,
+        bio: user.bio || user.Boi || prev.bio,
+        city: user.city || prev.city,
+        state: user.state || prev.state,
         address: user.address || prev.address,
       }));
     }
@@ -112,7 +119,9 @@ export default function MyAccountScreen() {
         const form = new FormData();
         form.append("name", formData.name);
         form.append("phone", fullPhone);
-        form.append("dob", formData.dob);
+        form.append("bio", formData.bio);
+        form.append("city", formData.city);
+        form.append("state", formData.state);
         form.append("address", formData.address);
 
         const filename = selectedImage.split("/").pop() || "profile.jpg";
@@ -129,7 +138,9 @@ export default function MyAccountScreen() {
         dataToUpdate = {
           name: formData.name,
           phone: fullPhone,
-          dob: formData.dob,
+          bio: formData.bio,
+          city: formData.city,
+          state: formData.state,
           address: formData.address,
         };
       }
@@ -196,19 +207,13 @@ export default function MyAccountScreen() {
           <View className="items-center mb-8">
             <View className="relative">
               <View className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden">
-                {avatarUri && !avatarLoadFailed ? (
-                  <Image
-                    key={avatarUri}
-                    source={{ uri: avatarUri }}
-                    style={{ width: 96, height: 96, borderRadius: 999 }}
-                    contentFit="cover"
-                    onError={() => setAvatarLoadFailed(true)}
-                  />
-                ) : (
-                  <View className="w-full h-full items-center justify-center">
-                    <Ionicons name="person" size={34} color="#9CA3AF" />
-                  </View>
-                )}
+                <Image
+                  key={avatarUri || "default"}
+                  source={avatarSource}
+                  style={{ width: "100%", height: "100%", borderRadius: 999 }}
+                  contentFit="contain"
+                  onError={() => setAvatarLoadFailed(true)}
+                />
               </View>
               {isEditing && (
                 <TouchableOpacity
@@ -284,24 +289,64 @@ export default function MyAccountScreen() {
               </View>
             </View>
 
-            {/* DOB Field */}
+            {/* Bio Field */}
             <View className="mt-4">
               {isEditing && (
-                <Text className="text-gray-500 text-sm mb-1 ml-1">
-                  Date of Birth
-                </Text>
+                <Text className="text-gray-500 text-sm mb-1 ml-1">Bio</Text>
               )}
               <View className="bg-white p-4 rounded-xl border border-gray-100">
                 {isEditing ? (
                   <TextInput
-                    value={formData.dob}
-                    onChangeText={(t) => handleChange("dob", t)}
-                    placeholder="DD-MM-YYYY"
+                    value={formData.bio}
+                    onChangeText={(t) => handleChange("bio", t)}
                     className="text-base font-normal text-gray-900 p-0"
+                    placeholder="Tell us about yourself"
                   />
                 ) : (
                   <Text className="text-base font-normal text-gray-900">
-                    {formData.dob}
+                    {formData.bio || "No bio added"}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* City Field */}
+            <View className="mt-4">
+              {isEditing && (
+                <Text className="text-gray-500 text-sm mb-1 ml-1">City</Text>
+              )}
+              <View className="bg-white p-4 rounded-xl border border-gray-100">
+                {isEditing ? (
+                  <TextInput
+                    value={formData.city}
+                    onChangeText={(t) => handleChange("city", t)}
+                    className="text-base font-normal text-gray-900 p-0"
+                    placeholder="Enter city"
+                  />
+                ) : (
+                  <Text className="text-base font-normal text-gray-900">
+                    {formData.city || "No city added"}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* State Field */}
+            <View className="mt-4">
+              {isEditing && (
+                <Text className="text-gray-500 text-sm mb-1 ml-1">State</Text>
+              )}
+              <View className="bg-white p-4 rounded-xl border border-gray-100">
+                {isEditing ? (
+                  <TextInput
+                    value={formData.state}
+                    onChangeText={(t) => handleChange("state", t)}
+                    className="text-base font-normal text-gray-900 p-0"
+                    placeholder="Enter state"
+                  />
+                ) : (
+                  <Text className="text-base font-normal text-gray-900">
+                    {formData.state || "No state added"}
                   </Text>
                 )}
               </View>
@@ -321,7 +366,7 @@ export default function MyAccountScreen() {
                   />
                 ) : (
                   <Text className="text-base font-normal text-gray-900">
-                    Address - {formData.address}
+                    {formData.address}
                   </Text>
                 )}
                 {!isEditing && (

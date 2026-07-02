@@ -387,10 +387,8 @@ export default function HomeScreen() {
   const locationLabel = React.useMemo(() => {
     return (
       pickString(
+        user?.address,
         currentLocationLabel,
-        user?.address?.street,
-        user?.address?.line1,
-        user?.address?.address,
         user?.city,
         user?.state,
       ) || "Fetching location..."

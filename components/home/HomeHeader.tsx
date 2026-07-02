@@ -16,6 +16,7 @@ export const HomeHeader = ({ name, location, profileImage }: HomeHeaderProps) =>
   const router = useRouter();
   const { user, fetchProfile } = useStore() as any;
   const avatarUri = profileImage || getUserAvatarUri(user);
+  const avatarSource = avatarUri ? { uri: avatarUri } : require("@/assets/images/user-icon.jpg");
 
   React.useEffect(() => {
     fetchProfile?.();
@@ -26,9 +27,9 @@ export const HomeHeader = ({ name, location, profileImage }: HomeHeaderProps) =>
       <View className="flex-row items-center gap-3">
         <View className="w-11 h-11 rounded-full overflow-hidden bg-[#F1F1EF] items-center justify-center">
           <Image
-            source={{ uri: avatarUri }}
-            contentFit="cover"
-            style={{ width: 44, height: 44, borderRadius: 22 }}
+            source={avatarSource}
+            contentFit="contain"
+            style={{ width: "100%", height: "100%", borderRadius: 100 }}
           />
         </View>
         <View className="max-w-[190px]">
@@ -38,7 +39,7 @@ export const HomeHeader = ({ name, location, profileImage }: HomeHeaderProps) =>
           <View className="flex-row items-center mt-0.5">
             <Ionicons name="location-outline" size={13} color="#A3A3A3" />
             <Text numberOfLines={1} className="text-[11px] text-[#9A9A9A] ml-1">
-              {location || user?.address || "Madhavaram Milk colony..."}
+              {location || user?.address || "123 St. Gulshan, Dhaka..."}
             </Text>
           </View>
         </View>
