@@ -10,7 +10,7 @@ import { ScrollView, Text, TouchableOpacity, View, Alert, StyleSheet } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
-  const { user, fetchProfile, favorites, fetchFavorites, logout } = useStore() as any;
+  const { user, fetchProfile, logout } = useStore() as any;
   const router = useRouter();
 
   const avatarUri = getUserAvatarUri(user);
@@ -18,8 +18,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     fetchProfile?.();
-    fetchFavorites?.();
-  }, [fetchProfile, fetchFavorites]);
+  }, [fetchProfile]);
 
   const handleLogout = () => {
     Alert.alert(
@@ -117,27 +116,34 @@ export default function ProfileScreen() {
       <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: 160 }}
       >
-        {/* Banner Cover with Gradient */}
-        <View className="relative h-44 overflow-hidden mb-24">
-          <LinearGradient
-            colors={["#F5C518", "#E29E10"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
-          {/* Subtle light reflections */}
-          <View className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
-          <View className="absolute -bottom-20 -left-10 w-60 h-60 bg-white/5 rounded-full" />
+        {/* Banner and Profile Card Section */}
+        <View className="relative mb-32">
+          {/* Banner Cover with Gradient */}
+          <View className="relative h-44 overflow-hidden">
+            <LinearGradient
+              colors={["#F5C518", "#E29E10"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+            {/* Subtle light reflections */}
+            <View className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+            <View className="absolute -bottom-20 -left-10 w-60 h-60 bg-white/5 rounded-full" />
+          </View>
 
           {/* Profile Card Container (centered absolute overlap) */}
           <View 
-            className="absolute left-6 right-6 bg-white p-5 rounded-3xl shadow-xl flex-row items-center gap-4 border border-gray-100"
-            style={{ top: 70 }}
+            className="absolute left-6 right-6 bg-white p-6 rounded-3xl shadow-xl flex-col items-center gap-3 border border-gray-100"
+            style={{
+              top: 70,
+              zIndex: 10,
+              elevation: 10,
+            }}
           >
             <View 
-              className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-white"
+              className="w-24 h-24 rounded-full overflow-hidden border-4 border-white bg-white"
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
@@ -152,60 +158,21 @@ export default function ProfileScreen() {
                 contentFit="cover"
               />
             </View>
-            <View className="flex-1">
-              <Text numberOfLines={1} className="text-xl font-extrabold text-gray-900 leading-6">
+            <View className="items-center">
+              <Text numberOfLines={1} className="text-xl font-extrabold text-gray-900 leading-6 text-center">
                 {user?.name || user?.fullName || "User"}
               </Text>
-              <Text numberOfLines={1} className="text-sm font-medium text-gray-400 mt-1 leading-4">
+              <Text numberOfLines={1} className="text-sm font-medium text-gray-400 mt-1 leading-4 text-center">
                 {user?.email || "No email provided"}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Stats Row */}
-        <View className="flex-row justify-between px-6 mb-8 gap-3">
-          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
-            <View className="w-9 h-9 rounded-full bg-[#FFF0F3] items-center justify-center mb-1">
-              <Ionicons name="heart" size={18} color="#FF4D6D" />
-            </View>
-            <Text className="text-base font-bold text-gray-900">
-              {favorites?.length || 0}
-            </Text>
-            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-              Saved
-            </Text>
-          </View>
-
-          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
-            <View className="w-9 h-9 rounded-full bg-[#FFF7E6] items-center justify-center mb-1">
-              <Ionicons name="bag" size={18} color="#FF9F1C" />
-            </View>
-            <Text className="text-base font-bold text-gray-900">
-              {user?.orderCount || 6}
-            </Text>
-            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-              Orders
-            </Text>
-          </View>
-
-          <View className="flex-1 bg-white p-4 rounded-2xl items-center shadow-sm border border-gray-50">
-            <View className="w-9 h-9 rounded-full bg-[#E6F8F6] items-center justify-center mb-1">
-              <Ionicons name="gift" size={18} color="#2EC4B6" />
-            </View>
-            <Text className="text-base font-bold text-gray-900">
-              {user?.donationCount || 2}
-            </Text>
-            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-              Donated
-            </Text>
-          </View>
-        </View>
-
         {/* Menu Sections */}
-        <View className="px-6 space-y-6">
+        <View className="px-6 gap-y-6">
           {menuSections.map((section) => (
-            <View key={section.title} className="space-y-2">
+            <View key={section.title} className="gap-y-2">
               <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">
                 {section.title}
               </Text>
