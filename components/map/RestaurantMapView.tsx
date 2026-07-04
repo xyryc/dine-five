@@ -146,7 +146,7 @@ export default function RestaurantMapView({
         },
         {
           text: "Search",
-          onPress: async (address) => {
+          onPress: async (address?: string) => {
             if (!address) return;
             try {
               const results = await Location.geocodeAsync(address);
@@ -264,20 +264,21 @@ export default function RestaurantMapView({
   }, [location, locationLoading]);
 
   const allRestaurants = useMemo(() => {
-    return restaurants;
+    return Array.isArray(restaurants) ? restaurants : [];
   }, [restaurants]);
 
   const filteredRestaurants = useMemo(() => {
     const normalizedQuery = normalizeRestaurantSearchQuery(debouncedSearchText);
-    if (!normalizedQuery) return allRestaurants;
+    const restaurantsList = Array.isArray(allRestaurants) ? allRestaurants : [];
+    if (!normalizedQuery) return restaurantsList;
 
     const queryTokens = normalizedQuery.split(" ").filter(Boolean);
     if (!queryTokens.length) {
-      console.log(`[RestaurantMapView] Filter: ${mealFilter}, Items: ${allRestaurants.length}`);
-      return allRestaurants;
+      console.log(`[RestaurantMapView] Filter: ${mealFilter}, Items: ${restaurantsList.length}`);
+      return restaurantsList;
     }
 
-    const list = allRestaurants.filter((restaurant) => {
+    const list = restaurantsList.filter((restaurant) => {
       const haystack = buildRestaurantSearchHaystack(restaurant);
       return queryTokens.every((token) => haystack.includes(token));
     });

@@ -114,7 +114,7 @@ export const useStore = create((rawSet, get) => {
     ) {
       nextPartial.user = normalizeUserPayload(nextPartial.user);
     }
-    rawSet(nextPartial, replace);
+    rawSet(nextPartial, replace as any);
   };
 
   return {
@@ -794,7 +794,7 @@ export const useStore = create((rawSet, get) => {
 
       try {
         const response = await (get() as any).requestWithAuth(
-          `${API_BASE_URL}/profile/me`,
+          `${API_BASE_URL}/api/v1/profile/me`,
           {
             method: "GET",
             headers: {},
@@ -878,7 +878,7 @@ export const useStore = create((rawSet, get) => {
           throw new Error("No access token found");
 
         const response = await (get() as any).requestWithAuth(
-          `${API_BASE_URL}/profile/me`,
+          `${API_BASE_URL}/api/v1/profile/me`,
           {
             method: "DELETE",
             headers: {
@@ -1229,8 +1229,9 @@ export const useStore = create((rawSet, get) => {
         }
 
         const { favorites } = get() as any;
+        const favoritesList = Array.isArray(favorites) ? favorites : [];
         set({
-          favorites: favorites.filter(
+          favorites: favoritesList.filter(
             (id: string) => String(id).trim() !== String(foodId).trim(),
           ),
           isLoading: false,

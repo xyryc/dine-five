@@ -13,7 +13,7 @@ export const Categories = ({
   onCategoryChange: (cat: string) => void;
 }) => {
   const categoryList =
-    categories && categories.length > 0
+    Array.isArray(categories) && categories.length > 0
       ? ["All", ...Array.from(new Set(categories.filter(Boolean).map((item) => item.trim()))).filter((item) => item !== "All")]
       : DEFAULT_CATEGORIES;
 

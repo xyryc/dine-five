@@ -47,6 +47,15 @@ const normalizeImageUri = (value: string | string[] | undefined): string => {
 };
 
 export default function ProductDetails() {
+  try {
+    return <ProductDetailsInner />;
+  } catch (error: any) {
+    console.error("❌ ProductDetails CRASH STACK:", error.stack);
+    throw error;
+  }
+}
+
+function ProductDetailsInner() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { addFavorite, removeFavorite, addToCart, favorites, fetchFavorites, fetchReviewsByFoodId } =
@@ -118,12 +127,17 @@ export default function ProductDetails() {
   }, [fetchReviewsByFoodId, foodId, id]);
 
   useEffect(() => {
-    setHeroImageError(false);
-    setHeroImageUri(
-      normalizedProductImage ||
-      normalizedRestaurantProfile ||
-      DEFAULT_PRODUCT_IMAGE,
-    );
+    try {
+      setHeroImageError(false);
+      setHeroImageUri(
+        normalizedProductImage ||
+        normalizedRestaurantProfile ||
+        DEFAULT_PRODUCT_IMAGE,
+      );
+    } catch (error: any) {
+      console.error("❌ ProductDetailsInner RENDER CRASH STACK:", error.stack);
+      throw error;
+    }
   }, [normalizedProductImage, normalizedRestaurantProfile]);
 
   const product: any = {
@@ -256,9 +270,10 @@ export default function ProductDetails() {
     }
   };
 
-  return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="light" />
+  try {
+    return (
+      <View className="flex-1 bg-white">
+        <StatusBar style="light" />
 
       {/* Fixed Background Image */}
       <View className="absolute top-0 w-full h-[45vh] bg-gray-200">
@@ -487,5 +502,9 @@ export default function ProductDetails() {
         <ViewCart count={quantity} total={quantity * parseFloat(product.price)} />
       )}
     </View>
-  );
+    );
+  } catch (error: any) {
+    console.error("❌ ProductDetailsInner RENDER CRASH STACK:", error.stack);
+    throw error;
+  }
 }

@@ -13,7 +13,6 @@ const targetFile = path.join(
 
 const fallbackJson = "{}\n";
 const expoModulesToLinkAsProjects = [
-  "expo-av",
   "expo-image",
   "expo-notifications",
 ];
@@ -116,3 +115,4 @@ try {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
 }
+

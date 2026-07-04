@@ -11,6 +11,7 @@ import {
 } from "@/stores/useRestaurantStore";
 import { extractHomeRestaurants } from "@/utils/homeFeedRestaurants";
 import { getUserAvatarUri, normalizeImageUri } from "@/utils/userAvatar";
+import { navigateToRestaurantDetail } from "@/utils/restaurantDetailNavigation";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -287,16 +288,22 @@ export default function HomeScreen() {
     const cuisineSet = new Set<string>();
 
     // Add categories from API
-    dynamicCategories.forEach((cat: any) => {
-      if (cat.categoryName) cuisineSet.add(cat.categoryName);
-    });
+    if (Array.isArray(dynamicCategories)) {
+      dynamicCategories.forEach((cat: any) => {
+        if (cat?.categoryName) cuisineSet.add(cat.categoryName);
+      });
+    }
 
     // Add categories from restaurants
-    restaurants.forEach((restaurant) => {
-      restaurant.cuisine.forEach((cuisine) => {
-        if (cuisine) cuisineSet.add(cuisine);
+    if (Array.isArray(restaurants)) {
+      restaurants.forEach((restaurant) => {
+        if (Array.isArray(restaurant?.cuisine)) {
+          restaurant.cuisine.forEach((cuisine) => {
+            if (cuisine) cuisineSet.add(cuisine);
+          });
+        }
       });
-    });
+    }
 
     return ["All", ...Array.from(cuisineSet)];
   }, [dynamicCategories, restaurants]);
@@ -309,22 +316,25 @@ export default function HomeScreen() {
 
   const filteredRestaurants = React.useMemo(() => {
     const query = searchText.trim().toLowerCase();
+    const list = Array.isArray(restaurants) ? restaurants : [];
 
-    return restaurants.filter((restaurant) => {
+    return list.filter((restaurant) => {
       const matchesCategory =
         activeCategory === "All" ||
-        restaurant.cuisine.some(
-          (cuisine) => cuisine.toLowerCase() === activeCategory.toLowerCase(),
-        );
+        (Array.isArray(restaurant?.cuisine) &&
+          restaurant.cuisine.some(
+            (cuisine) => cuisine && String(cuisine).toLowerCase() === activeCategory.toLowerCase(),
+          ));
 
       const searchable = [
-        restaurant.restaurantName,
-        restaurant.restaurantAddress,
-        restaurant.city,
-        restaurant.state,
-        restaurant.contactEmail,
-        ...restaurant.cuisine,
+        restaurant?.restaurantName,
+        restaurant?.restaurantAddress,
+        restaurant?.city,
+        restaurant?.state,
+        restaurant?.contactEmail,
+        ...(Array.isArray(restaurant?.cuisine) ? restaurant.cuisine : []),
       ]
+        .filter(Boolean)
         .join(", ")
         .toLowerCase();
 
@@ -402,22 +412,7 @@ export default function HomeScreen() {
 
   const openRestaurantDetail = React.useCallback(
     (restaurant: Restaurant) => {
-      router.push({
-        pathname: "/screens/home/restaurant-details",
-        params: {
-          id: restaurant.providerId,
-          providerId: restaurant.providerId,
-          name: restaurant.restaurantName,
-          image: restaurant.profile,
-          rating: "",
-          address: restaurant.restaurantAddress,
-          distance: formatDistance(restaurant.distance),
-          city: restaurant.city,
-          state: restaurant.state,
-          cuisine: restaurant.cuisine.join(", "),
-          availableFoods: String(restaurant.availableFoods || 0),
-        },
-      } as any);
+      navigateToRestaurantDetail(router as any, restaurant);
     },
     [router],
   );

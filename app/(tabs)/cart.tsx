@@ -2,9 +2,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/stores/stores";
 import { useRestaurantStore } from "@/stores/useRestaurantStore";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useRouter } from "expo-router";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {

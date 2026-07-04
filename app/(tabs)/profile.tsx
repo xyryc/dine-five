@@ -126,7 +126,7 @@ export default function ProfileScreen() {
               colors={["#F5C518", "#E29E10"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
+              style={StyleSheet.absoluteFill}
             />
             {/* Subtle light reflections */}
             <View className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />

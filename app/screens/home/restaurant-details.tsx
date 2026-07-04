@@ -216,6 +216,15 @@ function MenuItem({
 
 
 export default function RestaurantDetailScreen() {
+  try {
+    return <RestaurantDetailScreenInner />;
+  } catch (error: any) {
+    console.error("❌ RestaurantDetailScreen CRASH STACK:", error.stack);
+    throw error;
+  }
+}
+
+function RestaurantDetailScreenInner() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -278,29 +287,32 @@ export default function RestaurantDetailScreen() {
   }, [loadMenu]);
 
   const menuTabs = React.useMemo(
-    () => menuSections.map((section) => section.title),
+    () => (Array.isArray(menuSections) ? menuSections : []).map((section) => section?.title || ""),
     [menuSections],
   );
 
   const visibleSections = React.useMemo(() => {
     const query = searchText.trim().toLowerCase();
+    const sections = Array.isArray(menuSections) ? menuSections : [];
 
     if (query) {
-      return menuSections
+      return sections
         .map((section) => ({
           ...section,
-          items: section.items.filter((item) =>
-            [item.name, item.description, section.title]
-              .join(" ")
-              .toLowerCase()
-              .includes(query),
-          ),
+          items: Array.isArray(section?.items)
+            ? section.items.filter((item) =>
+                [item?.name, item?.description, section?.title]
+                  .join(" ")
+                  .toLowerCase()
+                  .includes(query),
+              )
+            : [],
         }))
-        .filter((section) => section.items.length > 0);
+        .filter((section) => Array.isArray(section?.items) && section.items.length > 0);
     }
 
-    if (!activeTab) return menuSections;
-    return menuSections.filter((section) => section.title === activeTab);
+    if (!activeTab) return sections;
+    return sections.filter((section) => section?.title === activeTab);
   }, [activeTab, menuSections, searchText]);
 
   const handleAdd = React.useCallback(
@@ -352,9 +364,10 @@ export default function RestaurantDetailScreen() {
     [restaurantImage, restaurantName, router],
   );
 
-  return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="light" />
+  try {
+    return (
+      <View className="flex-1 bg-white">
+        <StatusBar style="light" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -559,5 +572,9 @@ export default function RestaurantDetailScreen() {
       </ScrollView>
 
     </View>
-  );
+    );
+  } catch (error: any) {
+    console.error("❌ RestaurantDetailScreenInner RENDER CRASH STACK:", error.stack);
+    throw error;
+  }
 }

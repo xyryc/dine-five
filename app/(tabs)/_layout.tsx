@@ -1,6 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -19,20 +18,21 @@ const BAR_HEIGHT = 64;
 const PILL_SIZE  = 44;
 
 // ─── Custom animated tab bar ─────────────────────────────────────────────────
-function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const [barWidth, setBarWidth] = useState(0);
   const translateX   = useRef(new Animated.Value(0)).current;
   const initialised  = useRef(false);
 
   // Only the 4 named tabs (filter out href:null screens)
-  const visibleRoutes = state.routes.filter((r) =>
-    TAB_CONFIG.some((t) => t.name === r.name)
+  const routesList = Array.isArray(state?.routes) ? state.routes : [];
+  const visibleRoutes = routesList.filter((r: any) =>
+    TAB_CONFIG.some((t: any) => t.name === r.name)
   );
 
-  const activeRoute = state.routes[state.index];
-  const activeIdx   = visibleRoutes.findIndex((r) => r.key === activeRoute.key);
-  const tabWidth    = barWidth > 0 ? barWidth / visibleRoutes.length : 0;
+  const activeRoute = routesList[state?.index ?? 0];
+  const activeIdx   = activeRoute ? visibleRoutes.findIndex((r: any) => r.key === activeRoute.key) : 0;
+  const tabWidth    = barWidth > 0 ? barWidth / 4 : 0;
 
   // Centre of the active tab minus half pill so pill centres under icon
   const targetX = tabWidth > 0
@@ -92,7 +92,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           style={styles.tabsRow}
           onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
         >
-          {visibleRoutes.map((route, idx) => {
+          {visibleRoutes.map((route: any, idx: number) => {
             const config   = TAB_CONFIG.find((t) => t.name === route.name);
             if (!config) return null;
             const isFocused = activeIdx === idx;

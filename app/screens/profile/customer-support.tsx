@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ResizeMode, Video } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,6 +19,22 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStore } from "../../../stores/stores";
+
+function SupportVideoPlayer({ uri, className, useNativeControls = false, isMuted = false }: { uri: string; className?: string; useNativeControls?: boolean; isMuted?: boolean }) {
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+    player.muted = isMuted;
+  });
+
+  return (
+    <VideoView
+      player={player}
+      nativeControls={useNativeControls}
+      className={className}
+      contentFit="cover"
+    />
+  );
+}
 
 export default function CustomerSupportScreen() {
   const router = useRouter();
@@ -474,13 +490,10 @@ export default function CustomerSupportScreen() {
                               />
                             ) : (
                               <View className="relative">
-                                <Video
-                                  source={{ uri: attachment.uri }}
+                                <SupportVideoPlayer
+                                  uri={attachment.uri}
                                   className="w-36 h-36"
                                   useNativeControls
-                                  resizeMode={ResizeMode.COVER}
-                                  isLooping
-                                  shouldPlay={false}
                                 />
                               </View>
                             )}
@@ -516,11 +529,9 @@ export default function CustomerSupportScreen() {
                         />
                       ) : (
                         <View className="relative">
-                          <Video
-                            source={{ uri: attachment.uri }}
+                          <SupportVideoPlayer
+                            uri={attachment.uri}
                             className="w-16 h-16 rounded-xl"
-                            resizeMode={ResizeMode.COVER}
-                            shouldPlay={false}
                             isMuted
                           />
                           <View className="absolute inset-0 bg-black/30 rounded-xl items-center justify-center">
