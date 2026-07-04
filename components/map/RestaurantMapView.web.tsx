@@ -1,6 +1,12 @@
 // RestaurantMapView.web.tsx
 import { Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
+const Slider = (props: any) => {
+  return (
+    <View style={props.style}>
+      <View style={{ height: 4, backgroundColor: props.minimumTrackTintColor || '#FFC107', borderRadius: 2 }} />
+    </View>
+  );
+};
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,

@@ -87,7 +87,6 @@
       "expo-status-bar",
       "expo-web-browser",
       "expo-video",
-      "expo-audio",
       "expo-asset"
     ],
     "experiments": {
