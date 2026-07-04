@@ -127,20 +127,8 @@ export default function HomeScreen() {
   );
 
   const restaurants = React.useMemo((): Restaurant[] => {
-    // Start with feed restaurants
-    const list = [...extractedHomeRestaurants];
-
-    // Fill up to 4 using store restaurants if they aren't already there
-    if (list.length < 4 && storeRestaurants) {
-      storeRestaurants.forEach(res => {
-        if (list.length < 4 && !list.some(item => item.providerId === res.providerId)) {
-          list.push(res);
-        }
-      });
-    }
-
-    return list.slice(0, 4);
-  }, [extractedHomeRestaurants, storeRestaurants]);
+    return storeRestaurants || [];
+  }, [storeRestaurants]);
 
   React.useEffect(() => {
     setHomeRestaurants(extractedHomeRestaurants);
@@ -183,8 +171,17 @@ export default function HomeScreen() {
   const loadNearbyRestaurants = React.useCallback(
     async (
       targetLocation: { latitude: number; longitude: number } | null | undefined,
+      searchQuery = "",
+      cuisineFilter = "All",
     ) => {
       if (!targetLocation) return;
+
+      console.log("🔍 [HomeScreen] Querying Nearby API:", {
+        latitude: targetLocation.latitude,
+        longitude: targetLocation.longitude,
+        radius: 100000,
+        search: searchQuery.trim() || undefined,
+      });
 
       await fetchNearbyRestaurants({
         latitude: targetLocation.latitude,
@@ -192,6 +189,7 @@ export default function HomeScreen() {
         radius: 100000,
         limit: 100,
         sortBy: "distance",
+        search: searchQuery.trim() || undefined,
       });
     },
     [fetchNearbyRestaurants],
@@ -212,7 +210,7 @@ export default function HomeScreen() {
       ]);
 
       const latestLocation = useRestaurantStore.getState().location ?? location;
-      await loadNearbyRestaurants(latestLocation);
+      await loadNearbyRestaurants(latestLocation, searchText);
     } finally {
       setRefreshing(false);
     }
@@ -224,6 +222,7 @@ export default function HomeScreen() {
     loadHomeFeed,
     loadNearbyRestaurants,
     location,
+    searchText,
   ]);
 
   React.useEffect(() => {
@@ -281,8 +280,12 @@ export default function HomeScreen() {
   }, [location]);
 
   React.useEffect(() => {
-    loadNearbyRestaurants(location);
-  }, [loadNearbyRestaurants, location]);
+    const delayDebounceId = setTimeout(() => {
+      loadNearbyRestaurants(location, searchText);
+    }, 400);
+
+    return () => clearTimeout(delayDebounceId);
+  }, [loadNearbyRestaurants, location, searchText]);
 
   const categories = React.useMemo(() => {
     const cuisineSet = new Set<string>();
@@ -315,7 +318,6 @@ export default function HomeScreen() {
   }, [activeCategory, categories]);
 
   const filteredRestaurants = React.useMemo(() => {
-    const query = searchText.trim().toLowerCase();
     const list = Array.isArray(restaurants) ? restaurants : [];
 
     return list.filter((restaurant) => {
@@ -325,23 +327,9 @@ export default function HomeScreen() {
           restaurant.cuisine.some(
             (cuisine) => cuisine && String(cuisine).toLowerCase() === activeCategory.toLowerCase(),
           ));
-
-      const searchable = [
-        restaurant?.restaurantName,
-        restaurant?.restaurantAddress,
-        restaurant?.city,
-        restaurant?.state,
-        restaurant?.contactEmail,
-        ...(Array.isArray(restaurant?.cuisine) ? restaurant.cuisine : []),
-      ]
-        .filter(Boolean)
-        .join(", ")
-        .toLowerCase();
-
-      const matchesSearch = !query || searchable.includes(query);
-      return matchesCategory && matchesSearch;
+      return matchesCategory;
     });
-  }, [activeCategory, restaurants, searchText]);
+  }, [activeCategory, restaurants]);
 
   const sections = React.useMemo<RestaurantSectionData[]>(() => {
     if (!filteredRestaurants.length) return [];
@@ -443,6 +431,7 @@ export default function HomeScreen() {
             name={userName}
             location={locationLabel}
             profileImage={profileImage || undefined}
+            onLocationPress={fetchLocation}
           />
 
           <SearchBar searchText={searchText} onSearch={setSearchText} />

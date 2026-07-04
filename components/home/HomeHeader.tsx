@@ -10,9 +10,10 @@ interface HomeHeaderProps {
   name?: string;
   location?: string;
   profileImage?: string;
+  onLocationPress?: () => void;
 }
 
-export const HomeHeader = ({ name, location, profileImage }: HomeHeaderProps) => {
+export const HomeHeader = ({ name, location, profileImage, onLocationPress }: HomeHeaderProps) => {
   const router = useRouter();
   const { user, fetchProfile } = useStore() as any;
   const avatarUri = profileImage || getUserAvatarUri(user);
@@ -36,12 +37,12 @@ export const HomeHeader = ({ name, location, profileImage }: HomeHeaderProps) =>
           <Text numberOfLines={1} className="text-[15px] font-semibold text-[#1C1C1C]">
             {name || user?.name || user?.fullName || "Maria's Kitchen"}
           </Text>
-          <View className="flex-row items-center mt-0.5">
+          <TouchableOpacity onPress={onLocationPress} activeOpacity={0.7} className="flex-row items-center mt-0.5">
             <Ionicons name="location-outline" size={13} color="#A3A3A3" />
             <Text numberOfLines={1} className="text-[11px] text-[#9A9A9A] ml-1">
               {location || user?.address || "123 St. Gulshan, Dhaka..."}
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
