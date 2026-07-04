@@ -59,6 +59,7 @@ export default function CustomerSupportScreen() {
   );
 
   const [message, setMessage] = useState("");
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
   const [attachments, setAttachments] = useState<
     { uri: string; type: "image" | "video" }[]
   >([]);
@@ -180,52 +181,39 @@ export default function CustomerSupportScreen() {
     }
   };
 
-  // Request permissions
-  const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  // Request Camera permissions
+  const requestCameraPermission = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
-        "Permission Required",
-        "Sorry, we need camera roll permissions to make this work!",
+        "Camera Permission Required",
+        "Sorry, we need camera permissions to take photos!",
       );
       return false;
     }
     return true;
   };
 
-  // Show media selection options
-  const showMediaOptions = () => {
-    Alert.alert("Select Media", "Choose what you want to send", [
-      {
-        text: "📷 Take Photo",
-        onPress: takePhoto,
-      },
-      {
-        text: "🖼️ Choose from Library",
-        onPress: pickImage,
-      },
-      {
-        text: "🎥 Record Video",
-        onPress: recordVideo,
-      },
-      {
-        text: "📹 Choose Video from Library",
-        onPress: pickVideo,
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
+  // Request Gallery permissions
+  const requestLibraryPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Gallery Permission Required",
+        "Sorry, we need gallery permissions to pick photos!",
+      );
+      return false;
+    }
+    return true;
   };
 
   // Take photo
   const takePhoto = async () => {
-    const hasPermission = await requestPermissions();
+    const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -241,11 +229,11 @@ export default function CustomerSupportScreen() {
 
   // Pick image from library
   const pickImage = async () => {
-    const hasPermission = await requestPermissions();
+    const hasPermission = await requestLibraryPermission();
     if (!hasPermission) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -255,44 +243,6 @@ export default function CustomerSupportScreen() {
       setAttachments([
         ...attachments,
         { uri: result.assets[0].uri, type: "image" },
-      ]);
-    }
-  };
-
-  // Record video
-  const recordVideo = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setAttachments([
-        ...attachments,
-        { uri: result.assets[0].uri, type: "video" },
-      ]);
-    }
-  };
-
-  // Pick video from library
-  const pickVideo = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setAttachments([
-        ...attachments,
-        { uri: result.assets[0].uri, type: "video" },
       ]);
     }
   };
@@ -482,21 +432,21 @@ export default function CustomerSupportScreen() {
                       <View className="mt-2.5 flex-row flex-wrap gap-2">
                         {msg.attachments.map((attachment: any, index: number) => (
                           <View key={index} className="rounded-xl overflow-hidden border border-gray-100 shadow-xs">
-                            {attachment.type === "image" ? (
-                              <Image
-                                source={{ uri: attachment.uri }}
-                                className="h-36 w-36"
-                                resizeMode="cover"
-                              />
-                            ) : (
-                              <View className="relative">
-                                <SupportVideoPlayer
-                                  uri={attachment.uri}
-                                  className="w-36 h-36"
-                                  useNativeControls
-                                />
-                              </View>
-                            )}
+                             {attachment.type === "image" ? (
+                               <Image
+                                 source={{ uri: attachment.uri }}
+                                 className="h-56 w-56"
+                                 resizeMode="cover"
+                               />
+                             ) : (
+                               <View className="relative">
+                                 <SupportVideoPlayer
+                                   uri={attachment.uri}
+                                   className="w-56 h-56"
+                                   useNativeControls
+                                 />
+                               </View>
+                             )}
                           </View>
                         ))}
                       </View>
@@ -524,14 +474,14 @@ export default function CustomerSupportScreen() {
                       {attachment.type === "image" ? (
                         <Image
                           source={{ uri: attachment.uri }}
-                          className="w-16 h-16 rounded-xl border border-gray-100"
+                          className="w-20 h-20 rounded-xl border border-gray-100"
                           resizeMode="cover"
                         />
                       ) : (
                         <View className="relative">
                           <SupportVideoPlayer
                             uri={attachment.uri}
-                            className="w-16 h-16 rounded-xl"
+                            className="w-20 h-20 rounded-xl"
                             isMuted
                           />
                           <View className="absolute inset-0 bg-black/30 rounded-xl items-center justify-center">
@@ -575,17 +525,47 @@ export default function CustomerSupportScreen() {
         >
           <View className="flex-row items-center gap-3">
             <TouchableOpacity
-              onPress={showMediaOptions}
+              onPress={() => setIsMenuExpanded(!isMenuExpanded)}
               activeOpacity={0.7}
               className="w-11 h-11 bg-gray-50 rounded-full items-center justify-center border border-gray-100"
+              style={{
+                transform: [{ rotate: isMenuExpanded ? "45deg" : "0deg" }],
+              }}
             >
               <Ionicons name="add" size={24} color="#E29E10" />
             </TouchableOpacity>
+
+            {isMenuExpanded && (
+              <>
+                <TouchableOpacity
+                  onPress={() => {
+                    takePhoto();
+                    setIsMenuExpanded(false);
+                  }}
+                  activeOpacity={0.7}
+                  className="w-11 h-11 bg-[#FDFBF7] rounded-full items-center justify-center border border-yellow-100 shadow-xs"
+                >
+                  <Ionicons name="camera" size={20} color="#E29E10" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    pickImage();
+                    setIsMenuExpanded(false);
+                  }}
+                  activeOpacity={0.7}
+                  className="w-11 h-11 bg-[#FDFBF7] rounded-full items-center justify-center border border-yellow-100 shadow-xs"
+                >
+                  <Ionicons name="image" size={20} color="#E29E10" />
+                </TouchableOpacity>
+              </>
+            )}
             
             <View className="flex-1 bg-gray-50 rounded-3xl px-4 py-2.5 border border-gray-100 max-h-24">
               <TextInput
                 value={message}
                 onChangeText={setMessage}
+                onFocus={() => setIsMenuExpanded(false)}
                 placeholder="Type your message..."
                 placeholderTextColor="#9CA3AF"
                 className="text-gray-900 text-[15px] font-medium p-0"

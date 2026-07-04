@@ -1,7 +1,20 @@
 import { API_BASE_URL, fetchWithLogging } from "@/utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-
+const uriToBlob = (uri: string): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function () {
+      reject(new Error("Failed to convert URI to Blob"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+};
 const STORAGE_KEYS = {
   USER: "auth_user",
   ACCESS_TOKEN: "auth_access_token",
@@ -1465,14 +1478,12 @@ export const useStore = create((rawSet, get) => {
         if (isFormData) {
           body = new FormData();
           body.append("message", message);
-          attachments.forEach((file) => {
-            const fileName = file.uri.split("/").pop();
-            body.append("attachments", {
-              uri: file.uri,
-              name: fileName,
-              type: file.type === "video" ? "video/mp4" : "image/jpeg",
-            } as any);
-          });
+          for (let index = 0; index < attachments.length; index++) {
+            const file = attachments[index];
+            const fileName = file.uri.split("/").pop() || `attachment_${index}.jpg`;
+            const blob = await uriToBlob(file.uri);
+            body.append("attachments", blob, fileName);
+          }
         } else {
           body = JSON.stringify({ message });
         }
@@ -1528,20 +1539,12 @@ export const useStore = create((rawSet, get) => {
           body.append("receiverId", providerId);
           body.append("text", message);
 
-          attachments.forEach((file, index) => {
+          for (let index = 0; index < attachments.length; index++) {
+            const file = attachments[index];
             const fileName = file.uri.split("/").pop() || `image_${index}.jpg`;
-            const extension = fileName.split(".").pop()?.toLowerCase() || "jpg";
-            const fileType =
-              file.type === "video"
-                ? "video/mp4"
-                : `image/${extension === "png" ? "png" : "jpeg"}`;
-
-            body.append("image", {
-              uri: file.uri,
-              name: fileName,
-              type: fileType,
-            } as any);
-          });
+            const blob = await uriToBlob(file.uri);
+            body.append("image", blob, fileName);
+          }
         } else {
           body = JSON.stringify({ receiverId: providerId, text: message });
         }

@@ -28,6 +28,21 @@ import PhoneInput, {
   isValidPhoneNumber,
 } from "rn-international-phone-number";
 
+const uriToBlob = (uri: string): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function () {
+      reject(new Error("Failed to convert URI to Blob"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+};
+
 export default function MyAccountScreen() {
   const router = useRouter();
   const { user, updateProfile, fetchProfile } = useStore() as any;
@@ -169,7 +184,7 @@ export default function MyAccountScreen() {
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
@@ -272,14 +287,8 @@ export default function MyAccountScreen() {
         if (payload.address) form.append("address", payload.address);
 
         const filename = selectedImage.split("/").pop() || "profile.jpg";
-        const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : `image`;
-
-        form.append("profilePic", {
-          uri: selectedImage,
-          name: filename,
-          type,
-        } as any);
+        const blob = await uriToBlob(selectedImage);
+        form.append("profilePic", blob, filename);
         dataToUpdate = form;
       } else {
         dataToUpdate = payload;
