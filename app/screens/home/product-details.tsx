@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Image, Modal, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
 import { useRestaurantStore } from "@/stores/useRestaurantStore";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 const firstParam = (value: string | string[] | undefined): string =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
@@ -272,231 +273,340 @@ function ProductDetailsInner() {
 
   try {
     return (
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-[#FBF9F6]">
         <StatusBar style="light" />
 
-      {/* Fixed Background Image */}
-      <View className="absolute top-0 w-full h-[45vh] bg-gray-200">
-        {!!heroImageUri && !heroImageError ? (
-          <Image
-            source={{ uri: heroImageUri }}
-            className="w-full h-full"
-            resizeMode="cover"
-            onError={() => {
-              if (heroImageUri !== DEFAULT_PRODUCT_IMAGE) {
-                setHeroImageUri(DEFAULT_PRODUCT_IMAGE);
-                return;
-              }
-              setHeroImageError(true);
-            }}
+        {/* Hero Product Image */}
+        <View className="absolute top-0 w-full h-[44vh] bg-gray-100">
+          {!!heroImageUri && !heroImageError ? (
+            <Image
+              source={{ uri: heroImageUri }}
+              className="w-full h-full"
+              resizeMode="cover"
+              onError={() => {
+                if (heroImageUri !== DEFAULT_PRODUCT_IMAGE) {
+                  setHeroImageUri(DEFAULT_PRODUCT_IMAGE);
+                  return;
+                }
+                setHeroImageError(true);
+              }}
+            />
+          ) : (
+            <View className="w-full h-full items-center justify-center bg-gray-100">
+              <Ionicons name="fast-food-outline" size={48} color="#9CA3AF" />
+            </View>
+          )}
+          
+          {/* Subtle top dark overlay for header buttons readability */}
+          <LinearGradient
+            colors={["rgba(0,0,0,0.35)", "transparent"]}
+            style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 112 }}
           />
-        ) : (
-          <View className="w-full h-full items-center justify-center bg-gray-200">
-            <Ionicons name="image-outline" size={46} color="#9CA3AF" />
-          </View>
-        )}
-        <View className="absolute w-full h-full bg-black/10" />
-      </View>
-
-      {/* Fixed Header Actions */}
-      <SafeAreaView className="absolute top-0 w-full z-50">
-        <View className="flex-row justify-between px-4 pt-4">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm"
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <View className="flex-row gap-3">
-            <TouchableOpacity 
-              onPress={handleShare}
-              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full items-center justify-center border border-white/30"
-            >
-              <Ionicons name="share-outline" size={20} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleToggleFavorite}
-              className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full items-center justify-center border border-white/30"
-            >
-              <Ionicons
-                name={isFav ? "heart" : "heart-outline"}
-                size={20}
-                color={isFav ? "#EF4444" : "#fff"}
-              />
-            </TouchableOpacity>
-          </View>
         </View>
-      </SafeAreaView>
 
-      {/* Scrollable Content */}
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {/* Spacer to push content down below visible image area */}
-        <View className="h-[40vh]" />
+        {/* Top Header Buttons Overlay */}
+        <SafeAreaView className="absolute top-0 w-full z-50">
+          <View className="flex-row justify-between px-4 pt-3">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <Ionicons name="chevron-back" size={24} color="#1F2937" />
+            </TouchableOpacity>
 
-        {/* White Content Container */}
-        <View className="flex-1 bg-white rounded-t-3xl px-6 pt-8 pb-32 min-h-screen">
-          {/* Stats Row */}
-          {/* <View className="flex-row justify-between mb-6 border border-[#E3E6F0] rounded-lg p-3 bg-white shadow-sm">
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="star" size={14} color="#FFC107" />
-              <Text className="text-sm font-bold text-[#1F2A33]">
-                {product.rating}
-              </Text>
-              <Text className="text-sm font-normal text-[#7A7A7A]">
-                ({product.reviews} Reviews)
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="flame" size={16} color="#F97316" />
-              <Text className="text-sm font-normal text-[#7A7A7A]">
-                {product.calories}kcal
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="time" size={16} color="#24B5D4" />
-              <Text className="text-sm font-normal text-[#7A7A7A]">
-                {product.time}mins
-              </Text>
-            </View>
-          </View> */}
-
-          {/* Restaurant Info */}
-          {/* <View className="flex-row items-center gap-3 mb-4">
-            {product.restaurantProfile ? (
-              <Image
-                source={{ uri: product.restaurantProfile }}
-                className="w-10 h-10 rounded-full bg-gray-100"
-              />
-            ) : (
-              <View className="w-10 h-10 rounded-full bg-yellow-100 items-center justify-center">
-                <Ionicons name="restaurant" size={18} color="#FFC107" />
-              </View>
-            )}
-            <Text className="text-sm font-medium text-gray-700">
-              {product.restaurantName}
-            </Text>
-          </View> */}
-
-          {/* Title & Quantity */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-medium text-[#363A33] w-[60%]">
-              {product.name}
-            </Text>
-            <View className="flex-row items-center  rounded-full px-2 py-1">
-              <TouchableOpacity
-                onPress={() => !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)}
-                className="w-10 h-10 items-center justify-center bg-[#FFF3CD] rounded-full"
+            <View className="flex-row gap-3">
+              <TouchableOpacity 
+                onPress={handleShare}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(0, 0, 0, 0.25)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                }}
               >
-                <Text className="text-lg font-bold text-[#332701]">-</Text>
+                <Ionicons name="share-outline" size={20} color="#fff" />
               </TouchableOpacity>
-              <Text className="mx-4 text-lg font-medium text-[#1F2A33]">
-                {quantity}
-              </Text>
               <TouchableOpacity
-                onPress={() => !isFreeMeal && setQuantity((q) => q + 1)}
-                className="w-10 h-10  items-center justify-center bg-[#FFF3CD] rounded-full"
+                onPress={handleToggleFavorite}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(0, 0, 0, 0.25)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                }}
               >
-                <Text className="text-lg font-bold text-[#332701]">+</Text>
+                <Ionicons
+                  name={isFav ? "heart" : "heart-outline"}
+                  size={20}
+                  color={isFav ? "#EF4444" : "#fff"}
+                />
               </TouchableOpacity>
             </View>
           </View>
+        </SafeAreaView>
 
-          {/* Description */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setIsExpanded(!isExpanded)}
-            className="mb-8"
+        {/* Fixed Detail Card Sheet */}
+        <View 
+          style={{
+            flex: 1,
+            marginTop: "42%",
+            backgroundColor: "#fff",
+            borderTopLeftRadius: 40,
+            borderTopRightRadius: 40,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.03,
+            shadowRadius: 10,
+            elevation: 5,
+            overflow: "hidden",
+          }}
+        >
+          {/* Sheet drag indicator handle */}
+          <View className="w-12 h-1.5 bg-gray-200 rounded-full my-4 self-center" />
+
+          {/* Scrollable Content inside the fixed sheet */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }}
           >
-            <Text
-              className="text-[#7A7A7A] text-sm font-normal leading-6"
-              numberOfLines={isExpanded ? undefined : 3}
-            >
-              {product.description}
-            </Text>
-            <Text className="text-[#363A33] font-bold mt-1">
-              {isExpanded ? "Show less" : "Read more..."}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Price & Add Button */}
-          <View className="flex-row items-center justify-between mb-8">
-            <Text className="text-2xl font-semibold text-[#363A33]">
-              {isFreeMeal ? "FREE" : `$${product.price}`}
-            </Text>
-            {isFreeMeal ? (
-              currentTokenId ? (
-                <TouchableOpacity
-                  onPress={handlePlaceFreeOrder}
-                  disabled={isPlacingFreeOrder}
-                  className="bg-green-500 px-8 py-4 rounded-2xl shadow-md min-w-[160px] items-center"
-                >
-                  <Text className="text-white font-bold text-base">
-                    {isPlacingFreeOrder ? "Processing..." : "Place Free Order"}
+            {/* Restaurant Info Bar */}
+            <View className="flex-row items-center justify-between mb-5 bg-gray-50 border border-gray-100 rounded-3xl p-3">
+              <View className="flex-row items-center gap-3">
+                {product.restaurantProfile ? (
+                  <Image
+                    source={{ uri: product.restaurantProfile }}
+                    className="w-10 h-10 rounded-2xl bg-gray-100"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View className="w-10 h-10 rounded-2xl bg-yellow-100 items-center justify-center border border-yellow-200">
+                    <Ionicons name="restaurant" size={18} color="#FFC107" />
+                  </View>
+                )}
+                <View>
+                  <Text className="text-xs font-bold text-gray-400 uppercase tracking-wide">Restaurant</Text>
+                  <Text className="text-sm font-black text-gray-800">
+                    {product.restaurantName}
                   </Text>
+                </View>
+              </View>
+              <View className="bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full flex-row items-center gap-1">
+                <Ionicons name="star" size={12} color="#F5C518" />
+                <Text className="text-[10px] font-extrabold text-amber-800">Verified</Text>
+              </View>
+            </View>
+
+            {/* Title, Pricing & Quantity Row */}
+            <View className="mb-6">
+              <View className="flex-row items-start justify-between">
+                <Text className="text-2xl font-black text-gray-900 leading-tight flex-1 mr-3">
+                  {product.name}
+                </Text>
+                <Text className="text-2xl font-black text-[#E29E10]">
+                  {isFreeMeal ? "FREE" : `$${product.price}`}
+                </Text>
+              </View>
+            </View>
+
+            {/* Stats Capsule Row */}
+            <View className="flex-row justify-between mb-6 p-3 bg-gray-50/50 border border-gray-100 rounded-2xl">
+              <View className="flex-row items-center gap-1.5">
+                <Ionicons name="star" size={14} color="#F5C518" />
+                <Text className="text-xs font-black text-gray-800">
+                  {product.rating}
+                </Text>
+                <Text className="text-[10px] font-bold text-gray-400">
+                  ({product.reviews} reviews)
+                </Text>
+              </View>
+
+              <View className="flex-row items-center gap-1.5">
+                <Ionicons name="flame" size={15} color="#FF5A5F" />
+                <Text className="text-xs font-bold text-gray-600">
+                  {product.calories} kcal
+                </Text>
+              </View>
+
+              <View className="flex-row items-center gap-1.5">
+                <Ionicons name="time-outline" size={15} color="#2D9CDB" />
+                <Text className="text-xs font-bold text-gray-600">
+                  {product.time} mins
+                </Text>
+              </View>
+            </View>
+
+            {/* Quantity Controller Capsule */}
+            <View className="flex-row items-center justify-between mb-6 bg-gray-50 border border-gray-100/80 rounded-2xl px-4 py-3">
+              <Text className="text-sm font-extrabold text-gray-800">Quantity</Text>
+              <View className="flex-row items-center gap-x-4">
+                <TouchableOpacity
+                  onPress={() => !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)}
+                  disabled={isFreeMeal}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    backgroundColor: isFreeMeal ? "#E5E7EB" : "#F5C518",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="remove" size={18} color="#1F2937" />
                 </TouchableOpacity>
+                <Text className="text-base font-black text-gray-900 min-w-[20px] text-center">
+                  {quantity}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => !isFreeMeal && setQuantity((q) => q + 1)}
+                  disabled={isFreeMeal}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    backgroundColor: isFreeMeal ? "#E5E7EB" : "#F5C518",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="add" size={18} color="#1F2937" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Description Block */}
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-0.5">Description</Text>
+              <TouchableOpacity
+                activeOpacity={0.72}
+                onPress={() => setIsExpanded(!isExpanded)}
+              >
+                <Text
+                  className="text-gray-500 text-sm font-semibold leading-relaxed"
+                  numberOfLines={isExpanded ? undefined : 3}
+                >
+                  {product.description}
+                </Text>
+                <Text className="text-[#E29E10] font-extrabold mt-1 text-xs">
+                  {isExpanded ? "Show less" : "Read more"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Interactive CTA button */}
+            <View className="mb-8">
+              {isFreeMeal ? (
+                currentTokenId ? (
+                  <TouchableOpacity
+                    onPress={handlePlaceFreeOrder}
+                    disabled={isPlacingFreeOrder}
+                    className="bg-emerald-500 w-full py-4 rounded-2xl shadow-sm items-center"
+                  >
+                    <Text className="text-white font-extrabold text-base">
+                      {isPlacingFreeOrder ? "Placing Order..." : "Place Free Order"}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handleClaimMeal}
+                    disabled={isClaimingMeal}
+                    style={{
+                      backgroundColor: "#F5C518",
+                      borderRadius: 16,
+                      paddingVertical: 16,
+                      alignItems: "center",
+                      shadowColor: "#F5C518",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 8,
+                      elevation: 4,
+                    }}
+                  >
+                    <Text className="text-gray-900 font-extrabold text-base">
+                      {isClaimingMeal ? "Claiming..." : "Claim Free Meal Now"}
+                    </Text>
+                  </TouchableOpacity>
+                )
               ) : (
                 <TouchableOpacity
-                  onPress={handleClaimMeal}
-                  disabled={isClaimingMeal}
-                  className="bg-[#FFC107] px-8 py-4 rounded-2xl shadow-md min-w-[160px] items-center"
+                  onPress={handleAddToCart}
+                  style={{
+                    backgroundColor: "#F5C518",
+                    borderRadius: 16,
+                    paddingVertical: 16,
+                    alignItems: "center",
+                    shadowColor: "#F5C518",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  }}
                 >
-                  <Text className="text-gray-900 font-bold text-base">
-                    {isClaimingMeal ? "Claiming..." : "Claim Now"}
+                  <Text className="text-gray-900 font-extrabold text-base">
+                    Add to Cart • ${(quantity * parseFloat(product.price)).toFixed(2)}
                   </Text>
                 </TouchableOpacity>
-              )
-            ) : (
-              <TouchableOpacity
-                onPress={handleAddToCart}
-                className="bg-yellow-400 px-8 py-4 rounded-2xl shadow-md min-w-[160px] items-center"
-              >
-                <Text className="text-[#1F2A33] font-medium text-base">
-                  Add to cart
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {isFreeMeal && (
-            <Text className="text-sm text-[#7A7A7A] mb-8">
-              One donated meal can be claimed once every 48 hours, and each token covers 1 meal only.
-            </Text>
-          )}
-
-          {/* Success Modal */}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={showSuccessModal}
-            onRequestClose={() => setShowSuccessModal(false)}
-          >
-            <View className="flex-1 justify-center items-center bg-black/50 px-6">
-              <View className="bg-white w-full rounded-3xl p-8 items-center shadow-xl">
-                <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
-                  <Ionicons name="checkmark-circle" size={50} color="#22C55E" />
-                </View>
-                <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">Claim Successful!</Text>
-                <Text className="text-gray-500 text-center mb-8 leading-5">
-                  You have successfully claimed this meal. You can now place 1 free order with this token.
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setShowSuccessModal(false)}
-                  className="bg-green-500 w-full py-4 rounded-2xl items-center shadow-sm"
-                >
-                  <Text className="text-white font-bold text-lg">Continue to Order</Text>
-                </TouchableOpacity>
-              </View>
+              )}
             </View>
-          </Modal>
 
-          {/* Customer Reviews */}
-          <CustomerReviews reviews={reviewsData} />
+            {isFreeMeal && (
+              <View className="bg-amber-50 border border-amber-100/50 rounded-2xl p-4 mb-8 flex-row gap-2">
+                <Ionicons name="information-circle" size={18} color="#D97706" />
+                <Text className="text-xs text-amber-800 font-semibold flex-1 leading-normal">
+                  One donated meal can be claimed once every 48 hours, and each token covers 1 meal only.
+                </Text>
+              </View>
+            )}
+
+            {/* Success Modal */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={showSuccessModal}
+              onRequestClose={() => setShowSuccessModal(false)}
+            >
+              <View className="flex-1 justify-center items-center bg-black/50 px-6">
+                <View className="bg-white w-full rounded-3xl p-8 items-center shadow-xl">
+                  <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
+                    <Ionicons name="checkmark-circle" size={50} color="#22C55E" />
+                  </View>
+                  <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">Claim Successful!</Text>
+                  <Text className="text-gray-500 text-center mb-8 leading-5 font-semibold">
+                    You have successfully claimed this meal. You can now place 1 free order with this token.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowSuccessModal(false)}
+                    className="bg-green-500 w-full py-4 rounded-2xl items-center shadow-sm"
+                  >
+                    <Text className="text-white font-bold text-lg">Continue to Order</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+
+            {/* Customer Reviews */}
+            <CustomerReviews reviews={reviewsData} />
+          </ScrollView>
         </View>
-      </ScrollView>
 
       {!isFreeMeal && (
         <ViewCart count={quantity} total={quantity * parseFloat(product.price)} />

@@ -175,10 +175,10 @@ function CheckoutContent() {
   const [isDonateModalVisible, setIsDonateModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState("Mastercard - Daniel Jones");
   const [cartSubtotal, setCartSubtotal] = useState(0);
+  const [cartGroups, setCartGroups] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(true);
   const [cartRawData, setCartRawData] = useState<any>(null);
-  const [stateTaxRate, setStateTaxRate] = useState(0);
   const [donationBreakdown, setDonationBreakdown] =
     useState<DonationBreakdown | null>(null);
 
@@ -205,6 +205,7 @@ function CheckoutContent() {
     if (isDonationCheckout) {
       setCartRawData(null);
       setCartSubtotal(0);
+      setCartGroups([]);
       setIsCheckoutLoading(false);
       return;
     }
@@ -220,7 +221,7 @@ function CheckoutContent() {
       if (root) {
         setCartRawData(root);
         const items = Array.isArray(root.items) ? root.items : [];
-        const computedSubtotal = items.reduce((acc: number, item: any) => {
+        const computedSubtotal = toNumber(root.subtotal, items.reduce((acc: number, item: any) => {
           const foodData =
             item?.foodId && typeof item.foodId === "object"
               ? item.foodId
@@ -237,8 +238,31 @@ function CheckoutContent() {
           );
           const quantity = Math.max(1, Math.floor(toNumber(item.quantity, 1)));
           return acc + price * quantity;
-        }, 0);
+        }, 0));
         setCartSubtotal(computedSubtotal);
+
+        // Format groups
+        const rawGroups = Array.isArray(root?.restaurantGroups) ? root.restaurantGroups : [];
+        const formattedGroups = rawGroups.map((group: any) => {
+          const subtotalVal = toNumber(group.subtotal, 0);
+          const stateTaxVal = toNumber(group.stateTax ?? group.stateTaxAmount, 0);
+          const cityTaxVal = toNumber(group.cityTax, 0);
+          const totalVal = toNumber(group.total, subtotalVal + stateTaxVal + cityTaxVal);
+
+          return {
+            providerId: group.providerId,
+            restaurantName: pickString(group.restaurantName, "Restaurant"),
+            restaurantAddress: pickString(group.restaurantAddress, "Address unavailable"),
+            restaurantProfile: pickString(group.restaurantProfile, group.restaurantImage, ""),
+            subtotal: subtotalVal,
+            stateTax: stateTaxVal,
+            cityTax: cityTaxVal,
+            total: totalVal,
+          };
+        });
+        setCartGroups(formattedGroups);
+      } else {
+        setCartGroups([]);
       }
     } catch (err) {
       console.log("loadCartData error:", err);
@@ -257,63 +281,7 @@ function CheckoutContent() {
     }, [loadCartData]),
   );
 
-  useEffect(() => {
-    if (isDonationCheckout) return;
-
-    if (!location) {
-      fetchLocation().catch(() => {
-        setStateTaxRate(0);
-      });
-    }
-  }, [fetchLocation, isDonationCheckout, location]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const resolveStateTax = async () => {
-      try {
-        if (isDonationCheckout) {
-          setStateTaxRate(0);
-          return;
-        }
-
-        if (!location) return;
-
-        const places = await Location.reverseGeocodeAsync({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-
-        const candidates = buildTaxLocationCandidates(places?.[0]);
-
-        for (const candidate of candidates) {
-          const taxInfo = await fetchStateTax(candidate);
-          const taxRate = extractTaxRateFromPayload(taxInfo);
-
-          if (taxInfo && taxRate > 0) {
-            if (isMounted) {
-              setStateTaxRate(taxRate);
-            }
-            return;
-          }
-        }
-
-        if (isMounted) {
-          setStateTaxRate(0);
-        }
-      } catch {
-        if (isMounted) {
-          setStateTaxRate(0);
-        }
-      }
-    };
-
-    resolveStateTax();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchStateTax, isDonationCheckout, location]);
+  // Removed local geocoding tax rules loading block
 
   const resolveProviderId = (item: any) => {
     const foodData =
@@ -335,25 +303,11 @@ function CheckoutContent() {
   };
 
   const cartItems = Array.isArray(cartRawData?.items) ? cartRawData.items : [];
-  const platformFee = cartItems.reduce((acc: number, item: any) => {
-    const foodData =
-      item?.foodId && typeof item.foodId === "object"
-        ? item.foodId
-        : item?.food && typeof item.food === "object"
-          ? item.food
-          : null;
-    const serviceFee = toNumber(item.serviceFee ?? foodData?.serviceFee, 0);
-    const quantity = Math.max(1, Math.floor(toNumber(item.quantity, 1)));
-    return acc + serviceFee * quantity;
-  }, 0);
-  const countyTaxRate = normalizeTaxRate(
-    cartRawData?.countyTaxRate ?? cartRawData?.cityTaxRate,
-  );
-  const countyTaxAmount = cartSubtotal * countyTaxRate;
-  const effectiveStateTaxRate = stateTaxRate;
-  const stateTaxAmount = cartSubtotal * effectiveStateTaxRate;
-  const effectiveTotal =
-    cartSubtotal + platformFee + stateTaxAmount + countyTaxAmount;
+  const platformFee = toNumber(cartRawData?.platformFee, 0);
+  const cityTax = toNumber(cartRawData?.cityTax, 0);
+  const stateTaxAmount = toNumber(cartRawData?.stateTaxAmount ?? cartRawData?.stateTax, 0);
+  const countyTaxAmount = toNumber(cartRawData?.countyTaxAmount, 0);
+  const effectiveTotal = toNumber(cartRawData?.total, cartSubtotal + platformFee + cityTax + stateTaxAmount + countyTaxAmount);
   const donationMealLabel = donationMealCount === 1 ? "Meal" : "Meals";
   const pickupAddress =
     cartRawData?.restaurantAddress ||
@@ -644,6 +598,19 @@ function CheckoutContent() {
                 </Text>
                 {isCheckoutLoading ? (
                   <View className="bg-gray-100 h-5 w-48 rounded animate-pulse mt-1" />
+                ) : cartGroups.length > 0 ? (
+                  <View className="gap-y-1.5 mt-1.5">
+                    {cartGroups.map((group, idx) => (
+                      <View key={group.providerId || idx} className="mb-2">
+                        <Text className="text-sm font-bold text-gray-800">
+                          • {group.restaurantName}
+                        </Text>
+                        <Text className="text-xs text-gray-500 ml-3">
+                          {group.restaurantAddress}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 ) : (
                   <Text className="text-base font-bold text-gray-800">
                     {pickupAddress}
@@ -727,46 +694,71 @@ function CheckoutContent() {
             </View>
           ) : (
             <View className="gap-y-2.5">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Item subtotal</Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-                ) : (
-                  <Text className="text-sm font-bold text-gray-800">{formatMoney(cartSubtotal)}</Text>
-                )}
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-                ) : (
-                  <Text className="text-sm font-bold text-gray-800">{formatMoney(platformFee)}</Text>
-                )}
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">State Tax</Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-                ) : (
-                  <Text className="text-sm font-bold text-gray-800">{formatTaxRate(effectiveStateTaxRate)}</Text>
-                )}
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">County Tax</Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-                ) : (
-                  <Text className="text-sm font-bold text-gray-800">{formatTaxRate(countyTaxRate)}</Text>
-                )}
-              </View>
+              {/* Restaurant Group Breakdowns */}
+              {cartGroups.map((group, idx) => (
+                <View key={group.providerId || idx} className="mb-4 pb-3 border-b border-gray-100/50">
+                  <Text className="text-xs font-extrabold text-gray-800 mb-2">
+                    {group.restaurantName}
+                  </Text>
+                  
+                  <View className="gap-y-1.5 pl-2">
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-xs text-gray-500">Subtotal</Text>
+                      <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.subtotal)}</Text>
+                    </View>
 
-              <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
-                <Text className="text-base font-bold text-gray-900">Total</Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
-                ) : (
-                  <Text className="text-lg font-extrabold text-[#E29E10]">{formatMoney(effectiveTotal)}</Text>
+                    {group.stateTax > 0 && (
+                      <View className="flex-row justify-between items-center">
+                        <Text className="text-xs text-gray-500">State Tax</Text>
+                        <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.stateTax)}</Text>
+                      </View>
+                    )}
+
+                    {group.cityTax > 0 && (
+                      <View className="flex-row justify-between items-center">
+                        <Text className="text-xs text-gray-500">City Tax</Text>
+                        <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.cityTax)}</Text>
+                      </View>
+                    )}
+
+                    <View className="flex-row justify-between items-center pt-1 border-t border-dashed border-gray-100">
+                      <Text className="text-xs font-bold text-gray-700">Subtotal + Taxes</Text>
+                      <Text className="text-xs font-bold text-gray-900">{formatMoney(group.total)}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+              {/* Global Fees and Grand Total */}
+              <View className="gap-y-2 mt-2 pt-2">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-sm font-medium text-gray-500">Items Subtotal</Text>
+                  {isCheckoutLoading ? (
+                    <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
+                  ) : (
+                    <Text className="text-sm font-bold text-gray-800">{formatMoney(cartSubtotal)}</Text>
+                  )}
+                </View>
+
+                {platformFee > 0 && (
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
+                    {isCheckoutLoading ? (
+                      <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
+                    ) : (
+                      <Text className="text-sm font-bold text-gray-800">{formatMoney(platformFee)}</Text>
+                    )}
+                  </View>
                 )}
+
+                <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-100">
+                  <Text className="text-base font-extrabold text-gray-900">Total Amount</Text>
+                  {isCheckoutLoading ? (
+                    <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
+                  ) : (
+                    <Text className="text-lg font-black text-[#E29E10]">{formatMoney(effectiveTotal)}</Text>
+                  )}
+                </View>
               </View>
             </View>
           )}
