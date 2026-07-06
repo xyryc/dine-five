@@ -70,12 +70,10 @@ export default function MyAccountScreen() {
     let parsedCountry: ICountry | null = null;
     let parsedPhone = "";
     if (user?.phone) {
-      parsedCountry = getCountryByPhoneNumber(user.phone) || null;
-      if (!parsedCountry && !user.phone.startsWith("+")) {
-        parsedCountry = getCountryByPhoneNumber("+" + user.phone) || null;
-      }
+      const phoneToParse = user.phone.startsWith("+") ? user.phone : "+" + user.phone;
+      parsedCountry = getCountryByPhoneNumber(phoneToParse) || null;
       if (parsedCountry) {
-        parsedPhone = getNationalPhoneNumber(user.phone);
+        parsedPhone = getNationalPhoneNumber(phoneToParse);
       } else {
         parsedPhone = user.phone;
       }
@@ -152,16 +150,14 @@ export default function MyAccountScreen() {
 
   // Sync profile details when user updates
   useEffect(() => {
-    if (user) {
+    if (user && !isEditing) {
       let parsedCountry: ICountry | null = null;
       let parsedPhone = user.phone || "";
       if (user.phone) {
-        parsedCountry = getCountryByPhoneNumber(user.phone) || null;
-        if (!parsedCountry && !user.phone.startsWith("+")) {
-          parsedCountry = getCountryByPhoneNumber("+" + user.phone) || null;
-        }
+        const phoneToParse = user.phone.startsWith("+") ? user.phone : "+" + user.phone;
+        parsedCountry = getCountryByPhoneNumber(phoneToParse) || null;
         if (parsedCountry) {
-          parsedPhone = getNationalPhoneNumber(user.phone);
+          parsedPhone = getNationalPhoneNumber(phoneToParse);
         }
       }
       setSelectedCountry(parsedCountry || getCountryByCca2("US") || null);
@@ -176,7 +172,7 @@ export default function MyAccountScreen() {
         address: user.address || prev.address,
       }));
     }
-  }, [user]);
+  }, [user, isEditing]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -202,12 +198,10 @@ export default function MyAccountScreen() {
       let parsedCountry: ICountry | null = null;
       let parsedPhone = user.phone || "";
       if (user.phone) {
-        parsedCountry = getCountryByPhoneNumber(user.phone) || null;
-        if (!parsedCountry && !user.phone.startsWith("+")) {
-          parsedCountry = getCountryByPhoneNumber("+" + user.phone) || null;
-        }
+        const phoneToParse = user.phone.startsWith("+") ? user.phone : "+" + user.phone;
+        parsedCountry = getCountryByPhoneNumber(phoneToParse) || null;
         if (parsedCountry) {
-          parsedPhone = getNationalPhoneNumber(user.phone);
+          parsedPhone = getNationalPhoneNumber(phoneToParse);
         }
       }
       setSelectedCountry(parsedCountry || getCountryByCca2("US") || null);
@@ -258,9 +252,13 @@ export default function MyAccountScreen() {
     setIsLoading(true);
     try {
       const callingCode = selectedCountry
-        ? `${selectedCountry.idd.root}${selectedCountry.idd.suffixes?.[0] || ""}`
+        ? selectedCountry.idd.root
         : "";
-      const nationalPhone = (formData.phone || "").replace(/\D/g, "");
+      const callingCodeDigits = callingCode.replace(/\D/g, "");
+      let nationalPhone = (formData.phone || "").replace(/\D/g, "");
+      if (callingCodeDigits && nationalPhone.startsWith(callingCodeDigits) && nationalPhone.length > callingCodeDigits.length) {
+        nationalPhone = nationalPhone.substring(callingCodeDigits.length);
+      }
       const fullPhone = callingCode ? `${callingCode}${nationalPhone}` : nationalPhone;
 
       console.log("Saving profile data for:", formData.name, "with phone:", fullPhone);
@@ -463,6 +461,7 @@ export default function MyAccountScreen() {
                   country={selectedCountry}
                   onChangeCountry={setSelectedCountry}
                   disabled={!isEditing}
+                  modalDisabled={!isEditing}
                   placeholder="Phone number"
                   theme="light"
                   phoneInputStyles={{
