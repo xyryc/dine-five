@@ -17,12 +17,45 @@ import {
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { Restaurant, useRestaurantStore } from "../../stores/useRestaurantStore";
-import {
-  buildRestaurantSearchHaystack,
-  formatRestaurantDistance,
-  getRestaurantImage,
-  normalizeRestaurantSearchQuery,
-} from "../../utils/restaurantDetailNavigation";
+const normalizeText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const getRestaurantImage = (restaurant: Restaurant): string =>
+  (restaurant.profile as string) ||
+  (restaurant as any).image ||
+  (restaurant as any).imageUrl ||
+  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=500";
+
+const formatRestaurantDistance = (distanceKm: number): string => {
+  if (!Number.isFinite(distanceKm) || distanceKm <= 0) return "0 m";
+  if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} m`;
+  return `${distanceKm.toFixed(1)} km`;
+};
+
+const buildRestaurantSearchHaystack = (restaurant: Restaurant): string => {
+  const searchParts = [
+    restaurant.restaurantName,
+    restaurant.restaurantAddress,
+    restaurant.city,
+    restaurant.state,
+    restaurant.contactEmail,
+    restaurant.phoneNumber,
+    (restaurant as any).providerName,
+    (restaurant as any).name,
+    restaurant.title,
+    restaurant.mealName,
+    Array.isArray(restaurant.cuisine) ? restaurant.cuisine.join(" ") : "",
+  ];
+
+  return normalizeText(searchParts.filter(Boolean).join(" "));
+};
+
+const normalizeRestaurantSearchQuery = (query: string): string =>
+  normalizeText(query);
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.82;

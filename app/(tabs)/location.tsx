@@ -1,7 +1,6 @@
 import RestaurantMapView from '@/components/map/RestaurantMapView';
 import { Restaurant } from '@/stores/restaurantService';
 import { useRestaurantStore } from '@/stores/useRestaurantStore';
-import { navigateToRestaurantDetail } from '@/utils/restaurantDetailNavigation';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
@@ -16,7 +15,12 @@ export default function LocationScreen() {
   }, [setRadiusMeters]);
 
   const handleOpenRestaurant = (restaurant: Restaurant) => {
-    navigateToRestaurantDetail(router as any, restaurant);
+    router.push({
+      pathname: "/screens/home/restaurant-details",
+      params: {
+        providerId: restaurant.providerId || restaurant.id,
+      },
+    });
   };
 
   return (

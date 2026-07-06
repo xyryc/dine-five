@@ -4,6 +4,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
+import { API_BASE_URL } from "@/utils/api";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
@@ -171,32 +172,53 @@ function MenuItem({
     <TouchableOpacity
       activeOpacity={0.92}
       onPress={onOpen}
-      className="flex-row items-center px-4 py-3"
+      className="flex-row bg-gray-50/40 border border-gray-100 rounded-3xl p-3 mb-4 items-center"
+      style={{
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.02,
+        shadowRadius: 6,
+        elevation: 1,
+      }}
     >
-      <View className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100 mr-3">
+      <View className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 mr-4">
         {item.image ? (
           <Image
             source={{ uri: item.image }}
-            className="w-20 h-20"
+            className="w-24 h-24"
             resizeMode="cover"
           />
         ) : (
-          <View className="w-20 h-20 items-center justify-center bg-gray-100">
-            <Ionicons name="fast-food-outline" size={22} color="#9CA3AF" />
+          <View className="w-24 h-24 items-center justify-center bg-gray-100">
+            <Ionicons name="fast-food-outline" size={26} color="#9CA3AF" />
           </View>
         )}
       </View>
 
-      <View className="flex-1">
-        <Text className="text-sm font-bold text-gray-900 mb-1" numberOfLines={2}>
+      <View className="flex-1 justify-center py-1">
+        <Text className="text-sm font-extrabold text-gray-900 mb-1" numberOfLines={1}>
           {item.name}
         </Text>
-        <Text className="text-base font-extrabold text-gray-900 mb-1">
-          ${item.price}
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-          <Text className="text-xs text-gray-400 ml-1">{item.time}</Text>
+        
+        {item.description ? (
+          <Text className="text-[11px] text-gray-400 font-semibold mb-2 pr-2" numberOfLines={2}>
+            {item.description}
+          </Text>
+        ) : (
+          <Text className="text-[11px] text-gray-300 italic font-semibold mb-2">
+            No description available
+          </Text>
+        )}
+
+        <View className="flex-row items-center justify-between">
+          <Text className="text-base font-black text-gray-900">
+            ${item.price}
+          </Text>
+          
+          <View className="flex-row items-center bg-gray-100 px-2.5 py-1 rounded-full">
+            <Ionicons name="time-outline" size={11} color="#6B7280" />
+            <Text className="text-[10px] font-bold text-gray-600 ml-1">{item.time}</Text>
+          </View>
         </View>
       </View>
 
@@ -205,7 +227,8 @@ function MenuItem({
           event.stopPropagation();
           onAdd();
         }}
-        className="w-9 h-9 rounded-full items-center justify-center"
+        activeOpacity={0.8}
+        className="w-10 h-10 rounded-2xl items-center justify-center ml-2 shadow-sm"
         style={{ backgroundColor: "#F5C518" }}
       >
         <Ionicons name="add" size={22} color="#1F2937" />
@@ -213,7 +236,6 @@ function MenuItem({
     </TouchableOpacity>
   );
 }
-
 
 export default function RestaurantDetailScreen() {
   try {
@@ -228,24 +250,36 @@ function RestaurantDetailScreenInner() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { fetchHomeFeed, addToCart, fetchCartCount } = useStore() as any;
+  const { requestWithAuth, addToCart, fetchCartCount } = useStore() as any;
+
+  const [fetchedDetails, setFetchedDetails] = React.useState<any>(null);
+  const [cartCount, setCartCount] = React.useState(0);
 
   const providerId = pickString(params.providerId, params.id);
-  const restaurantName = pickString(params.name) || "Restaurant";
-  const restaurantImage = pickString(params.image);
-  const restaurantRating = pickString(params.rating) || "N/A";
+  const restaurantName = pickString(params.name, fetchedDetails?.name) || "Restaurant";
+  const restaurantImage = pickString(params.image, fetchedDetails?.image);
+  const restaurantRating = pickString(params.rating, fetchedDetails?.rating) || "N/A";
   const restaurantAddress =
-    pickString(params.address) ||
+    pickString(params.address, fetchedDetails?.address) ||
     [pickString(params.city), pickString(params.state)]
       .filter(Boolean)
       .join(", ");
-  const restaurantDistance = pickString(params.distance) || "N/A";
+  const restaurantDistance = pickString(params.distance, fetchedDetails?.distance) || "N/A";
 
   const [activeTab, setActiveTab] = React.useState("");
   const [searchText, setSearchText] = React.useState("");
   const [menuSections, setMenuSections] = React.useState<MenuSectionType[]>([]);
   const [menuLoading, setMenuLoading] = React.useState(true);
   const [menuError, setMenuError] = React.useState<string | null>(null);
+
+  const updateCartCount = React.useCallback(async () => {
+    try {
+      const count = await fetchCartCount?.();
+      setCartCount(count || 0);
+    } catch (err) {
+      console.log("Error updating cart count:", err);
+    }
+  }, [fetchCartCount]);
 
   const loadMenu = React.useCallback(async () => {
     if (!providerId) {
@@ -259,19 +293,31 @@ function RestaurantDetailScreenInner() {
     setMenuError(null);
 
     try {
-      const feedData = await fetchHomeFeed({
-        page: 1,
-        limit: 60,
-        providerId,
+      const url = `${API_BASE_URL}/api/v1/feed?providerId=${providerId}&page=1&limit=50`;
+      const response = await requestWithAuth(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      if (!feedData) {
-        setMenuSections([]);
-        setMenuError("Failed to load menu.");
-        return;
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to load menu.");
       }
 
-      const normalized = normalizeMenuSections(feedData);
+      const foods = result.data;
+      if (Array.isArray(foods) && foods.length > 0) {
+        const first = foods[0];
+        setFetchedDetails({
+          name: pickString(first.restaurantName, first.providerRestaurantName, first.providerName),
+          image: pickString(first.restaurantImage, first.restaurantProfile, first.providerImage, first.providerProfile, first.profile),
+          address: pickString(first.restaurantAddress),
+          rating: first.rating !== undefined && first.rating !== null ? String(first.rating) : undefined,
+        });
+      }
+
+      const normalized = normalizeMenuSections(result);
       setMenuSections(normalized);
       setActiveTab((current) => current || normalized[0]?.title || "");
     } catch (error: any) {
@@ -280,11 +326,12 @@ function RestaurantDetailScreenInner() {
     } finally {
       setMenuLoading(false);
     }
-  }, [fetchHomeFeed, providerId]);
+  }, [requestWithAuth, providerId]);
 
   React.useEffect(() => {
     loadMenu();
-  }, [loadMenu]);
+    updateCartCount();
+  }, [loadMenu, updateCartCount]);
 
   const menuTabs = React.useMemo(
     () => (Array.isArray(menuSections) ? menuSections : []).map((section) => section?.title || ""),
@@ -337,12 +384,13 @@ function RestaurantDetailScreenInner() {
         }
 
         await fetchCartCount?.();
+        await updateCartCount();
         Alert.alert("Added", `${item.name} added to cart.`);
       } catch (error: any) {
         Alert.alert("Failed", error?.message || "Could not add this item to cart.");
       }
     },
-    [addToCart, fetchCartCount],
+    [addToCart, fetchCartCount, updateCartCount],
   );
 
   const openFoodDetail = React.useCallback(
@@ -364,6 +412,19 @@ function RestaurantDetailScreenInner() {
     [restaurantImage, restaurantName, router],
   );
 
+  if (menuLoading && !fetchedDetails) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <StatusBar style="dark" />
+        <View className="w-16 h-16 rounded-3xl bg-[#F5C518]/10 items-center justify-center mb-4">
+          <Ionicons name="restaurant" size={32} color="#F5C518" />
+        </View>
+        <ActivityIndicator size="small" color="#F5C518" />
+        <Text className="text-gray-500 mt-3 font-semibold text-sm">Preparing menu...</Text>
+      </View>
+    );
+  }
+
   try {
     return (
       <View className="flex-1 bg-white">
@@ -371,24 +432,24 @@ function RestaurantDetailScreenInner() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: cartCount > 0 ? 150 : 100 }}
       >
-        <View className="relative h-64">
+        <View className="relative h-72">
           {restaurantImage ? (
             <Image
               source={{ uri: restaurantImage }}
-              className="w-full h-64"
+              className="w-full h-72"
               resizeMode="cover"
             />
           ) : (
-            <View className="w-full h-64 items-center justify-center bg-gray-200">
+            <View className="w-full h-72 items-center justify-center bg-gray-100">
               <Ionicons name="restaurant-outline" size={40} color="#9CA3AF" />
             </View>
           )}
 
           <View
             className="absolute inset-0"
-            style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
+            style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
           />
 
           <View
@@ -397,180 +458,198 @@ function RestaurantDetailScreenInner() {
           >
             <TouchableOpacity
               onPress={() => router.back()}
-              className="w-9 h-9 rounded-full bg-white items-center justify-center shadow"
+              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow"
             >
-              <Ionicons name="chevron-back" size={20} color="#1F2937" />
+              <Ionicons name="chevron-back" size={22} color="#1F2937" />
             </TouchableOpacity>
 
             <View className="flex-row gap-3">
               <TouchableOpacity 
                 onPress={() => router.push("/(tabs)/cart")}
-                className="w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow"
               >
-                <Ionicons name="bag-outline" size={18} color="#fff" />
+                <Ionicons name="bag-outline" size={20} color="#1F2937" />
               </TouchableOpacity>
-              <TouchableOpacity className="w-9 h-9 rounded-full bg-white/20 items-center justify-center">
-                <Ionicons name="heart-outline" size={18} color="#fff" />
+              <TouchableOpacity className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow">
+                <Ionicons name="heart-outline" size={20} color="#1F2937" />
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        <View className="px-4 pt-4 pb-3 border-b border-gray-100">
-          <View className="flex-row items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-200">
-              {restaurantImage ? (
-                <Image
-                  source={{ uri: restaurantImage }}
-                  className="w-14 h-14"
-                  resizeMode="cover"
-                />
-              ) : (
-                <View className="w-14 h-14 items-center justify-center bg-gray-200">
-                  <Ionicons name="restaurant-outline" size={18} color="#9CA3AF" />
-                </View>
-              )}
-            </View>
+        <View 
+          className="bg-white px-5 pt-6 -mt-8 rounded-t-[32px] flex-1"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.04,
+            shadowRadius: 10,
+            elevation: 4,
+          }}
+        >
+          <View className="mb-4">
+            <Text className="text-2xl font-black text-gray-900 leading-tight">
+              {restaurantName}
+            </Text>
 
-            <View className="flex-1">
-              <Text className="text-base font-extrabold text-gray-900">
-                {restaurantName}
+            <View className="flex-row items-center mt-1.5">
+              <Ionicons name="location-outline" size={14} color="#9CA3AF" />
+              <Text className="text-xs font-semibold text-gray-500 ml-1 flex-1" numberOfLines={1}>
+                {restaurantAddress || "Address not available"}
               </Text>
-              <View className="flex-row items-center mt-0.5">
-                <Ionicons name="location-outline" size={12} color="#9CA3AF" />
-                <Text className="text-xs text-gray-500 ml-1" numberOfLines={1}>
-                  {restaurantAddress || "Address not available"}
+            </View>
+          </View>
+
+          <View className="flex-row items-center gap-2 mb-6">
+            <View className="flex-row items-center px-3 py-1.5 rounded-full bg-amber-50 border border-amber-100 gap-1">
+              <Ionicons name="star" size={13} color="#F5C518" />
+              <Text className="text-xs font-extrabold text-amber-800">
+                {restaurantRating}
+              </Text>
+            </View>
+            
+            {restaurantDistance !== "N/A" && (
+              <View className="flex-row items-center px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 gap-1">
+                <Ionicons name="bicycle-outline" size={13} color="#2D9CDB" />
+                <Text className="text-xs font-extrabold text-blue-800">
+                  Pickup {restaurantDistance}
                 </Text>
               </View>
-              <Text
-                className="text-xs font-semibold mt-0.5"
-                style={{ color: "#22C55E" }}
-              >
+            )}
+
+            <View className="flex-row items-center px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 gap-1">
+              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <Text className="text-xs font-extrabold text-emerald-800">
                 Open Now
               </Text>
             </View>
           </View>
 
-          <View className="flex-row items-center mt-3 gap-3">
+          <View className="mb-6">
             <View
-              className="flex-row items-center px-3 py-1.5 rounded-full gap-1"
-              style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
+              className="flex-row items-center rounded-2xl px-4 py-2 bg-gray-50 border border-gray-100"
             >
-              <Ionicons name="star" size={13} color="#F5C518" />
-              <Text className="text-xs font-semibold text-gray-700">
-                {restaurantRating} Ratings
-              </Text>
-            </View>
-            <View
-              className="flex-row items-center px-3 py-1.5 rounded-full gap-1"
-              style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
-            >
-              <Ionicons name="bicycle-outline" size={13} color="#6B7280" />
-              <Text className="text-xs font-semibold text-gray-700">
-                Pickup {restaurantDistance}
-              </Text>
+              <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+              <TextInput
+                value={searchText}
+                onChangeText={setSearchText}
+                placeholder="Search restaurant menu..."
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 ml-2 text-sm text-gray-700 py-1"
+              />
             </View>
           </View>
-        </View>
 
-        <View className="mx-4 mt-4 mb-3">
-          <View
-            className="flex-row items-center rounded-full px-4"
-            style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
-          >
-            <Ionicons name="search-outline" size={16} color="#9CA3AF" />
-            <TextInput
-              value={searchText}
-              onChangeText={setSearchText}
-              placeholder="Search menu"
-              placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-2 text-sm text-gray-700"
-            />
-          </View>
-        </View>
+          {menuTabs.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: 16, gap: 8 }}
+              className="mb-4"
+            >
+              {menuTabs.map((tab) => {
+                const isActive = tab === activeTab;
 
-        {menuTabs.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 0 }}
-            className="border-b border-gray-100"
-          >
-            {menuTabs.map((tab) => {
-              const isActive = tab === activeTab;
-
-              return (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setActiveTab(tab)}
-                  className="mr-5 pb-3"
-                  style={{
-                    borderBottomWidth: isActive ? 2 : 0,
-                    borderBottomColor: "#1F2937",
-                  }}
-                >
-                  <Text
-                    className="text-sm font-semibold"
-                    style={{ color: isActive ? "#1F2937" : "#9CA3AF" }}
+                return (
+                  <TouchableOpacity
+                    key={tab}
+                    onPress={() => setActiveTab(tab)}
+                    activeOpacity={0.8}
+                    className={`px-4 py-2 rounded-full border ${
+                      isActive
+                        ? "bg-gray-900 border-gray-900 shadow-sm"
+                        : "bg-gray-50 border-gray-100"
+                    }`}
                   >
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        )}
+                    <Text
+                      className={`text-xs font-bold ${
+                        isActive ? "text-[#F5C518]" : "text-gray-500"
+                      }`}
+                    >
+                      {tab}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
 
-        {menuLoading && (
-          <View className="py-10 items-center justify-center">
-            <ActivityIndicator size="small" color="#F5C518" />
-            <Text className="text-gray-400 mt-2">Loading menu...</Text>
-          </View>
-        )}
+          {menuLoading && (
+            <View className="py-10 items-center justify-center">
+              <ActivityIndicator size="small" color="#F5C518" />
+              <Text className="text-gray-400 mt-2">Loading menu...</Text>
+            </View>
+          )}
 
-        {!menuLoading && !!menuError && (
-          <View className="py-10 items-center justify-center px-4">
-            <Text className="text-gray-400 text-center">{menuError}</Text>
-            <TouchableOpacity
-              onPress={loadMenu}
-              className="mt-3 px-4 py-2 rounded-full"
-              style={{ backgroundColor: "#F5C518" }}
-            >
-              <Text className="text-xs font-bold text-gray-900">Retry</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          {!menuLoading && !!menuError && (
+            <View className="py-10 items-center justify-center px-4">
+              <Text className="text-gray-400 text-center">{menuError}</Text>
+              <TouchableOpacity
+                onPress={loadMenu}
+                className="mt-3 px-4 py-2 rounded-full"
+                style={{ backgroundColor: "#F5C518" }}
+              >
+                <Text className="text-xs font-bold text-gray-900">Retry</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-        {!menuLoading &&
-          !menuError &&
-          visibleSections.map((section) => (
-            <View key={section.title} className="mt-4">
-              <Text className="text-base font-bold text-gray-900 px-4 mb-2">
-                {section.title}
-              </Text>
+          {!menuLoading &&
+            !menuError &&
+            visibleSections.map((section) => (
+              <View key={section.title} className="mt-4">
+                <Text className="text-base font-black text-gray-900 px-1 mb-3">
+                  {section.title}
+                </Text>
 
-              {section.items.map((item, index) => (
-                <View key={item.id}>
+                {section.items.map((item) => (
                   <MenuItem
+                    key={item.id}
                     item={item}
                     onAdd={() => handleAdd(item)}
                     onOpen={() => openFoodDetail(item)}
                   />
-                  {index < section.items.length - 1 && (
-                    <View className="h-px bg-gray-100 mx-4" />
-                  )}
-                </View>
-              ))}
-            </View>
-          ))}
+                ))}
+              </View>
+            ))}
 
-        {!menuLoading && !menuError && visibleSections.length === 0 && (
-          <View className="py-10 items-center justify-center">
-            <Text className="text-gray-400">No menu items found.</Text>
-          </View>
-        )}
+          {!menuLoading && !menuError && visibleSections.length === 0 && (
+            <View className="py-10 items-center justify-center">
+              <Text className="text-gray-400">No menu items found.</Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
 
+      {cartCount > 0 && (
+        <View 
+          className="absolute bottom-6 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.25,
+            shadowRadius: 15,
+            elevation: 8,
+          }}
+        >
+          <View className="flex-row items-center gap-3">
+            <View className="w-10 h-10 rounded-2xl bg-[#F5C518] items-center justify-center">
+              <Ionicons name="bag" size={20} color="#1F2937" />
+            </View>
+            <View>
+              <Text className="text-white font-extrabold text-sm">{cartCount} {cartCount === 1 ? 'item' : 'items'} in bag</Text>
+              <Text className="text-gray-400 text-xs font-semibold">Fresh food ready for pickup</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/cart")}
+            activeOpacity={0.8}
+            className="bg-[#F5C518] px-5 py-2.5 rounded-2xl"
+          >
+            <Text className="text-gray-900 font-extrabold text-xs">View Bag</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
     );
   } catch (error: any) {

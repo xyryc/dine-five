@@ -11,7 +11,6 @@ import {
 } from "@/stores/useRestaurantStore";
 import { extractHomeRestaurants } from "@/utils/homeFeedRestaurants";
 import { getUserAvatarUri, normalizeImageUri } from "@/utils/userAvatar";
-import { navigateToRestaurantDetail } from "@/utils/restaurantDetailNavigation";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -400,7 +399,12 @@ export default function HomeScreen() {
 
   const openRestaurantDetail = React.useCallback(
     (restaurant: Restaurant) => {
-      navigateToRestaurantDetail(router as any, restaurant);
+      router.push({
+        pathname: "/screens/home/restaurant-details",
+        params: {
+          providerId: restaurant.providerId || restaurant.id,
+        },
+      });
     },
     [router],
   );

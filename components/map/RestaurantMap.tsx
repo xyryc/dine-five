@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
 import { Restaurant, useRestaurantStore } from "../../stores/useRestaurantStore";
-import { navigateToRestaurantDetail } from "../../utils/restaurantDetailNavigation";
 import { RestaurantCard } from "./RestaurantCard";
 
 const RADIUS_OPTIONS = [
@@ -124,8 +123,14 @@ export const RestaurantMap = () => {
     }
   };
 
-  const openRestaurantDetail = (restaurant: Restaurant) =>
-    navigateToRestaurantDetail(router, restaurant);
+  const openRestaurantDetail = (restaurant: Restaurant) => {
+    router.push({
+      pathname: "/screens/home/restaurant-details",
+      params: {
+        providerId: restaurant.providerId || restaurant.id,
+      },
+    });
+  };
 
   // ─── Loading ─────────────────────────────────────────────────────────────────
   if (locationLoading) {
