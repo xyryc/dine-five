@@ -192,6 +192,7 @@ export default function CartScreen() {
   const insets = useSafeAreaInsets();
   const { location, fetchLocation } = useRestaurantStore();
   const [cartItems, setCartItems] = React.useState<any[]>([]);
+  const [cartGroups, setCartGroups] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [subtotal, setSubtotal] = React.useState(0);
   const [cartMeta, setCartMeta] = React.useState<any>(null);
@@ -209,10 +210,111 @@ export default function CartScreen() {
           ? cartData.data
           : null;
       const rawItems = Array.isArray(root?.items) ? root.items : [];
+      const rawGroups = Array.isArray(root?.restaurantGroups) ? root.restaurantGroups : [];
 
-      if (root && rawItems.length) {
+      if (root && (rawItems.length || rawGroups.length)) {
         setCartMeta(root);
-        const formattedItems = rawItems.map((item: any) => {
+
+        // Format groups
+        const formattedGroups = rawGroups.map((group: any) => {
+          const groupItems = Array.isArray(group.items) ? group.items : [];
+          const formattedGroupItems = groupItems.map((item: any) => {
+            const foodData =
+              item?.foodId && typeof item.foodId === "object"
+                ? item.foodId
+                : item?.food && typeof item.food === "object"
+                  ? item.food
+                  : null;
+
+            const resolvedFoodId = pickString(
+              foodData?._id,
+              foodData?.id,
+              item?.foodId,
+              item?.food?.foodId,
+              item?.food?.id,
+              item?._id,
+            );
+
+            return {
+              id: pickString(
+                foodData?._id,
+                foodData?.id,
+                item._id,
+                resolvedFoodId,
+              ),
+              cartItemId: pickString(item._id, resolvedFoodId),
+              name: pickString(
+                foodData?.title,
+                foodData?.name,
+                item.title,
+                item.name,
+                "Unknown item",
+              ),
+              price: toNumber(
+                item.baseRevenue ??
+                foodData?.baseRevenue ??
+                item.price ??
+                foodData?.price ??
+                foodData?.finalPriceTag,
+                0,
+              ),
+              image: pickString(foodData?.image, item.image),
+              quantity: Math.max(1, Math.floor(toNumber(item.quantity, 1))),
+              foodId: resolvedFoodId,
+              providerId: pickString(
+                group.providerId,
+                item.providerId,
+                foodData?.providerId,
+                foodData?.providerID,
+              ),
+              providerProfile: pickString(
+                group.restaurantProfile,
+                group.restaurantImage,
+                item.providerProfile,
+                foodData?.providerProfile,
+              ),
+              providerName: pickString(
+                group.restaurantName,
+                item.providerName,
+                foodData?.providerName,
+              ),
+              restaurantName: pickString(
+                group.restaurantName,
+                root?.restaurantName,
+                item.restaurantName,
+                item.providerRestaurantName,
+                foodData?.restaurantName,
+                foodData?.providerRestaurantName,
+                foodData?.providerName,
+                item.providerName,
+              ),
+              restaurantAddress: pickString(
+                group.restaurantAddress,
+                root?.restaurantAddress,
+                item.restaurantAddress,
+                foodData?.restaurantAddress,
+                item.address,
+              ),
+              distanceKm: toNumber(item.distanceKm ?? foodData?.distanceKm, NaN),
+              etaMinutes: toNumber(item.etaMinutes ?? foodData?.etaMinutes, NaN),
+              serviceFee: toNumber(item.serviceFee ?? foodData?.serviceFee, 0),
+            };
+          });
+
+          return {
+            providerId: group.providerId,
+            restaurantName: pickString(group.restaurantName, "Restaurant"),
+            restaurantAddress: pickString(group.restaurantAddress, "Address unavailable"),
+            restaurantProfile: pickString(group.restaurantProfile, group.restaurantImage, ""),
+            subtotal: toNumber(group.subtotal, 0),
+            items: formattedGroupItems,
+          };
+        });
+        setCartGroups(formattedGroups);
+
+        // Format flat items (either directly from root.items or derived by flattening the groups)
+        const itemsToFormat = rawItems.length ? rawItems : rawGroups.reduce((acc: any[], g: any) => [...acc, ...g.items], []);
+        const formattedItems = itemsToFormat.map((item: any) => {
           const foodData =
             item?.foodId && typeof item.foodId === "object"
               ? item.foodId
@@ -286,13 +388,15 @@ export default function CartScreen() {
           };
         });
         setCartItems(formattedItems);
-        const computedSubtotal = formattedItems.reduce(
+
+        const computedSubtotal = toNumber(root.subtotal, formattedItems.reduce(
           (acc: number, item: any) => acc + item.price * item.quantity,
           0,
-        );
+        ));
         setSubtotal(computedSubtotal);
       } else {
         setCartItems([]);
+        setCartGroups([]);
         setSubtotal(0);
         setCartMeta(null);
       }
@@ -489,108 +593,117 @@ export default function CartScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 230 }}
       >
-        {/* Restaurant Info Card */}
-        <View className="bg-white rounded-3xl border border-gray-100/80 overflow-hidden shadow-sm mb-4">
-          <View className="p-4 flex-row items-center">
-            <View className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 justify-center items-center">
-              {restaurantProfile ? (
-                <Image
-                  source={{ uri: restaurantProfile }}
-                  className="w-12 h-12"
-                  resizeMode="cover"
-                />
-              ) : (
-                <Ionicons name="restaurant" size={20} color="#9CA3AF" />
-              )}
-            </View>
-            <View className="flex-1">
-              <Text className="text-base font-bold text-gray-900">
-                {restaurantName}
-              </Text>
-              <Text className="text-xs font-semibold text-[#E29E10] mt-0.5">
-                Pickup • {distanceMiles}
-              </Text>
-              <View className="flex-row items-center mt-1">
-                <Ionicons name="location-outline" size={12} color="#9CA3AF" />
-                <Text className="text-[11px] text-gray-400 ml-1 font-medium" numberOfLines={1}>
-                  {restaurantAddress}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Cart Items Card */}
-        <View className="bg-white rounded-3xl border border-gray-100/80 overflow-hidden shadow-sm mb-4">
-          {cartItems.map((item, index) => (
-            <View
-              key={item.cartItemId || item.id}
-              className={`flex-row items-center p-4 ${
-                index < cartItems.length - 1 ? "border-b border-gray-50" : ""
-              }`}
-            >
-              {/* Item Image */}
-              <View className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 justify-center items-center">
-                {item.image ? (
+        {/* Restaurant Groups */}
+        {cartGroups.map((group, groupIdx) => (
+          <View 
+            key={group.providerId || groupIdx} 
+            className="bg-white rounded-3xl border border-gray-100/80 overflow-hidden shadow-sm mb-6"
+          >
+            {/* Restaurant Header */}
+            <View className="p-4 flex-row items-center bg-gray-50/50 border-b border-gray-100/50">
+              <View className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100/80 mr-3 justify-center items-center">
+                {group.restaurantProfile ? (
                   <Image
-                    source={{ uri: item.image }}
-                    className="w-16 h-16"
+                    source={{ uri: group.restaurantProfile }}
+                    className="w-12 h-12"
                     resizeMode="cover"
                   />
                 ) : (
-                  <Ionicons name="fast-food-outline" size={24} color="#9CA3AF" />
+                  <Ionicons name="restaurant" size={20} color="#9CA3AF" />
                 )}
               </View>
-
-              {/* Item Details */}
-              <View className="flex-1 justify-center mr-2">
-                <Text className="text-sm font-bold text-gray-900" numberOfLines={2}>
-                  {item.name}
+              <View className="flex-1">
+                <Text className="text-base font-extrabold text-gray-900" numberOfLines={1}>
+                  {group.restaurantName}
                 </Text>
-                <Text className="text-sm font-semibold text-[#E29E10] mt-1">
-                  {formatMoney(toNumber(item.price, 0))}
-                </Text>
-              </View>
-
-              {/* Quantity Selector */}
-              <View className="flex-row items-center bg-gray-50 border border-gray-100/50 rounded-2xl p-1 gap-x-2">
-                <TouchableOpacity
-                  onPress={() =>
-                    handleUpdateQuantity(
-                      item.foodId,
-                      item.cartItemId,
-                      -1,
-                      item.quantity,
-                    )
-                  }
-                  activeOpacity={0.7}
-                  className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
-                >
-                  <Ionicons name="remove" size={14} color="#1F2937" />
-                </TouchableOpacity>
-
-                <Text className="text-sm font-extrabold text-gray-800 min-w-[20px] text-center">
-                  {item.quantity}
-                </Text>
-
-                <TouchableOpacity
-                  onPress={() =>
-                    handleUpdateQuantity(
-                      item.foodId,
-                      item.cartItemId,
-                      1,
-                      item.quantity,
-                    )
-                  }
-                  activeOpacity={0.7}
-                  className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
-                >
-                  <Ionicons name="add" size={14} color="#1F2937" />
-                </TouchableOpacity>
+                <View className="flex-row items-center mt-1">
+                  <Ionicons name="location-outline" size={12} color="#9CA3AF" />
+                  <Text className="text-[11px] text-gray-400 ml-1 font-medium flex-1" numberOfLines={1}>
+                    {group.restaurantAddress}
+                  </Text>
+                </View>
               </View>
             </View>
-          ))}
-        </View>
+
+            {/* Group Items list */}
+            <View>
+              {group.items.map((item: any, itemIdx: number) => (
+                <View
+                  key={item.cartItemId || item.id}
+                  className={`flex-row items-center p-4 ${
+                    itemIdx < group.items.length - 1 ? "border-b border-gray-50" : ""
+                  }`}
+                >
+                  {/* Item Image */}
+                  <View className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 justify-center items-center">
+                    {item.image ? (
+                      <Image
+                        source={{ uri: item.image }}
+                        className="w-16 h-16"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Ionicons name="fast-food-outline" size={24} color="#9CA3AF" />
+                    )}
+                  </View>
+
+                  {/* Item Details */}
+                  <View className="flex-1 justify-center mr-2">
+                    <Text className="text-sm font-bold text-gray-900" numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                    <Text className="text-sm font-semibold text-[#E29E10] mt-1">
+                      {formatMoney(toNumber(item.price, 0))}
+                    </Text>
+                  </View>
+
+                  {/* Quantity Selector */}
+                  <View className="flex-row items-center bg-gray-50 border border-gray-100/50 rounded-2xl p-1 gap-x-2">
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleUpdateQuantity(
+                          item.foodId,
+                          item.cartItemId,
+                          -1,
+                          item.quantity,
+                        )
+                      }
+                      activeOpacity={0.7}
+                      className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
+                    >
+                      <Ionicons name="remove" size={14} color="#1F2937" />
+                    </TouchableOpacity>
+
+                    <Text className="text-sm font-extrabold text-gray-800 min-w-[20px] text-center">
+                      {item.quantity}
+                    </Text>
+
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleUpdateQuantity(
+                          item.foodId,
+                          item.cartItemId,
+                          1,
+                          item.quantity,
+                        )
+                      }
+                      activeOpacity={0.7}
+                      className="w-8 h-8 rounded-xl bg-white border border-gray-100 items-center justify-center shadow-xs"
+                    >
+                      <Ionicons name="add" size={14} color="#1F2937" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            {/* Group Subtotal Footer */}
+            <View className="px-4 py-3 bg-gray-50/20 border-t border-gray-100/50 flex-row justify-between items-center">
+              <Text className="text-[11px] text-gray-400 font-semibold">Subtotal for this restaurant</Text>
+              <Text className="text-sm font-black text-gray-800">{formatMoney(group.subtotal)}</Text>
+            </View>
+          </View>
+        ))}
 
         {/* Utensils Option Card */}
         <View className="bg-white rounded-3xl border border-gray-100/80 p-4 shadow-sm flex-row items-center justify-between mb-4">
