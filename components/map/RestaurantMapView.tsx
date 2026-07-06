@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -28,7 +29,7 @@ const CARD_WIDTH = SCREEN_WIDTH * 0.82;
 const CARD_GAP = 12;
 const CARD_SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
-const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
+const RADIUS_STEPS = [100, 200, 500, 1000, 2000, 5000, 10000];
 
 const toNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -66,6 +67,56 @@ const getRestaurantCoords = (restaurant: Restaurant | null) => {
 
 type RestaurantMapViewProps = {
   onOpenRestaurant?: (restaurant: Restaurant) => void;
+};
+
+const SkeletonCard = () => {
+  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.9,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
+  return (
+    <Animated.View
+      style={{ width: CARD_WIDTH, opacity: pulseAnim }}
+      className="rounded-3xl bg-white border border-gray-100 overflow-hidden p-3 gap-y-3 shadow-md"
+    >
+      {/* Image Skeleton */}
+      <View className="w-full h-32 bg-gray-200 rounded-2xl" />
+      
+      {/* Title Skeleton */}
+      <View className="h-5 w-3/4 bg-gray-200 rounded-lg" />
+      
+      {/* Subtitle / Stars Skeleton */}
+      <View className="flex-row items-center gap-x-2">
+        <View className="w-4 h-4 bg-gray-200 rounded-full" />
+        <View className="h-4 w-12 bg-gray-200 rounded-lg" />
+        <View className="h-4 w-20 bg-gray-200 rounded-lg" />
+      </View>
+      
+      {/* Bottom Row Skeleton */}
+      <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
+        <View className="flex-row items-center gap-x-1">
+          <View className="w-4 h-4 bg-gray-200 rounded-full" />
+          <View className="h-4 w-12 bg-gray-200 rounded-lg" />
+        </View>
+        <View className="h-8 w-24 bg-gray-200 rounded-xl" />
+      </View>
+    </Animated.View>
+  );
 };
 
 export default function RestaurantMapView({
@@ -641,7 +692,20 @@ export default function RestaurantMapView({
           </TouchableOpacity>
         </View>
 
-        {filteredRestaurants.length === 0 ? (
+        {restaurantsLoading ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 12,
+              gap: CARD_GAP,
+            }}
+          >
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </ScrollView>
+        ) : filteredRestaurants.length === 0 ? (
           <View className="mx-4 bg-white/95 rounded-2xl px-4 py-3 shadow-md">
             <Text className="text-sm text-gray-500 text-center">
               No restaurants found in this area.

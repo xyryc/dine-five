@@ -52,7 +52,6 @@ export interface NearbyParams {
   limit?: number;
   freeNearYou?: boolean;
   search?: string;
-  alcohol?: boolean;
 }
 
 export interface NearbyResponse {
@@ -387,7 +386,6 @@ export const restaurantService = {
       page: String(page),
       limit: String(limit),
       sortBy,
-      alcohol: params.alcohol !== false ? "true" : "false",
       freeNearYou: params.freeNearYou ? "true" : "false",
     });
 
@@ -443,7 +441,6 @@ export const restaurantService = {
     longitude?: number;
     radius?: number;
     search?: string;
-    alcohol?: boolean;
   }): Promise<NearbyResponse> => {
     const FALLBACK = { latitude: 23.780704, longitude: 90.407756 };
     const lat = params.latitude ?? FALLBACK.latitude;
@@ -460,7 +457,6 @@ export const restaurantService = {
       page: String(page),
       limit: String(limit),
       sortBy: "distance",
-      alcohol: params.alcohol !== false ? "true" : "false",
       freeNearYou: "true",
     });
 

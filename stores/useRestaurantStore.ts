@@ -56,7 +56,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
   restaurantRequestSeq: 0,
   selectedRestaurant: null,
   cuisineFilter: undefined,
-  radiusMeters: 1000,
+  radiusMeters: 5000,
   availableTokenCount: 0,
 
   fetchLocation: async () => {
