@@ -161,10 +161,12 @@ const normalizeMenuSections = (payload: any): MenuSectionType[] => {
 
 function MenuItem({
   item,
+  isAdding,
   onAdd,
   onOpen,
 }: {
   item: MenuItemType;
+  isAdding: boolean;
   onAdd: () => void;
   onOpen: () => void;
 }) {
@@ -172,8 +174,9 @@ function MenuItem({
     <TouchableOpacity
       activeOpacity={0.92}
       onPress={onOpen}
-      className="flex-row bg-gray-50/40 border border-gray-100 rounded-3xl p-3 mb-4 items-center"
+      className="flex-row border border-gray-100 rounded-3xl p-3 mb-4 items-center"
       style={{
+        backgroundColor: "rgba(249, 250, 251, 0.4)",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.02,
@@ -181,6 +184,7 @@ function MenuItem({
         elevation: 1,
       }}
     >
+      {/* Food Image */}
       <View className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 mr-4">
         {item.image ? (
           <Image
@@ -195,6 +199,7 @@ function MenuItem({
         )}
       </View>
 
+      {/* Info Column */}
       <View className="flex-1 justify-center py-1">
         <Text className="text-sm font-extrabold text-gray-900 mb-1" numberOfLines={1}>
           {item.name}
@@ -222,16 +227,35 @@ function MenuItem({
         </View>
       </View>
 
+      {/* Add Button */}
       <TouchableOpacity
         onPress={(event) => {
           event.stopPropagation();
+          if (isAdding) return;
           onAdd();
         }}
+        disabled={isAdding}
         activeOpacity={0.8}
-        className="w-10 h-10 rounded-2xl items-center justify-center ml-2 shadow-sm"
-        style={{ backgroundColor: "#F5C518" }}
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 16,
+          backgroundColor: "#F5C518",
+          alignItems: "center",
+          justifyContent: "center",
+          marginLeft: 8,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        }}
       >
-        <Ionicons name="add" size={22} color="#1F2937" />
+        {isAdding ? (
+          <ActivityIndicator size="small" color="#1F2937" />
+        ) : (
+          <Ionicons name="add" size={22} color="#1F2937" />
+        )}
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -252,8 +276,13 @@ function RestaurantDetailScreenInner() {
   const params = useLocalSearchParams();
   const { requestWithAuth, addToCart, fetchCartCount } = useStore() as any;
 
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const sectionPositions = React.useRef<Record<string, number>>({});
+  const isManualScroll = React.useRef(false);
+
   const [fetchedDetails, setFetchedDetails] = React.useState<any>(null);
   const [cartCount, setCartCount] = React.useState(0);
+  const [addingItemId, setAddingItemId] = React.useState<string | null>(null);
 
   const providerId = pickString(params.providerId, params.id);
   const restaurantName = pickString(params.name, fetchedDetails?.name) || "Restaurant";
@@ -358,12 +387,24 @@ function RestaurantDetailScreenInner() {
         .filter((section) => Array.isArray(section?.items) && section.items.length > 0);
     }
 
-    if (!activeTab) return sections;
-    return sections.filter((section) => section?.title === activeTab);
-  }, [activeTab, menuSections, searchText]);
+    return sections;
+  }, [menuSections, searchText]);
+
+  const handleTabPress = (tab: string) => {
+    setActiveTab(tab);
+    const yPos = sectionPositions.current[tab];
+    if (yPos !== undefined && scrollViewRef.current) {
+      isManualScroll.current = true;
+      scrollViewRef.current.scrollTo({ y: yPos - 120, animated: true });
+      setTimeout(() => {
+        isManualScroll.current = false;
+      }, 350);
+    }
+  };
 
   const handleAdd = React.useCallback(
     async (item: MenuItemType) => {
+      setAddingItemId(item.id);
       try {
         const result = await addToCart(
           {
@@ -388,6 +429,8 @@ function RestaurantDetailScreenInner() {
         Alert.alert("Added", `${item.name} added to cart.`);
       } catch (error: any) {
         Alert.alert("Failed", error?.message || "Could not add this item to cart.");
+      } finally {
+        setAddingItemId(null);
       }
     },
     [addToCart, fetchCartCount, updateCartCount],
@@ -431,8 +474,27 @@ function RestaurantDetailScreenInner() {
         <StatusBar style="light" />
 
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: cartCount > 0 ? 150 : 100 }}
+        onScroll={(e) => {
+          if (isManualScroll.current) return;
+          const scrollY = e.nativeEvent.contentOffset.y;
+          
+          let activeSection = "";
+          const sortedPositions = Object.entries(sectionPositions.current).sort((a, b) => a[1] - b[1]);
+          
+          for (const [title, yPos] of sortedPositions) {
+            if (scrollY >= yPos - 140) {
+              activeSection = title;
+            }
+          }
+          
+          if (activeSection && activeSection !== activeTab) {
+            setActiveTab(activeSection);
+          }
+        }}
+        scrollEventThrottle={16}
       >
         <View className="relative h-72">
           {restaurantImage ? (
@@ -458,7 +520,19 @@ function RestaurantDetailScreenInner() {
           >
             <TouchableOpacity
               onPress={() => router.back()}
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
             >
               <Ionicons name="chevron-back" size={22} color="#1F2937" />
             </TouchableOpacity>
@@ -466,11 +540,37 @@ function RestaurantDetailScreenInner() {
             <View className="flex-row gap-3">
               <TouchableOpacity 
                 onPress={() => router.push("/(tabs)/cart")}
-                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
               >
                 <Ionicons name="bag-outline" size={20} color="#1F2937" />
               </TouchableOpacity>
-              <TouchableOpacity className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md items-center justify-center shadow">
+              <TouchableOpacity 
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
                 <Ionicons name="heart-outline" size={20} color="#1F2937" />
               </TouchableOpacity>
             </View>
@@ -553,13 +653,23 @@ function RestaurantDetailScreenInner() {
                 return (
                   <TouchableOpacity
                     key={tab}
-                    onPress={() => setActiveTab(tab)}
+                    onPress={() => handleTabPress(tab)}
                     activeOpacity={0.8}
-                    className={`px-4 py-2 rounded-full border ${
-                      isActive
-                        ? "bg-gray-900 border-gray-900 shadow-sm"
-                        : "bg-gray-50 border-gray-100"
-                    }`}
+                    style={{
+                      backgroundColor: isActive ? "#1F2937" : "#F9FAFB",
+                      borderColor: isActive ? "#1F2937" : "#F3F4F6",
+                      borderWidth: 1,
+                      borderRadius: 9999,
+                      paddingHorizontal: 16,
+                      paddingVertical: 8,
+                      ...(isActive ? {
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 2,
+                        elevation: 1,
+                      } : {}),
+                    }}
                   >
                     <Text
                       className={`text-xs font-bold ${
@@ -597,7 +707,13 @@ function RestaurantDetailScreenInner() {
           {!menuLoading &&
             !menuError &&
             visibleSections.map((section) => (
-              <View key={section.title} className="mt-4">
+              <View 
+                key={section.title} 
+                onLayout={(e) => {
+                  sectionPositions.current[section.title] = e.nativeEvent.layout.y + 256;
+                }}
+                className="mt-4"
+              >
                 <Text className="text-base font-black text-gray-900 px-1 mb-3">
                   {section.title}
                 </Text>
@@ -606,6 +722,7 @@ function RestaurantDetailScreenInner() {
                   <MenuItem
                     key={item.id}
                     item={item}
+                    isAdding={addingItemId === item.id}
                     onAdd={() => handleAdd(item)}
                     onOpen={() => openFoodDetail(item)}
                   />
