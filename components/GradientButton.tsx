@@ -35,12 +35,14 @@ const GradientButton = ({
         style={{
           borderRadius: 16,
           height: buttonHeight,
+          alignItems: "center",
+          justifyContent: "center",
         }}
-        className="items-center justify-center px-4"
+        className="px-4"
       >
         <Text 
-          style={{ fontSize }}
-          className={`text-black font-bold ${textClassName}`}
+          style={{ fontSize, textAlign: "center" }}
+          className={`text-black font-bold text-center ${textClassName}`}
         >
           {title}
         </Text>
