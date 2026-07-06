@@ -178,6 +178,7 @@ export default function RestaurantMapView({
                     sortBy: "distance",
                     page: 1,
                     limit: 20,
+                    freeNearYou: false,
                   });
                 }
               } else {
@@ -218,12 +219,12 @@ export default function RestaurantMapView({
 
     const loadData = async () => {
       if (mealFilter === "free") {
-        console.log("[RestaurantMapView] Fetching free meals (donated-foods/nearby?freeNearYou=true)...");
+        console.log("[RestaurantMapView] Fetching free meals (provider/nearby?freeNearYou=true)...");
         await fetchFreeMeals({ page: 1, limit: 20, search: debouncedSearchText || undefined });
         return;
       }
 
-      console.log("[RestaurantMapView] Fetching nearby donated foods...");
+      console.log("[RestaurantMapView] Fetching nearby providers...");
       fetchNearbyRestaurants({
         latitude: userLat,
         longitude: userLng,
@@ -233,6 +234,7 @@ export default function RestaurantMapView({
         page: 1,
         limit: 20,
         search: debouncedSearchText || undefined,
+        freeNearYou: false,
       });
     };
 
@@ -587,6 +589,7 @@ export default function RestaurantMapView({
                 sortBy: "distance",
                 page: 1,
                 limit: 20,
+                freeNearYou: false,
               });
             }}
             className={`flex-1 flex-row items-center justify-center px-4 py-2.5 rounded-full shadow-lg border ${mealFilter === "all" ? "bg-[#FFC107] border-white" : "bg-white border-gray-100"

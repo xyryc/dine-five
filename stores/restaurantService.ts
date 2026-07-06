@@ -52,6 +52,7 @@ export interface NearbyParams {
   limit?: number;
   freeNearYou?: boolean;
   search?: string;
+  alcohol?: boolean;
 }
 
 export interface NearbyResponse {
@@ -180,7 +181,14 @@ const normalizeRestaurant = (item: any, index: number): Restaurant => {
     5 + Math.min(15, Math.round(distanceKm * 2)),
   );
 
-  const id = String(item?.id ?? item?._id ?? item?.foodId ?? `res-${index}`);
+  const id = String(
+    item?.id ??
+      item?._id ??
+      item?.providerId ??
+      item?.providerID ??
+      item?.foodId ??
+      `res-${index}`,
+  );
 
   return {
     id,
@@ -379,11 +387,10 @@ export const restaurantService = {
       page: String(page),
       limit: String(limit),
       sortBy,
+      alcohol: params.alcohol !== false ? "true" : "false",
+      freeNearYou: params.freeNearYou ? "true" : "false",
     });
 
-    if (params.freeNearYou) {
-      queryParams.set("freeNearYou", "true");
-    }
     if (params.cuisine) {
       queryParams.set("cuisine", params.cuisine);
     }
@@ -391,7 +398,7 @@ export const restaurantService = {
       queryParams.set("search", params.search);
     }
 
-    const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
+    const url = `${BASE_URL}/provider/nearby?${queryParams.toString()}`;
     console.log("🚀 CALLING API ENDPOINT (getNearby):", url);
 
     try {
@@ -436,6 +443,7 @@ export const restaurantService = {
     longitude?: number;
     radius?: number;
     search?: string;
+    alcohol?: boolean;
   }): Promise<NearbyResponse> => {
     const FALLBACK = { latitude: 23.780704, longitude: 90.407756 };
     const lat = params.latitude ?? FALLBACK.latitude;
@@ -452,6 +460,7 @@ export const restaurantService = {
       page: String(page),
       limit: String(limit),
       sortBy: "distance",
+      alcohol: params.alcohol !== false ? "true" : "false",
       freeNearYou: "true",
     });
 
@@ -459,7 +468,7 @@ export const restaurantService = {
       queryParams.set("search", params.search);
     }
 
-    const url = `${BASE_URL}/provider/donated-foods/nearby?${queryParams.toString()}`;
+    const url = `${BASE_URL}/provider/nearby?${queryParams.toString()}`;
     console.log("🚀 CALLING API ENDPOINT (getFreeMeals):", url);
 
     try {
