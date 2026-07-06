@@ -34,7 +34,10 @@ const pickString = (...values: unknown[]): string => {
   return "";
 };
 
-const formatMoney = (value: number) => `$${value.toFixed(2)}`;
+const formatMoney = (value: unknown) => {
+  const num = toNumber(value, 0);
+  return `$${num.toFixed(2)}`;
+};
 
 const formatTaxRate = (value: number) => `${(value * 100).toFixed(0)}%`;
 
@@ -187,7 +190,6 @@ export default function CartScreen() {
     updateCartQuantity,
     removeCartItem,
     clearCart,
-    fetchStateTax,
   } = useStore() as any;
   const insets = useSafeAreaInsets();
   const { location, fetchLocation } = useRestaurantStore();
@@ -197,8 +199,6 @@ export default function CartScreen() {
   const [subtotal, setSubtotal] = React.useState(0);
   const [cartMeta, setCartMeta] = React.useState<any>(null);
   const [includeUtensils, setIncludeUtensils] = React.useState(true);
-  const [resolvedStateName, setResolvedStateName] = React.useState("");
-  const [locationTaxRate, setLocationTaxRate] = React.useState(0);
 
   const loadCart = React.useCallback(
     async (showLoading = true) => {
@@ -301,12 +301,20 @@ export default function CartScreen() {
             };
           });
 
+          const subtotalVal = toNumber(group.subtotal, 0);
+          const stateTaxVal = toNumber(group.stateTax ?? group.stateTaxAmount, 0);
+          const cityTaxVal = toNumber(group.cityTax, 0);
+          const totalVal = toNumber(group.total, subtotalVal + stateTaxVal + cityTaxVal);
+
           return {
             providerId: group.providerId,
             restaurantName: pickString(group.restaurantName, "Restaurant"),
             restaurantAddress: pickString(group.restaurantAddress, "Address unavailable"),
             restaurantProfile: pickString(group.restaurantProfile, group.restaurantImage, ""),
-            subtotal: toNumber(group.subtotal, 0),
+            subtotal: subtotalVal,
+            stateTax: stateTaxVal,
+            cityTax: cityTaxVal,
+            total: totalVal,
             items: formattedGroupItems,
           };
         });
@@ -409,80 +417,7 @@ export default function CartScreen() {
     loadCart();
   }, [loadCart]);
 
-  React.useEffect(() => {
-    if (!location) {
-      fetchLocation().catch(() => {
-        setResolvedStateName("");
-        setLocationTaxRate(0);
-      });
-    }
-  }, [fetchLocation, location]);
-
-  React.useEffect(() => {
-    let isMounted = true;
-
-    const resolveStateTax = async () => {
-      try {
-        if (!location) return;
-
-        const places = await Location.reverseGeocodeAsync({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-        const place = places?.[0];
-        const candidates = buildTaxLocationCandidates(place);
-        const fallbackStateName = extractStateName(
-          normalizeLocationCandidate(place?.city),
-          normalizeLocationCandidate(place?.district),
-          normalizeLocationCandidate(place?.subregion),
-          normalizeLocationCandidate(place?.region),
-        );
-
-        if (!candidates.length) {
-          if (isMounted) {
-            setResolvedStateName("");
-            setLocationTaxRate(0);
-          }
-          return;
-        }
-
-        for (const candidate of candidates) {
-          const taxInfo = await fetchStateTax(candidate);
-          const taxRate = extractTaxRateFromPayload(taxInfo, candidate);
-
-          if (taxInfo && taxRate > 0) {
-            if (isMounted) {
-              setResolvedStateName(
-                extractStateName(
-                  taxInfo?.name,
-                  taxInfo?.state,
-                  fallbackStateName,
-                ),
-              );
-              setLocationTaxRate(taxRate);
-            }
-            return;
-          }
-        }
-
-        if (isMounted) {
-          setResolvedStateName(fallbackStateName);
-          setLocationTaxRate(0);
-        }
-      } catch {
-        if (isMounted) {
-          setResolvedStateName("");
-          setLocationTaxRate(0);
-        }
-      }
-    };
-
-    resolveStateTax();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchStateTax, location]);
+  // Removed geocoding / tax rules loading block
 
   useFocusEffect(
     React.useCallback(() => {
@@ -567,14 +502,11 @@ export default function CartScreen() {
     ? `${(firstItem.distanceKm * 0.621371).toFixed(1)} mi`
     : pickString(cartMeta?.distance, "3.1 mi");
 
-  const platformFee = cartItems.reduce((acc, item) => {
-    return acc + (item.serviceFee || 0) * (item.quantity || 1);
-  }, 0);
-  const stateTaxRate = normalizeTaxRate(locationTaxRate);
-  const countyTaxRate = normalizeTaxRate(cartMeta?.countyTaxRate);
-  const stateTaxAmount = subtotal * stateTaxRate;
-  const countyTaxAmount = subtotal * countyTaxRate;
-  const total = subtotal + platformFee + stateTaxAmount + countyTaxAmount;
+  const platformFee = toNumber(cartMeta?.platformFee, 0);
+  const cityTax = toNumber(cartMeta?.cityTax, 0);
+  const stateTaxAmount = toNumber(cartMeta?.stateTaxAmount ?? cartMeta?.stateTax, 0);
+  const countyTaxAmount = toNumber(cartMeta?.countyTaxAmount, 0);
+  const total = toNumber(cartMeta?.total, subtotal + platformFee + cityTax + stateTaxAmount + countyTaxAmount);
 
   return (
     <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top"]}>
@@ -697,10 +629,31 @@ export default function CartScreen() {
               ))}
             </View>
 
-            {/* Group Subtotal Footer */}
-            <View className="px-4 py-3 bg-gray-50/20 border-t border-gray-100/50 flex-row justify-between items-center">
-              <Text className="text-[11px] text-gray-400 font-semibold">Subtotal for this restaurant</Text>
-              <Text className="text-sm font-black text-gray-800">{formatMoney(group.subtotal)}</Text>
+            {/* Group Price Breakdown Footer */}
+            <View className="px-4 py-3 bg-gray-50/10 border-t border-gray-100/50 gap-y-1.5">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-[11px] text-gray-400 font-semibold">Subtotal</Text>
+                <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.subtotal)}</Text>
+              </View>
+
+              {group.stateTax > 0 && (
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[11px] text-gray-400 font-semibold">State Tax</Text>
+                  <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.stateTax)}</Text>
+                </View>
+              )}
+
+              {group.cityTax > 0 && (
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[11px] text-gray-400 font-semibold">City Tax</Text>
+                  <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.cityTax)}</Text>
+                </View>
+              )}
+
+              <View className="flex-row justify-between items-center pt-1.5 mt-1 border-t border-gray-100/50">
+                <Text className="text-[12px] font-extrabold text-gray-800">Total for this restaurant</Text>
+                <Text className="text-sm font-black text-gray-900">{formatMoney(group.total)}</Text>
+              </View>
             </View>
           </View>
         ))}
@@ -753,23 +706,7 @@ export default function CartScreen() {
               )}
             </View>
 
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm font-medium text-gray-500">State tax</Text>
-              {loading ? (
-                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-              ) : (
-                <Text className="text-sm font-semibold text-gray-800">{formatTaxRate(stateTaxRate)}</Text>
-              )}
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm font-medium text-gray-500">County tax</Text>
-              {loading ? (
-                <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
-              ) : (
-                <Text className="text-sm font-semibold text-gray-800">{formatTaxRate(countyTaxRate)}</Text>
-              )}
-            </View>
+            {/* Taxes are itemized per restaurant card above */}
 
             <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
               <Text className="text-base font-bold text-gray-900">Total Amount</Text>
