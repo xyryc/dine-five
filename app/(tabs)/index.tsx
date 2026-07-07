@@ -19,6 +19,7 @@ import React from "react";
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   RefreshControl,
   ScrollView,
   Text,
@@ -125,6 +126,7 @@ export default function HomeScreen() {
   const [homeFeed, setHomeFeed] = React.useState<any>(null);
   const [manualAddressInput, setManualAddressInput] = React.useState("");
   const [isSearchingAddress, setIsSearchingAddress] = React.useState(false);
+  const [isAddressModalVisible, setIsAddressModalVisible] = React.useState(false);
 
   const { setHomeRestaurants } = useRestaurantStore();
 
@@ -274,7 +276,7 @@ export default function HomeScreen() {
         setCurrentLocationLabel(label);
       } catch {
         if (isMounted) {
-          setCurrentLocationLabel("");
+          setCurrentLocationLabel("Current Location");
         }
       }
     };
@@ -392,8 +394,8 @@ export default function HomeScreen() {
   const locationLabel = React.useMemo(() => {
     return (
       pickString(
-        user?.address,
         currentLocationLabel,
+        user?.address,
         user?.city,
         user?.state,
       ) || "Fetching location..."
@@ -422,27 +424,18 @@ export default function HomeScreen() {
     (restaurantsLoading && restaurants.length === 0);
 
   const handleManualLocationPress = () => {
-    Alert.prompt(
-      "Set Location Manually",
-      "Enter your address, city, or zip code:",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Search",
-          onPress: async (address?: string) => {
-            if (!address || !address.trim()) return;
-            const res = await setLocationManually(address);
-            if (!res || !res.success) {
-              Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
-            }
-          },
-        },
-      ],
-      "plain-text"
-    );
+    setIsAddressModalVisible(true);
+  };
+
+  const handleAddressModalConfirm = async (address: string) => {
+    const res = await setLocationManually(address);
+    if (res && res.success) {
+      setCurrentLocationLabel(address);
+      return true;
+    } else {
+      Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
+      return false;
+    }
   };
 
   const handleLocationPress = () => {
@@ -530,7 +523,9 @@ export default function HomeScreen() {
                           setIsSearchingAddress(true);
                           const res = await setLocationManually(manualAddressInput);
                           setIsSearchingAddress(false);
-                          if (!res || !res.success) {
+                          if (res && res.success) {
+                            setCurrentLocationLabel(manualAddressInput);
+                          } else {
                             Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
                           }
                         }}
@@ -595,7 +590,90 @@ export default function HomeScreen() {
             </>
           )}
         </ScrollView>
-        </View>
+        
+        <AddressModal
+          visible={isAddressModalVisible}
+          onClose={() => setIsAddressModalVisible(false)}
+          onConfirm={handleAddressModalConfirm}
+        />
+      </View>
     </View>
+  );
+}
+
+function AddressModal({
+  visible,
+  onClose,
+  onConfirm,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onConfirm: (address: string) => Promise<boolean>;
+}) {
+  const [address, setAddress] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSearch = async () => {
+    if (!address.trim()) return;
+    setLoading(true);
+    const success = await onConfirm(address);
+    setLoading(false);
+    if (success) {
+      setAddress("");
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+        <View className="bg-white rounded-[28px] w-full p-6 shadow-xl gap-y-4">
+          <View className="flex-row justify-between items-center">
+            <Text className="text-lg font-black text-gray-900">Set Location</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+          <Text className="text-xs text-gray-400 font-semibold leading-relaxed">
+            Enter your address, city, or zip code below to find nearby restaurants:
+          </Text>
+          <View className="flex-row items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl px-3 py-2">
+            <Ionicons name="location-outline" size={18} color="#9CA3AF" />
+            <TextInput
+              value={address}
+              onChangeText={setAddress}
+              placeholder="e.g. New York, Dhaka..."
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 text-sm text-gray-800 py-1"
+              autoFocus
+            />
+          </View>
+          <View className="flex-row gap-3 mt-2">
+            <TouchableOpacity
+              onPress={onClose}
+              className="flex-1 bg-gray-50 border border-gray-200/60 h-12 rounded-2xl items-center justify-center"
+            >
+              <Text className="text-gray-500 font-extrabold text-sm">Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSearch}
+              disabled={loading || !address.trim()}
+              className={`flex-1 bg-[#E29E10] h-12 rounded-2xl items-center justify-center ${loading || !address.trim() ? 'opacity-60' : ''}`}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" size="small" />
+              ) : (
+                <Text className="text-white font-extrabold text-sm">Search</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
