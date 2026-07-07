@@ -45,9 +45,10 @@ export const DonateCard = () => {
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}
-        className="bg-[#F8F9FF] border border-[#D1D5DB] px-3 py-2 rounded-xl shadow-sm"
+        className="bg-[#F8F9FF] border border-[#D1D5DB] px-3.5 py-2 rounded-xl shadow-sm shrink-0"
+        style={{ flexShrink: 0 }}
       >
-        <Text className="text-[#1F2937] text-[11px] font-bold tracking-tight">
+        <Text className="text-[#1F2937] text-[11px] font-bold tracking-tight" numberOfLines={1}>
           DONATE A MEAL
         </Text>
       </TouchableOpacity>

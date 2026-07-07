@@ -2,15 +2,17 @@ import React from "react";
 import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { type Restaurant } from "@/stores/useRestaurantStore";
+import { useRouter } from "expo-router";
 
-const formatDistance = (distanceKm?: number) => {
-  if (typeof distanceKm !== "number" || !Number.isFinite(distanceKm)) return "";
-  if (distanceKm < 1) return `${Math.max(1, Math.round(distanceKm * 1000))} m`;
-  return `${distanceKm.toFixed(1)} mi`;
+const formatDistance = (distanceKm?: any) => {
+  const dist = Number(distanceKm);
+  if (!Number.isFinite(dist)) return "";
+  if (dist < 1) return `${Math.max(1, Math.round(dist * 1000))} m`;
+  return `${dist.toFixed(1)} mi`;
 };
 
 const getCuisineLabel = (restaurant: Restaurant) =>
-  restaurant.cuisine?.filter(Boolean).join(" • ") || "Restaurant";
+  restaurant?.cuisine?.filter(Boolean).join(" • ") || "Restaurant";
 
 export function RestaurantCard({
   restaurant,
@@ -19,12 +21,16 @@ export function RestaurantCard({
   restaurant: Restaurant;
   onOpen: () => void;
 }) {
+  if (!restaurant) return null;
   const distanceLabel = formatDistance(restaurant.distance);
-  const rating = (restaurant.rating ?? 4.2).toFixed(1);
+  const rating = (() => {
+    const r = Number(restaurant.rating);
+    return Number.isFinite(r) ? r.toFixed(1) : "4.2";
+  })();
   const cuisineLabel = getCuisineLabel(restaurant);
   const deliveryMin =
     restaurant.deliveryTimeMinutes ??
-    Math.max(5, Math.min(30, Math.round(restaurant.distance * 2) + 5));
+    Math.max(5, Math.min(30, Math.round((Number(restaurant.distance) || 0) * 2) + 5));
 
   return (
     <TouchableOpacity
@@ -89,13 +95,19 @@ export function RestaurantSection({
   restaurants: Restaurant[];
   onOpenRestaurant: (restaurant: Restaurant) => void;
 }) {
-  if (!restaurants.length) return null;
+  const router = useRouter();
+  if (!restaurants || !restaurants.length) return null;
 
   return (
     <View className="mb-6">
       <View className="flex-row justify-between items-center px-4 mb-2">
-        <Text className="text-lg font-bold text-gray-900">{title}</Text>
-        <TouchableOpacity>
+        <Text className="text-lg font-bold text-gray-900 flex-1 mr-2" numberOfLines={1}>
+          {title}
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.push("/screens/home/all-restaurants")}
+          style={{ flexShrink: 0 }}
+        >
           <Text className="text-sm font-semibold" style={{ color: "#F5C518" }}>
             View all
           </Text>
@@ -107,9 +119,9 @@ export function RestaurantSection({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16 }}
       >
-        {restaurants.map((restaurant) => (
+        {restaurants.filter(Boolean).map((restaurant) => (
           <RestaurantCard
-            key={restaurant.providerId}
+            key={restaurant.providerId || restaurant.id || Math.random().toString()}
             restaurant={restaurant}
             onOpen={() => onOpenRestaurant(restaurant)}
           />

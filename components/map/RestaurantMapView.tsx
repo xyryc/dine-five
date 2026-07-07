@@ -574,11 +574,24 @@ export default function RestaurantMapView({
           latitudeDelta: 0.001,
           longitudeDelta: 0.001,
         }}
-        showsUserLocation
+        showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
         onPress={() => setSelectedRestaurant(null)}
       >
+        {hasLocation && (
+          <Marker
+            coordinate={{ latitude: userLat, longitude: userLng }}
+            title="My Location"
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <View className="w-6 h-6 items-center justify-center">
+              <View className="absolute w-5 h-5 bg-blue-500/20 rounded-full border border-blue-500/30" />
+              <View className="w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white shadow-sm" />
+            </View>
+          </Marker>
+        )}
+
         {filteredRestaurants.map((restaurant) => {
           const coords = getRestaurantCoords(restaurant);
           if (!coords) return null;
