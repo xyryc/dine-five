@@ -161,6 +161,7 @@ export default function RestaurantMapView({
   const {
     location,
     locationLoading,
+    locationPermissionGranted,
     restaurants,
     restaurantsLoading,
     restaurantsError,
@@ -173,11 +174,14 @@ export default function RestaurantMapView({
     setSelectedRestaurant,
     setActiveFeedMode,
     setRadiusMeters,
+    setLocationManually,
   } = useRestaurantStore();
 
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [mealFilter, setMealFilter] = useState<"all" | "free">("all");
+  const [manualMapAddressInput, setManualMapAddressInput] = useState("");
+  const [isSearchingMapAddress, setIsSearchingMapAddress] = useState(false);
 
   const [addressLabel, setAddressLabel] = useState("3067 Fifth Ave");
 
@@ -479,6 +483,105 @@ export default function RestaurantMapView({
 
 
   const isShowingHomeProviders = false;
+
+  const handleManualLocationPrompt = () => {
+    Alert.prompt(
+      "Set Location Manually",
+      "Enter your address, city, or zip code:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Search",
+          onPress: async (address?: string) => {
+            if (!address || !address.trim()) return;
+            const res = await setLocationManually(address);
+            if (res && res.success) {
+              if (res.location && mapRef.current) {
+                mapRef.current.animateToRegion({
+                  ...res.location,
+                  latitudeDelta: 0.002,
+                  longitudeDelta: 0.002,
+                }, 1000);
+              }
+            } else {
+              Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
+
+  if (locationPermissionGranted === false) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#FDFBF7] px-8 gap-y-5">
+        <View className="w-20 h-20 bg-amber-50 border border-amber-100 rounded-full items-center justify-center shadow-sm">
+          <Ionicons name="location-outline" size={40} color="#E29E10" />
+        </View>
+        <View className="items-center px-4">
+          <Text className="text-lg font-bold text-gray-900 text-center">Location Access Required</Text>
+          <Text className="text-sm text-gray-400 font-semibold text-center mt-1.5 leading-relaxed">
+            Dine Five uses your location to show nearby food options and restaurants on the map. Please enable location permissions.
+          </Text>
+        </View>
+        <View className="w-full gap-y-3 px-6">
+          <TouchableOpacity
+            onPress={handleAutoLocate}
+            className="bg-[#E29E10] h-12 rounded-2xl flex-row items-center justify-center gap-2 shadow-sm"
+          >
+            <Ionicons name="pin" size={16} color="#FFF" />
+            <Text className="text-white font-extrabold text-sm">Enable Location Access</Text>
+          </TouchableOpacity>
+
+          <View className="w-full border-t border-gray-200/60 my-1 pt-3">
+            <Text className="text-xs font-bold text-gray-500 mb-2">Or enter address manually:</Text>
+            <View className="flex-row items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-1.5 shadow-sm">
+              <Ionicons name="search" size={16} color="#9CA3AF" />
+              <TextInput
+                value={manualMapAddressInput}
+                onChangeText={setManualMapAddressInput}
+                placeholder="e.g. New York, Dhaka..."
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 text-sm text-gray-800 py-1"
+              />
+              {manualMapAddressInput.trim().length > 0 && (
+                <TouchableOpacity
+                  onPress={async () => {
+                    if (isSearchingMapAddress) return;
+                    setIsSearchingMapAddress(true);
+                    const res = await setLocationManually(manualMapAddressInput);
+                    setIsSearchingMapAddress(false);
+                    if (res && res.success) {
+                      if (res.location && mapRef.current) {
+                        mapRef.current.animateToRegion({
+                          ...res.location,
+                          latitudeDelta: 0.002,
+                          longitudeDelta: 0.002,
+                        }, 1000);
+                      }
+                    } else {
+                      Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
+                    }
+                  }}
+                  className="bg-[#E29E10] px-3.5 py-1.5 rounded-xl"
+                >
+                  {isSearchingMapAddress ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text className="text-white text-xs font-extrabold">Set</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   if (locationLoading) {
     return (

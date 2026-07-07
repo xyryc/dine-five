@@ -15,6 +15,7 @@ type FeedMode = "all" | "free";
 interface RestaurantState {
   location: { latitude: number; longitude: number } | null;
   locationLoading: boolean;
+  locationPermissionGranted: boolean | null;
   restaurants: Restaurant[];
   homeRestaurants: Restaurant[];
   restaurantsLoading: boolean;
@@ -27,6 +28,7 @@ interface RestaurantState {
   radiusMeters: number;
   availableTokenCount: number;
   fetchLocation: () => Promise<void>;
+  setLocationManually: (address: string) => Promise<any>;
   fetchNearbyRestaurants: (params: NearbyParams) => Promise<void>;
   fetchFreeMeals: (params: { page?: number; limit?: number; search?: string }) => Promise<void>;
   setActiveFeedMode: (mode: FeedMode) => void;
@@ -47,6 +49,7 @@ interface RestaurantState {
 export const useRestaurantStore = create<RestaurantState>((set, get) => ({
   location: null,
   locationLoading: true,
+  locationPermissionGranted: null,
   restaurants: [],
   homeRestaurants: [],
   restaurantsLoading: false,
@@ -59,14 +62,37 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
   radiusMeters: 5000,
   availableTokenCount: 0,
 
+  setLocationManually: async (address: string) => {
+    try {
+      const results = await Location.geocodeAsync(address);
+      if (results && results.length > 0) {
+        const newLoc = {
+          latitude: results[0].latitude,
+          longitude: results[0].longitude,
+        };
+        set({
+          location: newLoc,
+          locationPermissionGranted: true,
+          locationLoading: false,
+        });
+        return { success: true, location: newLoc };
+      }
+      return { success: false, error: "Address not found" };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Failed to resolve address" };
+    }
+  },
+
   fetchLocation: async () => {
     set({ locationLoading: true });
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        set({ location: FALLBACK_LOCATION });
+        set({ location: null, locationPermissionGranted: false, locationLoading: false });
         return;
       }
+
+      set({ locationPermissionGranted: true });
 
       const lastKnown = await Location.getLastKnownPositionAsync({});
       if (lastKnown) {
@@ -90,7 +116,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
         },
       });
     } catch {
-      set({ location: FALLBACK_LOCATION });
+      set({ location: null });
     } finally {
       set({ locationLoading: false });
     }
@@ -116,32 +142,6 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
       const response = await restaurantService.getNearby(params);
       let restaurants = response.data ?? [];
       let total = response.pagination?.total ?? restaurants.length;
-
-      if (restaurants.length === 0) {
-        const requestedLat = params.latitude;
-        const requestedLng = params.longitude;
-        const alreadyUsingFallback =
-          isNear(requestedLat, FALLBACK_LOCATION.latitude) &&
-          isNear(requestedLng, FALLBACK_LOCATION.longitude);
-
-        if (!alreadyUsingFallback) {
-          const fallbackResponse = await restaurantService.getNearby({
-            ...params,
-            latitude: FALLBACK_LOCATION.latitude,
-            longitude: FALLBACK_LOCATION.longitude,
-            radius: Math.max(params.radius ?? 1000, 5000),
-            cuisine: undefined,
-          });
-
-          if ((fallbackResponse.data ?? []).length > 0) {
-            restaurants = fallbackResponse.data;
-            total =
-              fallbackResponse.pagination?.total ??
-              fallbackResponse.data?.length ??
-              restaurants.length;
-          }
-        }
-      }
 
       const currentState = get();
       if (

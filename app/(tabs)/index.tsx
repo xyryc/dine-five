@@ -12,14 +12,18 @@ import {
 import { extractHomeRestaurants } from "@/utils/homeFeedRestaurants";
 import { getUserAvatarUri, normalizeImageUri } from "@/utils/userAvatar";
 import * as Location from "expo-location";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   Text,
+  TextInput,
+  TouchableOpacity,
   View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -109,14 +113,18 @@ export default function HomeScreen() {
   const {
     location,
     locationLoading,
+    locationPermissionGranted,
     restaurants: storeRestaurants,
     restaurantsLoading,
     restaurantsError,
     fetchLocation,
     fetchNearbyRestaurants,
+    setLocationManually,
   } = useRestaurantStore();
 
   const [homeFeed, setHomeFeed] = React.useState<any>(null);
+  const [manualAddressInput, setManualAddressInput] = React.useState("");
+  const [isSearchingAddress, setIsSearchingAddress] = React.useState(false);
 
   const { setHomeRestaurants } = useRestaurantStore();
 
@@ -413,6 +421,51 @@ export default function HomeScreen() {
     (locationLoading && restaurants.length === 0) ||
     (restaurantsLoading && restaurants.length === 0);
 
+  const handleManualLocationPress = () => {
+    Alert.prompt(
+      "Set Location Manually",
+      "Enter your address, city, or zip code:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Search",
+          onPress: async (address?: string) => {
+            if (!address || !address.trim()) return;
+            const res = await setLocationManually(address);
+            if (!res || !res.success) {
+              Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
+  };
+
+  const handleLocationPress = () => {
+    Alert.alert(
+      "Update Location",
+      "Choose how you want to set your address:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Use GPS Location",
+          onPress: () => fetchLocation(),
+        },
+        {
+          text: "Enter Address Manually",
+          onPress: () => handleManualLocationPress(),
+        },
+      ]
+    );
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <StatusBar style="dark" />
@@ -435,53 +488,111 @@ export default function HomeScreen() {
             name={userName}
             location={locationLabel}
             profileImage={profileImage || undefined}
-            onLocationPress={fetchLocation}
+            onLocationPress={handleLocationPress}
           />
 
-          <SearchBar searchText={searchText} onSearch={setSearchText} />
-          <PromoBanner deals={promoDeals ?? [FALLBACK_PROMO]} />
+          {locationPermissionGranted === false ? (
+            <View className="mx-6 my-10 p-6 bg-amber-50/50 border border-amber-100 rounded-[28px] items-center gap-y-4 shadow-sm">
+              <View className="w-16 h-16 bg-amber-100 rounded-full items-center justify-center">
+                <Ionicons name="location-outline" size={32} color="#E29E10" />
+              </View>
+              <View className="items-center px-4">
+                <Text className="text-base font-bold text-gray-900 text-center">Location Access Required</Text>
+                <Text className="text-xs text-gray-400 font-semibold text-center mt-1.5 leading-relaxed">
+                  Dine Five uses your location to discover restaurants and food pickup points near you. Please enable location permissions.
+                </Text>
+              </View>
+              
+              <View className="w-full mt-2 px-4 gap-y-3">
+                <TouchableOpacity
+                  onPress={fetchLocation}
+                  className="bg-[#E29E10] h-12 rounded-2xl flex-row items-center justify-center gap-2 shadow-sm"
+                >
+                  <Ionicons name="pin" size={16} color="#FFF" />
+                  <Text className="text-white font-extrabold text-sm">Enable Location Access</Text>
+                </TouchableOpacity>
 
-
-
-          <Categories
-            activeCategory={activeCategory}
-            categories={categories}
-            onCategoryChange={setActiveCategory}
-          />
-
-          {isInitialLoading && (
-            <View className="py-8 items-center">
-              <ActivityIndicator size="small" color="#F5C518" />
-              <Text className="text-xs text-gray-400 mt-2">
-                Loading restaurants...
-              </Text>
+                <View className="w-full border-t border-gray-200/60 my-1 pt-3">
+                  <Text className="text-xs font-bold text-gray-500 mb-2">Or enter address manually:</Text>
+                  <View className="flex-row items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-1.5 shadow-sm">
+                    <Ionicons name="search" size={16} color="#9CA3AF" />
+                    <TextInput
+                      value={manualAddressInput}
+                      onChangeText={setManualAddressInput}
+                      placeholder="e.g. New York, Dhaka, 94043..."
+                      placeholderTextColor="#9CA3AF"
+                      className="flex-1 text-sm text-gray-800 py-1"
+                    />
+                    {manualAddressInput.trim().length > 0 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          if (isSearchingAddress) return;
+                          setIsSearchingAddress(true);
+                          const res = await setLocationManually(manualAddressInput);
+                          setIsSearchingAddress(false);
+                          if (!res || !res.success) {
+                            Alert.alert("Error", res?.error || "Could not resolve address. Please try again.");
+                          }
+                        }}
+                        className="bg-[#E29E10] px-3.5 py-1.5 rounded-xl"
+                      >
+                        {isSearchingAddress ? (
+                          <ActivityIndicator size="small" color="#FFF" />
+                        ) : (
+                          <Text className="text-white text-xs font-extrabold">Set</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </View>
             </View>
-          )}
+          ) : (
+            <>
+              <SearchBar searchText={searchText} onSearch={setSearchText} />
+              <PromoBanner deals={promoDeals ?? [FALLBACK_PROMO]} />
 
-          {!isInitialLoading &&
-            sections.map((section) => (
-              <RestaurantSection
-                key={section.title}
-                title={section.title}
-                restaurants={section.items}
-                onOpenRestaurant={openRestaurantDetail}
+              <Categories
+                activeCategory={activeCategory}
+                categories={categories}
+                onCategoryChange={setActiveCategory}
               />
-            ))}
 
-          {!isInitialLoading && !sections.length && (
-            <View className="px-4 py-8">
-              <Text className="text-sm text-gray-400 text-center">
-                No restaurants found.
-              </Text>
-            </View>
-          )}
+              {isInitialLoading && (
+                <View className="py-8 items-center">
+                  <ActivityIndicator size="small" color="#F5C518" />
+                  <Text className="text-xs text-gray-400 mt-2">
+                    Loading restaurants...
+                  </Text>
+                </View>
+              )}
 
-          {!!restaurantsError && (
-            <View className="px-4 pb-4">
-              <Text className="text-xs text-amber-700 text-center">
-                {restaurantsError}
-              </Text>
-            </View>
+              {!isInitialLoading &&
+                sections.map((section) => (
+                  <RestaurantSection
+                    key={section.title}
+                    title={section.title}
+                    restaurants={section.items}
+                    onOpenRestaurant={openRestaurantDetail}
+                  />
+                ))}
+
+              {!isInitialLoading && !sections.length && (
+                <View className="px-4 py-8">
+                  <Text className="text-sm text-gray-400 text-center">
+                    No restaurants found.
+                  </Text>
+                </View>
+              )}
+
+              {!!restaurantsError && (
+                <View className="px-4 pb-4">
+                  <Text className="text-xs text-amber-700 text-center">
+                    {restaurantsError}
+                  </Text>
+                </View>
+              )}
+            </>
           )}
         </ScrollView>
         </View>
