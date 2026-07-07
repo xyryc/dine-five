@@ -851,14 +851,9 @@ export default function RestaurantMapView({
 
                     <View className="px-3 py-2.5">
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-base font-bold text-gray-900 flex-1 mr-2" numberOfLines={1}>
+                        <Text className="text-base font-bold text-gray-900 flex-1" numberOfLines={1}>
                           {isFreeMode ? ((item as any).name || (item as any).title || (item as any).mealName) : item.restaurantName}
                         </Text>
-                        {!isFreeMode && (
-                          <TouchableOpacity className="w-8 h-8 rounded-full border border-gray-200 items-center justify-center">
-                            <Ionicons name="heart-outline" size={15} color="#7C7C7C" />
-                          </TouchableOpacity>
-                        )}
                       </View>
 
                       <View className="flex-row items-center mt-1">

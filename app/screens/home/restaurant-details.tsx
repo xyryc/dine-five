@@ -917,7 +917,7 @@ function RestaurantDetailScreenInner() {
 
         {!isFreeFlow && cartCount > 0 && (
           <View
-            className="absolute bottom-6 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
+            className="absolute bottom-16 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
             style={{
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 10 },

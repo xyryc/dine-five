@@ -52,11 +52,7 @@ export function RestaurantCard({
               : "Open"}
           </Text>
         </View>
-
-        <TouchableOpacity className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md items-center justify-center shadow-sm">
-          <Ionicons name="heart-outline" size={15} color="#374151" />
-        </TouchableOpacity>
-      </View>
+        </View>
 
       <View className="px-1 pb-1">
         <Text className="text-sm font-bold text-gray-900" numberOfLines={1}>
