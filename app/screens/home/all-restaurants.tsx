@@ -299,11 +299,11 @@ export default function AllRestaurantsScreen() {
         ListHeaderComponent={
           <View className="pt-4 pb-3">
             {/* Search Input */}
-            <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-100 px-3 py-1.5 shadow-sm mb-4">
+            <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-100 px-3 shadow-sm mb-4">
               <Ionicons name="search-outline" size={18} color="#9CA3AF" />
               <TextInput
                 placeholder="Search restaurants, cuisines..."
-                className="flex-1 ml-2 text-gray-700 h-9 text-sm"
+                className="flex-1 ml-2 text-gray-700 text-sm py-2.5"
                 placeholderTextColor="#9CA3AF"
                 value={searchText}
                 onChangeText={setSearchText}

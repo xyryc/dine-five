@@ -544,7 +544,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <>
-              <SearchBar searchText={searchText} onSearch={setSearchText} />
+              <SearchBar onPress={() => router.push("/screens/home/all-restaurants")} />
               <PromoBanner deals={promoDeals ?? [FALLBACK_PROMO]} />
 
               <Categories
