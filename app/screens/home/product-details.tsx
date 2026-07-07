@@ -6,19 +6,30 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { Alert, Image, Modal, ScrollView, Share, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  Share,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useRestaurantStore } from "@/stores/useRestaurantStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 
 const firstParam = (value: string | string[] | undefined): string =>
-  Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 
 const DEFAULT_PRODUCT_IMAGE =
   "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80";
 
 const normalizeImageUri = (value: string | string[] | undefined): string => {
-  const raw = firstParam(value).trim().replace(/^['"]|['"]$/g, "");
+  const raw = firstParam(value)
+    .trim()
+    .replace(/^['"]|['"]$/g, "");
   if (!raw) return "";
   if (raw === "undefined" || raw === "null" || raw === "N/A") return "";
 
@@ -59,8 +70,14 @@ export default function ProductDetails() {
 function ProductDetailsInner() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { addFavorite, removeFavorite, addToCart, favorites, fetchFavorites, fetchReviewsByFoodId } =
-    useStore() as any;
+  const {
+    addFavorite,
+    removeFavorite,
+    addToCart,
+    favorites,
+    fetchFavorites,
+    fetchReviewsByFoodId,
+  } = useStore() as any;
   const {
     id,
     foodId,
@@ -72,30 +89,41 @@ function ProductDetailsInner() {
     restaurantProfile,
     tokenId,
   } = params;
-  
-  const { claimToken, placeFreeOrder, getAvailableTokens } = useRestaurantStore();
-  const [currentTokenId, setCurrentTokenId] = useState<string | null>(firstParam(tokenId as string | string[] | undefined) || null);
+
+  const { claimToken, placeFreeOrder, getAvailableTokens } =
+    useRestaurantStore();
+  const [currentTokenId, setCurrentTokenId] = useState<string | null>(
+    firstParam(tokenId as string | string[] | undefined) || null,
+  );
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isClaimingMeal, setIsClaimingMeal] = useState(false);
   const [isPlacingFreeOrder, setIsPlacingFreeOrder] = useState(false);
 
-  const productId = firstParam(id as string | string[] | undefined) || firstParam(foodId as string | string[] | undefined) || "1";
+  const productId =
+    firstParam(id as string | string[] | undefined) ||
+    firstParam(foodId as string | string[] | undefined) ||
+    "1";
 
   const [reviewsData, setReviewsData] = useState<any[]>([]);
   const [totalReviews, setTotalReviews] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [heroImageError, setHeroImageError] = useState(false);
-  const [heroImageUri, setHeroImageUri] = useState<string>(DEFAULT_PRODUCT_IMAGE);
+  const [heroImageUri, setHeroImageUri] = useState<string>(
+    DEFAULT_PRODUCT_IMAGE,
+  );
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  const isFreeMeal = params.isFreeAvailable === "true" || !!params.freeTokenCount;
+
+  const isFreeMeal =
+    params.isFreeAvailable === "true" || !!params.freeTokenCount;
 
   useEffect(() => {
     console.log("[ProductDetails] Mounted with params:", params);
     console.log("[ProductDetails] isFreeMeal detection:", isFreeMeal);
   }, [isFreeMeal, params]);
 
-  const normalizedProductImage = normalizeImageUri(image as string | string[] | undefined);
+  const normalizedProductImage = normalizeImageUri(
+    image as string | string[] | undefined,
+  );
   const normalizedRestaurantProfile = normalizeImageUri(
     restaurantProfile as string | string[] | undefined,
   );
@@ -114,7 +142,10 @@ function ProductDetailsInner() {
 
             // Calculate average rating if not provided by backend
             if (result.data.length > 0) {
-              const total = result.data.reduce((sum: number, review: any) => sum + (review.rating || 0), 0);
+              const total = result.data.reduce(
+                (sum: number, review: any) => sum + (review.rating || 0),
+                0,
+              );
               const avg = total / result.data.length;
               setAverageRating(parseFloat(avg.toFixed(1)));
             }
@@ -132,8 +163,8 @@ function ProductDetailsInner() {
       setHeroImageError(false);
       setHeroImageUri(
         normalizedProductImage ||
-        normalizedRestaurantProfile ||
-        DEFAULT_PRODUCT_IMAGE,
+          normalizedRestaurantProfile ||
+          DEFAULT_PRODUCT_IMAGE,
       );
     } catch (error: any) {
       console.error("❌ ProductDetailsInner RENDER CRASH STACK:", error.stack);
@@ -147,7 +178,9 @@ function ProductDetailsInner() {
       firstParam(foodId as string | string[] | undefined) ||
       firstParam(id as string | string[] | undefined) ||
       "1",
-    name: firstParam(name as string | string[] | undefined) || "Pepperoni Cheese Pizza",
+    name:
+      firstParam(name as string | string[] | undefined) ||
+      "Pepperoni Cheese Pizza",
     price: (price as string) || "5.99",
     image:
       normalizedProductImage ||
@@ -160,7 +193,9 @@ function ProductDetailsInner() {
     description:
       firstParam(description as string | string[] | undefined) ||
       "A classic favorite! Indulge in a crispy, thin crust topped with rich tomato sauce, layers of gooey mozzarella cheese, and delicious pepperoni slices. Perfectly baked with a hint of herbs for a mouth-watering experience in every bite.",
-    restaurantName: firstParam(restaurantName as string | string[] | undefined) || "The Gourmet Kitchen",
+    restaurantName:
+      firstParam(restaurantName as string | string[] | undefined) ||
+      "The Gourmet Kitchen",
     restaurantProfile: normalizedRestaurantProfile,
   };
 
@@ -191,10 +226,16 @@ function ProductDetailsInner() {
       console.log("[ProductDetails] Fetching available tokens...");
       const tokenResult = await getAvailableTokens();
       const tokens = tokenResult?.data?.tokens;
-      console.log("[ProductDetails] Available tokens found:", tokens?.length || 0);
-      
+      console.log(
+        "[ProductDetails] Available tokens found:",
+        tokens?.length || 0,
+      );
+
       if (!tokens || tokens.length === 0) {
-        Alert.alert("No Tokens", "Sorry, there are no free meal tokens available right now.");
+        Alert.alert(
+          "No Tokens",
+          "Sorry, there are no free meal tokens available right now.",
+        );
         return;
       }
 
@@ -225,17 +266,29 @@ function ProductDetailsInner() {
     try {
       const result = await placeFreeOrder({
         tokenId: currentTokenId,
-        providerId: firstParam(params.providerId as string | string[] | undefined) || product.id,
+        providerId:
+          firstParam(params.providerId as string | string[] | undefined) ||
+          product.id,
         foodId: product.foodId,
         quantity: quantity,
       });
 
-      Alert.alert("Success", result.message || "Free order placed successfully!", [
-        { text: "View Orders", onPress: () => router.push("/screens/profile/my-orders") },
-        { text: "OK", onPress: () => router.back() }
-      ]);
+      Alert.alert(
+        "Success",
+        result.message || "Free order placed successfully!",
+        [
+          {
+            text: "View Orders",
+            onPress: () => router.push("/screens/profile/my-orders"),
+          },
+          { text: "OK", onPress: () => router.back() },
+        ],
+      );
     } catch (error: any) {
-      Alert.alert("Order Failed", error.message || "Could not place free order");
+      Alert.alert(
+        "Order Failed",
+        error.message || "Could not place free order",
+      );
     } finally {
       setIsPlacingFreeOrder(false);
     }
@@ -249,7 +302,10 @@ function ProductDetailsInner() {
         router.push("/(tabs)/cart");
       } else {
         const latestError = (useStore.getState() as any)?.error;
-        Alert.alert("Failed", latestError || "Failed to add to cart. Please try again.");
+        Alert.alert(
+          "Failed",
+          latestError || "Failed to add to cart. Please try again.",
+        );
       }
     } catch (error) {
       console.log("Error adding to cart:", error);
@@ -260,7 +316,7 @@ function ProductDetailsInner() {
   const handleShare = async () => {
     try {
       const message = `Check out this ${product.name} from ${product.restaurantName}!\n\n${product.description}\n\nPrice: $${product.price}\n\nView Image: ${product.image}`;
-      
+
       await Share.share({
         message: message,
         url: product.image, // For iOS support
@@ -276,35 +332,7 @@ function ProductDetailsInner() {
       <View className="flex-1 bg-[#FBF9F6]">
         <StatusBar style="light" />
 
-        {/* Hero Product Image */}
-        <View className="absolute top-0 w-full h-[44vh] bg-gray-100">
-          {!!heroImageUri && !heroImageError ? (
-            <Image
-              source={{ uri: heroImageUri }}
-              className="w-full h-full"
-              resizeMode="cover"
-              onError={() => {
-                if (heroImageUri !== DEFAULT_PRODUCT_IMAGE) {
-                  setHeroImageUri(DEFAULT_PRODUCT_IMAGE);
-                  return;
-                }
-                setHeroImageError(true);
-              }}
-            />
-          ) : (
-            <View className="w-full h-full items-center justify-center bg-gray-100">
-              <Ionicons name="fast-food-outline" size={48} color="#9CA3AF" />
-            </View>
-          )}
-          
-          {/* Subtle top dark overlay for header buttons readability */}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.35)", "transparent"]}
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 112 }}
-          />
-        </View>
-
-        {/* Top Header Buttons Overlay */}
+        {/* Top Header Buttons Overlay (fixed at top of screen) */}
         <SafeAreaView className="absolute top-0 w-full z-50">
           <View className="flex-row justify-between px-4 pt-3">
             <TouchableOpacity
@@ -327,7 +355,7 @@ function ProductDetailsInner() {
             </TouchableOpacity>
 
             <View className="flex-row gap-3">
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                 onPress={handleShare}
                 style={{
                   width: 40,
@@ -341,7 +369,8 @@ function ProductDetailsInner() {
                 }}
               >
                 <Ionicons name="share-outline" size={20} color="#fff" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
+
               <TouchableOpacity
                 onPress={handleToggleFavorite}
                 style={{
@@ -365,29 +394,61 @@ function ProductDetailsInner() {
           </View>
         </SafeAreaView>
 
-        {/* Fixed Detail Card Sheet */}
-        <View 
-          style={{
-            flex: 1,
-            marginTop: "42%",
-            backgroundColor: "#fff",
-            borderTopLeftRadius: 40,
-            borderTopRightRadius: 40,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.03,
-            shadowRadius: 10,
-            elevation: 5,
-            overflow: "hidden",
-          }}
+        {/* Main Scrollable View */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 140 }}
+          className="flex-1"
         >
-          {/* Sheet drag indicator handle */}
-          <View className="w-12 h-1.5 bg-gray-200 rounded-full my-4 self-center" />
+          {/* Hero Product Image in flow */}
+          <View className="w-full h-[44vh] bg-gray-100 relative">
+            {!!heroImageUri && !heroImageError ? (
+              <Image
+                source={{ uri: heroImageUri }}
+                className="w-full h-full"
+                resizeMode="cover"
+                onError={() => {
+                  if (heroImageUri !== DEFAULT_PRODUCT_IMAGE) {
+                    setHeroImageUri(DEFAULT_PRODUCT_IMAGE);
+                    return;
+                  }
+                  setHeroImageError(true);
+                }}
+              />
+            ) : (
+              <View className="w-full h-full items-center justify-center bg-gray-100">
+                <Ionicons name="fast-food-outline" size={48} color="#9CA3AF" />
+              </View>
+            )}
 
-          {/* Scrollable Content inside the fixed sheet */}
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }}
+            {/* Subtle top dark overlay for header buttons readability */}
+            <LinearGradient
+              colors={["rgba(0,0,0,0.35)", "transparent"]}
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                height: 112,
+              }}
+            />
+          </View>
+
+          {/* Details Card (no longer fixed, doesn't scroll internally) */}
+          <View
+            style={{
+              marginTop: -30,
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 40,
+              borderTopRightRadius: 40,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.03,
+              shadowRadius: 10,
+              elevation: 5,
+              paddingHorizontal: 20,
+              paddingTop: 24,
+            }}
           >
             {/* Restaurant Info Bar */}
             <View className="flex-row items-center justify-between mb-5 bg-gray-50 border border-gray-100 rounded-3xl p-3">
@@ -404,7 +465,9 @@ function ProductDetailsInner() {
                   </View>
                 )}
                 <View>
-                  <Text className="text-xs font-bold text-gray-400 uppercase tracking-wide">Restaurant</Text>
+                  <Text className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    Restaurant
+                  </Text>
                   <Text className="text-sm font-black text-gray-800">
                     {product.restaurantName}
                   </Text>
@@ -412,7 +475,9 @@ function ProductDetailsInner() {
               </View>
               <View className="bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full flex-row items-center gap-1">
                 <Ionicons name="star" size={12} color="#F5C518" />
-                <Text className="text-[10px] font-extrabold text-amber-800">Verified</Text>
+                <Text className="text-[10px] font-extrabold text-amber-800">
+                  Verified
+                </Text>
               </View>
             </View>
 
@@ -457,10 +522,14 @@ function ProductDetailsInner() {
 
             {/* Quantity Controller Capsule */}
             <View className="flex-row items-center justify-between mb-6 bg-gray-50 border border-gray-100/80 rounded-2xl px-4 py-3">
-              <Text className="text-sm font-extrabold text-gray-800">Quantity</Text>
+              <Text className="text-sm font-extrabold text-gray-800">
+                Quantity
+              </Text>
               <View className="flex-row items-center gap-x-4">
                 <TouchableOpacity
-                  onPress={() => !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)}
+                  onPress={() =>
+                    !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)
+                  }
                   disabled={isFreeMeal}
                   style={{
                     width: 32,
@@ -495,7 +564,9 @@ function ProductDetailsInner() {
 
             {/* Description Block */}
             <View className="mb-6">
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-0.5">Description</Text>
+              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-0.5">
+                Description
+              </Text>
               <TouchableOpacity
                 activeOpacity={0.72}
                 onPress={() => setIsExpanded(!isExpanded)}
@@ -522,7 +593,9 @@ function ProductDetailsInner() {
                     className="bg-emerald-500 w-full py-4 rounded-2xl shadow-sm items-center"
                   >
                     <Text className="text-white font-extrabold text-base">
-                      {isPlacingFreeOrder ? "Placing Order..." : "Place Free Order"}
+                      {isPlacingFreeOrder
+                        ? "Placing Order..."
+                        : "Place Free Order"}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -562,7 +635,8 @@ function ProductDetailsInner() {
                   }}
                 >
                   <Text className="text-gray-900 font-extrabold text-base">
-                    Add to Cart • ${(quantity * parseFloat(product.price)).toFixed(2)}
+                    Add to Cart • $
+                    {(quantity * parseFloat(product.price)).toFixed(2)}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -572,7 +646,8 @@ function ProductDetailsInner() {
               <View className="bg-amber-50 border border-amber-100/50 rounded-2xl p-4 mb-8 flex-row gap-2">
                 <Ionicons name="information-circle" size={18} color="#D97706" />
                 <Text className="text-xs text-amber-800 font-semibold flex-1 leading-normal">
-                  One donated meal can be claimed once every 48 hours, and each token covers 1 meal only.
+                  One donated meal can be claimed once every 48 hours, and each
+                  token covers 1 meal only.
                 </Text>
               </View>
             )}
@@ -587,17 +662,26 @@ function ProductDetailsInner() {
               <View className="flex-1 justify-center items-center bg-black/50 px-6">
                 <View className="bg-white w-full rounded-3xl p-8 items-center shadow-xl">
                   <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
-                    <Ionicons name="checkmark-circle" size={50} color="#22C55E" />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={50}
+                      color="#22C55E"
+                    />
                   </View>
-                  <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">Claim Successful!</Text>
+                  <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">
+                    Claim Successful!
+                  </Text>
                   <Text className="text-gray-500 text-center mb-8 leading-5 font-semibold">
-                    You have successfully claimed this meal. You can now place 1 free order with this token.
+                    You have successfully claimed this meal. You can now place 1
+                    free order with this token.
                   </Text>
                   <TouchableOpacity
                     onPress={() => setShowSuccessModal(false)}
                     className="bg-green-500 w-full py-4 rounded-2xl items-center shadow-sm"
                   >
-                    <Text className="text-white font-bold text-lg">Continue to Order</Text>
+                    <Text className="text-white font-bold text-lg">
+                      Continue to Order
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -605,13 +689,16 @@ function ProductDetailsInner() {
 
             {/* Customer Reviews */}
             <CustomerReviews reviews={reviewsData} />
-          </ScrollView>
-        </View>
+          </View>
+        </ScrollView>
 
-      {!isFreeMeal && (
-        <ViewCart count={quantity} total={quantity * parseFloat(product.price)} />
-      )}
-    </View>
+        {!isFreeMeal && (
+          <ViewCart
+            count={quantity}
+            total={quantity * parseFloat(product.price)}
+          />
+        )}
+      </View>
     );
   } catch (error: any) {
     console.error("❌ ProductDetailsInner RENDER CRASH STACK:", error.stack);

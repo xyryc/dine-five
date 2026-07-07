@@ -171,9 +171,7 @@ function CheckoutContent() {
   } = useStore() as any;
   const { location, fetchLocation } = useRestaurantStore();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [modalVisible, setModalVisible] = useState(false);
   const [isDonateModalVisible, setIsDonateModalVisible] = useState(false);
-  const [selectedCard, setSelectedCard] = useState("Mastercard - Daniel Jones");
   const [cartSubtotal, setCartSubtotal] = useState(0);
   const [cartGroups, setCartGroups] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -197,8 +195,7 @@ function CheckoutContent() {
     donationBreakdown?.total ??
     donationSubtotal + donationPlatformFee + donationStateTax;
 
-  // Payment methods
-  const CARDS = ["Mastercard - Daniel Jones", "Visa - Daniel Jones"];
+
 
   const loadCartData = useCallback(async () => {
     setIsCheckoutLoading(true);
@@ -523,7 +520,7 @@ function CheckoutContent() {
         providerId: providerId,
         items: formattedItems,
         totalPrice: effectiveTotal,
-        paymentMethod: selectedCard,
+        paymentMethod: "Stripe",
         logisticsType: "Pickup",
       };
 
@@ -621,40 +618,7 @@ function CheckoutContent() {
           </View>
         )}
 
-        {/* Payment Method Card */}
-        <TouchableOpacity
-          onPress={() => {
-            if (!isDonationCheckout && !isCheckoutLoading) {
-              setModalVisible(true);
-            }
-          }}
-          disabled={isDonationCheckout || isCheckoutLoading}
-          activeOpacity={0.7}
-          className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-4"
-        >
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-start flex-1 mr-2">
-              <View className="w-10 h-10 bg-[#FFF8E7] rounded-2xl items-center justify-center mr-4 border border-[#FFE8B5]">
-                <Ionicons name="card-outline" size={18} color="#E29E10" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                  Payment Method
-                </Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-32 rounded animate-pulse mt-1" />
-                ) : (
-                  <Text className="text-base font-bold text-gray-800">
-                    {isDonationCheckout ? "Stripe Checkout" : selectedCard}
-                  </Text>
-                )}
-              </View>
-            </View>
-            {!isDonationCheckout && !isCheckoutLoading && (
-              <Ionicons name="chevron-forward" size={16} color="#CCCCCC" />
-            )}
-          </View>
-        </TouchableOpacity>
+
 
         {/* Summary Card */}
         <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-6">
@@ -817,64 +781,7 @@ function CheckoutContent() {
         }}
       />
 
-      {/* Change Card Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6 min-h-[40%]">
-            <View className="items-center mb-6">
-              <View className="w-12 h-1 bg-gray-300 rounded-full mb-4" />
-              <Text className="text-lg font-bold text-gray-900">
-                Choose Payment Method
-              </Text>
-            </View>
 
-            {CARDS.map((card, index) => (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.8}
-                onPress={() => setSelectedCard(card)}
-                className="flex-row items-center justify-between bg-gray-50 border border-gray-100/50 p-4 rounded-2xl mb-3"
-              >
-                <Text className="text-gray-900 font-semibold text-sm">{card}</Text>
-                <View
-                  className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-                    selectedCard === card ? "border-[#E29E10]" : "border-gray-300"
-                  }`}
-                >
-                  {selectedCard === card && (
-                    <View className="w-2.5 h-2.5 rounded-full bg-[#E29E10]" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              activeOpacity={0.8}
-              className="h-14 rounded-2xl overflow-hidden mt-6 shadow-sm"
-            >
-              <LinearGradient
-                colors={["#F5C518", "#E29E10"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  height: '100%',
-                  width: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text className="text-white font-bold text-base">Confirm</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }

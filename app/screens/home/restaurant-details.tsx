@@ -1,9 +1,6 @@
 import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { API_BASE_URL } from "@/utils/api";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -103,20 +100,20 @@ const normalizeMenuSections = (payload: any): MenuSectionType[] => {
 
     const priceValue = toNumber(
       food?.baseRevenue ??
-      entry?.baseRevenue ??
-      food?.finalPriceTag ??
-      food?.price ??
-      entry?.finalPriceTag ??
-      entry?.price,
+        entry?.baseRevenue ??
+        food?.finalPriceTag ??
+        food?.price ??
+        entry?.finalPriceTag ??
+        entry?.price,
       NaN,
     );
     const etaValue = toNumber(
       food?.etaMinutes ??
-      food?.deliveryTime ??
-      food?.prepTime ??
-      entry?.etaMinutes ??
-      entry?.deliveryTime ??
-      entry?.prepTime,
+        food?.deliveryTime ??
+        food?.prepTime ??
+        entry?.etaMinutes ??
+        entry?.deliveryTime ??
+        entry?.prepTime,
       NaN,
     );
     const sectionTitle = pickString(
@@ -131,7 +128,9 @@ const normalizeMenuSections = (payload: any): MenuSectionType[] => {
       id,
       name,
       price: Number.isFinite(priceValue) ? priceValue.toFixed(2) : "0.00",
-      time: Number.isFinite(etaValue) ? `${Math.round(etaValue)} min` : "15-20 min",
+      time: Number.isFinite(etaValue)
+        ? `${Math.round(etaValue)} min`
+        : "15-20 min",
       image: pickString(
         food?.image,
         food?.imageUrl,
@@ -174,9 +173,8 @@ function MenuItem({
     <TouchableOpacity
       activeOpacity={0.92}
       onPress={onOpen}
-      className="flex-row border border-gray-100 rounded-3xl p-3 mb-4 items-center"
+      className="flex-row border border-gray-100 rounded-3xl p-3 mb-4 items-center bg-white"
       style={{
-        backgroundColor: "rgba(249, 250, 251, 0.4)",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.02,
@@ -201,12 +199,18 @@ function MenuItem({
 
       {/* Info Column */}
       <View className="flex-1 justify-center py-1">
-        <Text className="text-sm font-extrabold text-gray-900 mb-1" numberOfLines={1}>
+        <Text
+          className="text-sm font-extrabold text-gray-900 mb-1"
+          numberOfLines={1}
+        >
           {item.name}
         </Text>
-        
+
         {item.description ? (
-          <Text className="text-[11px] text-gray-400 font-semibold mb-2 pr-2" numberOfLines={2}>
+          <Text
+            className="text-[11px] text-gray-400 font-semibold mb-2 pr-2"
+            numberOfLines={2}
+          >
             {item.description}
           </Text>
         ) : (
@@ -219,10 +223,12 @@ function MenuItem({
           <Text className="text-base font-black text-gray-900">
             ${item.price}
           </Text>
-          
+
           <View className="flex-row items-center bg-gray-100 px-2.5 py-1 rounded-full">
             <Ionicons name="time-outline" size={11} color="#6B7280" />
-            <Text className="text-[10px] font-bold text-gray-600 ml-1">{item.time}</Text>
+            <Text className="text-[10px] font-bold text-gray-600 ml-1">
+              {item.time}
+            </Text>
           </View>
         </View>
       </View>
@@ -285,15 +291,18 @@ function RestaurantDetailScreenInner() {
   const [addingItemId, setAddingItemId] = React.useState<string | null>(null);
 
   const providerId = pickString(params.providerId, params.id);
-  const restaurantName = pickString(params.name, fetchedDetails?.name) || "Restaurant";
+  const restaurantName =
+    pickString(params.name, fetchedDetails?.name) || "Restaurant";
   const restaurantImage = pickString(params.image, fetchedDetails?.image);
-  const restaurantRating = pickString(params.rating, fetchedDetails?.rating) || "N/A";
+  const restaurantRating =
+    pickString(params.rating, fetchedDetails?.rating) || "N/A";
   const restaurantAddress =
     pickString(params.address, fetchedDetails?.address) ||
     [pickString(params.city), pickString(params.state)]
       .filter(Boolean)
       .join(", ");
-  const restaurantDistance = pickString(params.distance, fetchedDetails?.distance) || "N/A";
+  const restaurantDistance =
+    pickString(params.distance, fetchedDetails?.distance) || "N/A";
 
   const [activeTab, setActiveTab] = React.useState("");
   const [searchText, setSearchText] = React.useState("");
@@ -339,10 +348,23 @@ function RestaurantDetailScreenInner() {
       if (Array.isArray(foods) && foods.length > 0) {
         const first = foods[0];
         setFetchedDetails({
-          name: pickString(first.restaurantName, first.providerRestaurantName, first.providerName),
-          image: pickString(first.restaurantImage, first.restaurantProfile, first.providerImage, first.providerProfile, first.profile),
+          name: pickString(
+            first.restaurantName,
+            first.providerRestaurantName,
+            first.providerName,
+          ),
+          image: pickString(
+            first.restaurantImage,
+            first.restaurantProfile,
+            first.providerImage,
+            first.providerProfile,
+            first.profile,
+          ),
           address: pickString(first.restaurantAddress),
-          rating: first.rating !== undefined && first.rating !== null ? String(first.rating) : undefined,
+          rating:
+            first.rating !== undefined && first.rating !== null
+              ? String(first.rating)
+              : undefined,
         });
       }
 
@@ -363,7 +385,10 @@ function RestaurantDetailScreenInner() {
   }, [loadMenu, updateCartCount]);
 
   const menuTabs = React.useMemo(
-    () => (Array.isArray(menuSections) ? menuSections : []).map((section) => section?.title || ""),
+    () =>
+      (Array.isArray(menuSections) ? menuSections : []).map(
+        (section) => section?.title || "",
+      ),
     [menuSections],
   );
 
@@ -384,7 +409,10 @@ function RestaurantDetailScreenInner() {
               )
             : [],
         }))
-        .filter((section) => Array.isArray(section?.items) && section.items.length > 0);
+        .filter(
+          (section) =>
+            Array.isArray(section?.items) && section.items.length > 0,
+        );
     }
 
     return sections;
@@ -420,7 +448,10 @@ function RestaurantDetailScreenInner() {
 
         if (!result) {
           const latestError = (useStore.getState() as any)?.error;
-          Alert.alert("Failed", latestError || "Could not add this item to cart.");
+          Alert.alert(
+            "Failed",
+            latestError || "Could not add this item to cart.",
+          );
           return;
         }
 
@@ -428,7 +459,10 @@ function RestaurantDetailScreenInner() {
         await updateCartCount();
         Alert.alert("Added", `${item.name} added to cart.`);
       } catch (error: any) {
-        Alert.alert("Failed", error?.message || "Could not add this item to cart.");
+        Alert.alert(
+          "Failed",
+          error?.message || "Could not add this item to cart.",
+        );
       } finally {
         setAddingItemId(null);
       }
@@ -463,7 +497,9 @@ function RestaurantDetailScreenInner() {
           <Ionicons name="restaurant" size={32} color="#F5C518" />
         </View>
         <ActivityIndicator size="small" color="#F5C518" />
-        <Text className="text-gray-500 mt-3 font-semibold text-sm">Preparing menu...</Text>
+        <Text className="text-gray-500 mt-3 font-semibold text-sm">
+          Preparing menu...
+        </Text>
       </View>
     );
   }
@@ -473,304 +509,302 @@ function RestaurantDetailScreenInner() {
       <View className="flex-1 bg-white">
         <StatusBar style="light" />
 
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: cartCount > 0 ? 150 : 100 }}
-        onScroll={(e) => {
-          if (isManualScroll.current) return;
-          const scrollY = e.nativeEvent.contentOffset.y;
-          
-          let activeSection = "";
-          const sortedPositions = Object.entries(sectionPositions.current).sort((a, b) => a[1] - b[1]);
-          
-          for (const [title, yPos] of sortedPositions) {
-            if (scrollY >= yPos - 140) {
-              activeSection = title;
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: cartCount > 0 ? 150 : 100 }}
+          onScroll={(e) => {
+            if (isManualScroll.current) return;
+            const scrollY = e.nativeEvent.contentOffset.y;
+
+            let activeSection = "";
+            const sortedPositions = Object.entries(
+              sectionPositions.current,
+            ).sort((a, b) => a[1] - b[1]);
+
+            for (const [title, yPos] of sortedPositions) {
+              if (scrollY >= yPos - 140) {
+                activeSection = title;
+              }
             }
-          }
-          
-          if (activeSection && activeSection !== activeTab) {
-            setActiveTab(activeSection);
-          }
-        }}
-        scrollEventThrottle={16}
-      >
-        <View className="relative h-72">
-          {restaurantImage ? (
-            <Image
-              source={{ uri: restaurantImage }}
-              className="w-full h-72"
-              resizeMode="cover"
-            />
-          ) : (
-            <View className="w-full h-72 items-center justify-center bg-gray-100">
-              <Ionicons name="restaurant-outline" size={40} color="#9CA3AF" />
-            </View>
-          )}
 
-          <View
-            className="absolute inset-0"
-            style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-          />
-
-          <View
-            className="absolute left-0 right-0 flex-row justify-between items-center px-4"
-            style={{ top: insets.top + 8 }}
-          >
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                alignItems: "center",
-                justifyContent: "center",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <Ionicons name="chevron-back" size={22} color="#1F2937" />
-            </TouchableOpacity>
-
-            <View className="flex-row gap-3">
-              <TouchableOpacity 
-                onPress={() => router.push("/(tabs)/cart")}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                <Ionicons name="bag-outline" size={20} color="#1F2937" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              >
-                <Ionicons name="heart-outline" size={20} color="#1F2937" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        <View 
-          className="bg-white px-5 pt-6 -mt-8 rounded-t-[32px] flex-1"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.04,
-            shadowRadius: 10,
-            elevation: 4,
+            if (activeSection && activeSection !== activeTab) {
+              setActiveTab(activeSection);
+            }
           }}
+          scrollEventThrottle={16}
         >
-          <View className="mb-4">
-            <Text className="text-2xl font-black text-gray-900 leading-tight">
-              {restaurantName}
-            </Text>
-
-            <View className="flex-row items-center mt-1.5">
-              <Ionicons name="location-outline" size={14} color="#9CA3AF" />
-              <Text className="text-xs font-semibold text-gray-500 ml-1 flex-1" numberOfLines={1}>
-                {restaurantAddress || "Address not available"}
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center gap-2 mb-6">
-            <View className="flex-row items-center px-3 py-1.5 rounded-full bg-amber-50 border border-amber-100 gap-1">
-              <Ionicons name="star" size={13} color="#F5C518" />
-              <Text className="text-xs font-extrabold text-amber-800">
-                {restaurantRating}
-              </Text>
-            </View>
-            
-            {restaurantDistance !== "N/A" && (
-              <View className="flex-row items-center px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 gap-1">
-                <Ionicons name="bicycle-outline" size={13} color="#2D9CDB" />
-                <Text className="text-xs font-extrabold text-blue-800">
-                  Pickup {restaurantDistance}
-                </Text>
+          <View className="relative h-72">
+            {restaurantImage ? (
+              <Image
+                source={{ uri: restaurantImage }}
+                className="w-full h-72"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="w-full h-72 items-center justify-center bg-gray-100">
+                <Ionicons name="restaurant-outline" size={40} color="#9CA3AF" />
               </View>
             )}
 
-            <View className="flex-row items-center px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 gap-1">
-              <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <Text className="text-xs font-extrabold text-emerald-800">
-                Open Now
-              </Text>
-            </View>
-          </View>
-
-          <View className="mb-6">
             <View
-              className="flex-row items-center rounded-2xl px-4 py-2 bg-gray-50 border border-gray-100"
+              className="absolute inset-0"
+              style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+            />
+
+            <View
+              className="absolute left-0 right-0 flex-row justify-between items-center px-4"
+              style={{ top: insets.top + 8 }}
             >
-              <Ionicons name="search-outline" size={18} color="#9CA3AF" />
-              <TextInput
-                value={searchText}
-                onChangeText={setSearchText}
-                placeholder="Search restaurant menu..."
-                placeholderTextColor="#9CA3AF"
-                className="flex-1 ml-2 text-sm text-gray-700 py-1"
-              />
-            </View>
-          </View>
-
-          {menuTabs.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 16, gap: 8 }}
-              className="mb-4"
-            >
-              {menuTabs.map((tab) => {
-                const isActive = tab === activeTab;
-
-                return (
-                  <TouchableOpacity
-                    key={tab}
-                    onPress={() => handleTabPress(tab)}
-                    activeOpacity={0.8}
-                    style={{
-                      backgroundColor: isActive ? "#1F2937" : "#F9FAFB",
-                      borderColor: isActive ? "#1F2937" : "#F3F4F6",
-                      borderWidth: 1,
-                      borderRadius: 9999,
-                      paddingHorizontal: 16,
-                      paddingVertical: 8,
-                      ...(isActive ? {
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 2,
-                        elevation: 1,
-                      } : {}),
-                    }}
-                  >
-                    <Text
-                      className={`text-xs font-bold ${
-                        isActive ? "text-[#F5C518]" : "text-gray-500"
-                      }`}
-                    >
-                      {tab}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          )}
-
-          {menuLoading && (
-            <View className="py-10 items-center justify-center">
-              <ActivityIndicator size="small" color="#F5C518" />
-              <Text className="text-gray-400 mt-2">Loading menu...</Text>
-            </View>
-          )}
-
-          {!menuLoading && !!menuError && (
-            <View className="py-10 items-center justify-center px-4">
-              <Text className="text-gray-400 text-center">{menuError}</Text>
               <TouchableOpacity
-                onPress={loadMenu}
-                className="mt-3 px-4 py-2 rounded-full"
-                style={{ backgroundColor: "#F5C518" }}
-              >
-                <Text className="text-xs font-bold text-gray-900">Retry</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {!menuLoading &&
-            !menuError &&
-            visibleSections.map((section) => (
-              <View 
-                key={section.title} 
-                onLayout={(e) => {
-                  sectionPositions.current[section.title] = e.nativeEvent.layout.y + 256;
+                onPress={() => router.back()}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
                 }}
-                className="mt-4"
               >
-                <Text className="text-base font-black text-gray-900 px-1 mb-3">
-                  {section.title}
-                </Text>
+                <Ionicons name="chevron-back" size={22} color="#1F2937" />
+              </TouchableOpacity>
 
-                {section.items.map((item) => (
-                  <MenuItem
-                    key={item.id}
-                    item={item}
-                    isAdding={addingItemId === item.id}
-                    onAdd={() => handleAdd(item)}
-                    onOpen={() => openFoodDetail(item)}
-                  />
-                ))}
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/(tabs)/cart")}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <Ionicons name="bag-outline" size={20} color="#1F2937" />
+                </TouchableOpacity>
               </View>
-            ))}
-
-          {!menuLoading && !menuError && visibleSections.length === 0 && (
-            <View className="py-10 items-center justify-center">
-              <Text className="text-gray-400">No menu items found.</Text>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-
-      {cartCount > 0 && (
-        <View 
-          className="absolute bottom-6 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.25,
-            shadowRadius: 15,
-            elevation: 8,
-          }}
-        >
-          <View className="flex-row items-center gap-3">
-            <View className="w-10 h-10 rounded-2xl bg-[#F5C518] items-center justify-center">
-              <Ionicons name="bag" size={20} color="#1F2937" />
-            </View>
-            <View>
-              <Text className="text-white font-extrabold text-sm">{cartCount} {cartCount === 1 ? 'item' : 'items'} in bag</Text>
-              <Text className="text-gray-400 text-xs font-semibold">Fresh food ready for pickup</Text>
             </View>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/cart")}
-            activeOpacity={0.8}
-            className="bg-[#F5C518] px-5 py-2.5 rounded-2xl"
+
+          <View
+            className="bg-white px-5 pt-6 -mt-8 rounded-t-[32px] flex-1"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.04,
+              shadowRadius: 10,
+              elevation: 4,
+            }}
           >
-            <Text className="text-gray-900 font-extrabold text-xs">View Bag</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+            <View className="mb-4">
+              <Text className="text-2xl font-black text-gray-900 leading-tight">
+                {restaurantName}
+              </Text>
+
+              <View className="flex-row items-center mt-1.5">
+                <Ionicons name="location-outline" size={14} color="#9CA3AF" />
+                <Text
+                  className="text-xs font-semibold text-gray-500 ml-1 flex-1"
+                  numberOfLines={1}
+                >
+                  {restaurantAddress || "Address not available"}
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex-row items-center gap-2 mb-6">
+              <View className="flex-row items-center px-3 py-1.5 rounded-full bg-amber-50 border border-amber-100 gap-1">
+                <Ionicons name="star" size={13} color="#F5C518" />
+                <Text className="text-xs font-extrabold text-amber-800">
+                  {restaurantRating}
+                </Text>
+              </View>
+
+              {restaurantDistance !== "N/A" && (
+                <View className="flex-row items-center px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 gap-1">
+                  <Ionicons name="bicycle-outline" size={13} color="#2D9CDB" />
+                  <Text className="text-xs font-extrabold text-blue-800">
+                    Pickup {restaurantDistance}
+                  </Text>
+                </View>
+              )}
+
+              <View className="flex-row items-center px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 gap-1">
+                <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <Text className="text-xs font-extrabold text-emerald-800">
+                  Open Now
+                </Text>
+              </View>
+            </View>
+
+            <View className="mb-6">
+              <View className="flex-row items-center rounded-2xl px-4 py-2 bg-gray-50 border border-gray-100">
+                <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+                <TextInput
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  placeholder="Search restaurant menu..."
+                  placeholderTextColor="#9CA3AF"
+                  className="flex-1 ml-2 text-sm text-gray-700 py-1"
+                />
+              </View>
+            </View>
+
+            {menuTabs.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 16, gap: 8 }}
+                className="mb-4"
+              >
+                {menuTabs.map((tab) => {
+                  const isActive = tab === activeTab;
+
+                  return (
+                    <TouchableOpacity
+                      key={tab}
+                      onPress={() => handleTabPress(tab)}
+                      activeOpacity={0.8}
+                      style={{
+                        backgroundColor: isActive ? "#1F2937" : "#F9FAFB",
+                        borderColor: isActive ? "#1F2937" : "#F3F4F6",
+                        borderWidth: 1,
+                        borderRadius: 9999,
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        ...(isActive
+                          ? {
+                              shadowColor: "#000",
+                              shadowOffset: { width: 0, height: 1 },
+                              shadowOpacity: 0.05,
+                              shadowRadius: 2,
+                              elevation: 1,
+                            }
+                          : {}),
+                      }}
+                    >
+                      <Text
+                        className={`text-xs font-bold ${
+                          isActive ? "text-[#F5C518]" : "text-gray-500"
+                        }`}
+                      >
+                        {tab}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
+
+            {menuLoading && (
+              <View className="py-10 items-center justify-center">
+                <ActivityIndicator size="small" color="#F5C518" />
+                <Text className="text-gray-400 mt-2">Loading menu...</Text>
+              </View>
+            )}
+
+            {!menuLoading && !!menuError && (
+              <View className="py-10 items-center justify-center px-4">
+                <Text className="text-gray-400 text-center">{menuError}</Text>
+                <TouchableOpacity
+                  onPress={loadMenu}
+                  className="mt-3 px-4 py-2 rounded-full"
+                  style={{ backgroundColor: "#F5C518" }}
+                >
+                  <Text className="text-xs font-bold text-gray-900">Retry</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!menuLoading &&
+              !menuError &&
+              visibleSections.map((section) => (
+                <View
+                  key={section.title}
+                  onLayout={(e) => {
+                    sectionPositions.current[section.title] =
+                      e.nativeEvent.layout.y + 256;
+                  }}
+                  className="mt-4"
+                >
+                  <Text className="text-base font-black text-gray-900 px-1 mb-3">
+                    {section.title}
+                  </Text>
+
+                  {section.items.map((item) => (
+                    <MenuItem
+                      key={item.id}
+                      item={item}
+                      isAdding={addingItemId === item.id}
+                      onAdd={() => handleAdd(item)}
+                      onOpen={() => openFoodDetail(item)}
+                    />
+                  ))}
+                </View>
+              ))}
+
+            {!menuLoading && !menuError && visibleSections.length === 0 && (
+              <View className="py-10 items-center justify-center">
+                <Text className="text-gray-400">No menu items found.</Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        {cartCount > 0 && (
+          <View
+            className="absolute bottom-6 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.25,
+              shadowRadius: 15,
+              elevation: 8,
+            }}
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-2xl bg-[#F5C518] items-center justify-center">
+                <Ionicons name="bag" size={20} color="#1F2937" />
+              </View>
+              <View>
+                <Text className="text-white font-extrabold text-sm">
+                  {cartCount} {cartCount === 1 ? "item" : "items"} in bag
+                </Text>
+                <Text className="text-gray-400 text-xs font-semibold">
+                  Fresh food ready for pickup
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/cart")}
+              activeOpacity={0.8}
+              className="bg-[#F5C518] px-5 py-2.5 rounded-2xl"
+            >
+              <Text className="text-gray-900 font-extrabold text-xs">
+                View Bag
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     );
   } catch (error: any) {
-    console.error("❌ RestaurantDetailScreenInner RENDER CRASH STACK:", error.stack);
+    console.error(
+      "❌ RestaurantDetailScreenInner RENDER CRASH STACK:",
+      error.stack,
+    );
     throw error;
   }
 }

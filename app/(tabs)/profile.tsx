@@ -79,14 +79,6 @@ export default function ProfileScreen() {
           route: "/screens/profile/donation-tokens",
         },
         {
-          id: "payment",
-          title: "Payment Methods",
-          icon: "card-outline",
-          color: "#4CAF50",
-          bgColor: "#E8F5E9",
-          route: "/screens/profile/payment",
-        },
-        {
           id: "cart",
           title: "View Cart",
           icon: "cart-outline",
