@@ -17,7 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
 
 const toNumber = (value: unknown, fallback = 0): number => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -26,6 +27,15 @@ const toNumber = (value: unknown, fallback = 0): number => {
     return Number.isFinite(parsed) ? parsed : fallback;
   }
   return fallback;
+};
+
+const pickString = (...values: unknown[]): string => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
 };
 
 const formatMoney = (value: number) => `$${value.toFixed(2)}`;
@@ -155,6 +165,7 @@ const extractTaxRateFromPayload = (payload: any): number => {
 };
 
 function CheckoutContent() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{
     mealCount?: string | string[];
@@ -172,6 +183,7 @@ function CheckoutContent() {
   const { location, fetchLocation } = useRestaurantStore();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [isDonateModalVisible, setIsDonateModalVisible] = useState(false);
+  const [includeUtensils, setIncludeUtensils] = useState(true);
   const [cartSubtotal, setCartSubtotal] = useState(0);
   const [cartGroups, setCartGroups] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -246,6 +258,18 @@ function CheckoutContent() {
           const cityTaxVal = toNumber(group.cityTax, 0);
           const totalVal = toNumber(group.total, subtotalVal + stateTaxVal + cityTaxVal);
 
+          const groupItems = Array.isArray(group.items) ? group.items : [];
+          const formattedItems = groupItems.map((item: any) => {
+            const foodData = item?.foodId && typeof item.foodId === "object" ? item.foodId : {};
+            return {
+              id: foodData?._id || foodData?.id || item._id,
+              name: pickString(foodData?.title, foodData?.name, item.title, item.name, "Unknown item"),
+              image: pickString(foodData?.image, item.image),
+              price: toNumber(item.price || foodData?.price || foodData?.finalPriceTag, 0),
+              quantity: Math.max(1, Math.floor(toNumber(item.quantity, 1))),
+            };
+          });
+
           return {
             providerId: group.providerId,
             restaurantName: pickString(group.restaurantName, "Restaurant"),
@@ -255,6 +279,7 @@ function CheckoutContent() {
             stateTax: stateTaxVal,
             cityTax: cityTaxVal,
             total: totalVal,
+            items: formattedItems,
           };
         });
         setCartGroups(formattedGroups);
@@ -559,144 +584,217 @@ function CheckoutContent() {
     }
   };
 
+  const totalTaxes = stateTaxAmount + cityTax + countyTaxAmount;
+
   return (
-    <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-[#F8F9FA]" edges={["top"]}>
       <StatusBar style="dark" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pt-3 pb-4 border-b border-gray-100 bg-white">
+      <View className="flex-row items-center justify-between px-6 py-4 bg-white">
         <TouchableOpacity
           onPress={() => router.back()}
           activeOpacity={0.7}
-          className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
+          className="w-10 h-10 rounded-full bg-[#F8F9FA] items-center justify-center border border-gray-100/50"
         >
           <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-gray-900">
+        <Text className="text-lg font-black text-gray-900 tracking-tight">
           {isDonationCheckout ? "Donate Meals" : "Checkout"}
         </Text>
         <View className="w-10" />
       </View>
 
+      {/* Stepper Progress bar */}
+      <View className="bg-white px-6 pb-4 pt-1 border-b border-gray-100 flex-row items-center justify-between">
+        <View className="flex-row items-center gap-1.5">
+          <View className="w-5 h-5 bg-emerald-500 rounded-full items-center justify-center">
+            <Ionicons name="checkmark" size={12} color="#FFF" />
+          </View>
+          <Text className="text-xs font-bold text-gray-800">Cart</Text>
+        </View>
+        <View className="flex-1 h-[2px] bg-emerald-500 mx-2" />
+        <View className="flex-row items-center gap-1.5">
+          <View className="w-5 h-5 bg-[#E29E10] rounded-full items-center justify-center">
+            <Text className="text-[10px] font-black text-white">2</Text>
+          </View>
+          <Text className="text-xs font-bold text-gray-800">Details</Text>
+        </View>
+        <View className="flex-1 h-[2px] bg-gray-200 mx-2" />
+        <View className="flex-row items-center gap-1.5">
+          <View className="w-5 h-5 bg-gray-200 rounded-full items-center justify-center">
+            <Text className="text-[10px] font-black text-gray-400">3</Text>
+          </View>
+          <Text className="text-xs font-bold text-gray-400">Payment</Text>
+        </View>
+      </View>
+
       <ScrollView 
         showsVerticalScrollIndicator={false}
-        className="flex-1 px-4 mt-4"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 160 }}
+        className="flex-1"
       >
-        {/* Pickup Address Card */}
-        {!isDonationCheckout && (
-          <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-4">
-            <View className="flex-row items-start">
-              <View className="w-10 h-10 bg-[#E0F2F1] rounded-2xl items-center justify-center mr-4 border border-[#B2DFDB]">
-                <Ionicons name="location-outline" size={18} color="#26A69A" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                  Pickup from
-                </Text>
-                {isCheckoutLoading ? (
-                  <View className="bg-gray-100 h-5 w-48 rounded animate-pulse mt-1" />
-                ) : cartGroups.length > 0 ? (
-                  <View className="gap-y-1.5 mt-1.5">
-                    {cartGroups.map((group, idx) => (
-                      <View key={group.providerId || idx} className="mb-2">
-                        <Text className="text-sm font-bold text-gray-800">
-                          • {group.restaurantName}
-                        </Text>
-                        <Text className="text-xs text-gray-500 ml-3">
-                          {group.restaurantAddress}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <Text className="text-base font-bold text-gray-800">
-                    {pickupAddress}
+        {/* Donation Header Banner */}
+        {isDonationCheckout && (
+          <View className="mb-6 rounded-3xl overflow-hidden shadow-sm">
+            <LinearGradient
+              colors={["#10B981", "#059669"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ width: "100%", height: "100%" }}
+            >
+              <View className="p-5 flex-row items-center justify-between">
+                <View className="flex-1 mr-4">
+                  <Text className="text-white font-extrabold text-lg mb-1">
+                    Help Fight Hunger
                   </Text>
-                )}
+                  <Text className="text-emerald-100 text-xs font-semibold leading-relaxed">
+                    Your donation goes directly toward preparing and serving fresh, warm meals to local community members in need.
+                  </Text>
+                </View>
+                <View className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center">
+                  <Ionicons name="heart" size={24} color="#FFF" />
+                </View>
               </View>
-            </View>
+            </LinearGradient>
           </View>
         )}
 
+        {/* Pickup Locations Summary */}
+        {!isDonationCheckout && (
+          <View className="mb-6">
+            <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
+              Pickup Locations
+            </Text>
 
-
-        {/* Summary Card */}
-        <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-6">
-          <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-0.5">
-            Order Summary
-          </Text>
-
-          {isDonationCheckout ? (
-            <View className="gap-y-2.5">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Meals</Text>
-                <Text className="text-sm font-bold text-gray-800">{donationMealCount}</Text>
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Price per meal</Text>
-                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPricePerMeal)}</Text>
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Meal subtotal</Text>
-                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationSubtotal)}</Text>
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
-                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPlatformFee)}</Text>
-              </View>
-              <View className="flex-row justify-between items-center">
-                <Text className="text-sm font-medium text-gray-500">
-                  State Tax{donationBreakdown?.state ? ` (${donationBreakdown.state})` : ""}
-                </Text>
-                <Text className="text-sm font-bold text-gray-800">{formatMoney(donationStateTax)}</Text>
-              </View>
-              
-              <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
-                <Text className="text-base font-bold text-gray-900">Total</Text>
-                <Text className="text-lg font-extrabold text-[#E29E10]">{formatMoney(donationTotal)}</Text>
-              </View>
-            </View>
-          ) : (
-            <View className="gap-y-2.5">
-              {/* Restaurant Group Breakdowns */}
-              {cartGroups.map((group, idx) => (
-                <View key={group.providerId || idx} className="mb-4 pb-3 border-b border-gray-100/50">
-                  <Text className="text-xs font-extrabold text-gray-800 mb-2">
-                    {group.restaurantName}
-                  </Text>
-                  
-                  <View className="gap-y-1.5 pl-2">
-                    <View className="flex-row justify-between items-center">
-                      <Text className="text-xs text-gray-500">Subtotal</Text>
-                      <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.subtotal)}</Text>
-                    </View>
-
-                    {group.stateTax > 0 && (
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-xs text-gray-500">State Tax</Text>
-                        <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.stateTax)}</Text>
-                      </View>
-                    )}
-
-                    {group.cityTax > 0 && (
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-xs text-gray-500">City Tax</Text>
-                        <Text className="text-xs font-semibold text-gray-700">{formatMoney(group.cityTax)}</Text>
-                      </View>
-                    )}
-
-                    <View className="flex-row justify-between items-center pt-1 border-t border-dashed border-gray-100">
-                      <Text className="text-xs font-bold text-gray-700">Subtotal + Taxes</Text>
-                      <Text className="text-xs font-bold text-gray-900">{formatMoney(group.total)}</Text>
-                    </View>
+            {isCheckoutLoading ? (
+              <View className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm gap-y-3">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-xl bg-gray-100 animate-pulse" />
+                  <View className="flex-1 gap-y-1.5">
+                    <View className="bg-gray-100 h-4 w-32 rounded animate-pulse" />
+                    <View className="bg-gray-100 h-3 w-48 rounded animate-pulse" />
                   </View>
                 </View>
-              ))}
+              </View>
+            ) : cartGroups.length > 0 ? (
+              <View className="bg-white rounded-3xl border border-gray-100/80 p-5 shadow-sm gap-y-3">
+                {cartGroups.map((group, idx) => (
+                  <View key={group.providerId || idx} className={`flex-row items-center gap-3 ${idx < cartGroups.length - 1 ? 'border-b border-gray-100/50 pb-3' : ''}`}>
+                    {group.restaurantProfile ? (
+                      <Image
+                        source={{ uri: group.restaurantProfile }}
+                        className="w-10 h-10 rounded-xl"
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <View className="w-10 h-10 bg-yellow-50 border border-yellow-100 rounded-xl items-center justify-center">
+                        <Ionicons name="restaurant" size={16} color="#E29E10" />
+                      </View>
+                    )}
+                    <View className="flex-1">
+                      <Text className="text-sm font-bold text-gray-900 leading-tight">
+                        {group.restaurantName}
+                      </Text>
+                      <Text numberOfLines={1} className="text-xs text-gray-400 font-semibold mt-0.5">
+                        {group.restaurantAddress}
+                      </Text>
+                    </View>
+                    <View className="bg-amber-50 border border-amber-100 px-2 py-1 rounded-full">
+                      <Text className="text-[9px] font-bold text-amber-800 uppercase">Pickup</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 bg-[#E0F2F1] rounded-2xl items-center justify-center border border-[#B2DFDB]">
+                    <Ionicons name="location-outline" size={18} color="#26A69A" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-xs text-gray-400 font-bold uppercase tracking-wider">Pickup Address</Text>
+                    <Text className="text-base font-bold text-gray-800 mt-0.5">{pickupAddress}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
 
-              {/* Global Fees and Grand Total */}
-              <View className="gap-y-2 mt-2 pt-2">
+        {/* Secure Checkout Banner */}
+        <View className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm mb-6 flex-row items-center gap-4">
+          <View className="w-12 h-12 bg-emerald-50 rounded-2xl items-center justify-center border border-emerald-100">
+            <Ionicons name="lock-closed" size={22} color="#10B981" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-sm font-bold text-gray-900">Secure Stripe Checkout</Text>
+            <Text className="text-xs text-gray-400 font-semibold mt-0.5">Encrypted transactions. We accept Visa, Mastercard, AMEX, and Google Pay.</Text>
+          </View>
+        </View>
+
+        {/* Summary Card / Bill Breakdown */}
+        <View className="mb-6">
+          <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
+            Receipt Details
+          </Text>
+
+          <View className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm overflow-hidden">
+            {isDonationCheckout ? (
+              <View className="gap-y-3.5">
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-sm font-medium text-gray-500">Items Subtotal</Text>
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="gift-outline" size={16} color="#9CA3AF" />
+                    <Text className="text-sm font-medium text-gray-600">Donated Meals</Text>
+                  </View>
+                  <Text className="text-sm font-bold text-gray-800">{donationMealCount}</Text>
+                </View>
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="pricetag-outline" size={16} color="#9CA3AF" />
+                    <Text className="text-sm font-medium text-gray-600">Price Per Meal</Text>
+                  </View>
+                  <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPricePerMeal)}</Text>
+                </View>
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-sm font-medium text-gray-500 pl-6">Meal Subtotal</Text>
+                  <Text className="text-sm font-semibold text-gray-700">{formatMoney(donationSubtotal)}</Text>
+                </View>
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons name="server-outline" size={16} color="#9CA3AF" />
+                    <Text className="text-sm font-medium text-gray-600">Platform Service Fee</Text>
+                  </View>
+                  <Text className="text-sm font-bold text-gray-800">{formatMoney(donationPlatformFee)}</Text>
+                </View>
+                {donationStateTax > 0 && (
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center gap-2">
+                      <Ionicons name="receipt-outline" size={16} color="#9CA3AF" />
+                      <Text className="text-sm font-medium text-gray-600">
+                        State Tax{donationBreakdown?.state ? ` (${donationBreakdown.state})` : ""}
+                      </Text>
+                    </View>
+                    <Text className="text-sm font-bold text-gray-800">{formatMoney(donationStateTax)}</Text>
+                  </View>
+                )}
+                
+                {/* Dashed Separator with Notch Cutouts */}
+                <View className="flex-row items-center my-4 relative">
+                  <View className="absolute -left-[32px] w-[14px] h-[14px] rounded-full bg-[#F8F9FA] z-10" />
+                  <View className="absolute -right-[32px] w-[14px] h-[14px] rounded-full bg-[#F8F9FA] z-10" />
+                  <View className="flex-1 h-[1px] border-t border-dashed border-gray-200" />
+                </View>
+
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-base font-extrabold text-gray-900">Total Donation</Text>
+                  <Text className="text-xl font-black text-[#E29E10]">{formatMoney(donationTotal)}</Text>
+                </View>
+              </View>
+            ) : (
+              <View className="gap-y-3.5">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-sm font-medium text-gray-600">Subtotal</Text>
                   {isCheckoutLoading ? (
                     <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                   ) : (
@@ -704,64 +802,96 @@ function CheckoutContent() {
                   )}
                 </View>
 
-                {platformFee > 0 && (
+                {(platformFee + totalTaxes) > 0 && (
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-sm font-medium text-gray-500">Platform Fee</Text>
+                    <Text className="text-sm font-medium text-gray-600">Fees & Taxes</Text>
                     {isCheckoutLoading ? (
                       <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
                     ) : (
-                      <Text className="text-sm font-bold text-gray-800">{formatMoney(platformFee)}</Text>
+                      <Text className="text-sm font-bold text-gray-800">{formatMoney(platformFee + totalTaxes)}</Text>
                     )}
                   </View>
                 )}
 
-                <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-100">
+                {/* Dashed Separator with Notch Cutouts */}
+                <View className="flex-row items-center my-4 relative">
+                  <View className="absolute -left-[32px] w-[14px] h-[14px] rounded-full bg-[#F8F9FA] z-10" />
+                  <View className="absolute -right-[32px] w-[14px] h-[14px] rounded-full bg-[#F8F9FA] z-10" />
+                  <View className="flex-1 h-[1px] border-t border-dashed border-gray-200" />
+                </View>
+
+                <View className="flex-row justify-between items-center">
                   <Text className="text-base font-extrabold text-gray-900">Total Amount</Text>
                   {isCheckoutLoading ? (
                     <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
                   ) : (
-                    <Text className="text-lg font-black text-[#E29E10]">{formatMoney(effectiveTotal)}</Text>
+                    <Text className="text-xl font-black text-[#E29E10]">{formatMoney(effectiveTotal)}</Text>
                   )}
                 </View>
               </View>
-            </View>
-          )}
+            )}
+          </View>
+        </View>
+
+        {/* Safety & Info Note */}
+        <View className="bg-gray-50 border border-gray-100/60 rounded-3xl p-4 flex-row gap-3">
+          <Ionicons name="shield-checkmark" size={18} color="#9CA3AF" />
+          <Text className="text-[11px] text-gray-500 font-semibold flex-1 leading-normal">
+            Dine Five secures all payments using industry-standard SSL encryption. Your credit card information is processed securely through Stripe and is never stored on our servers.
+          </Text>
         </View>
       </ScrollView>
 
-      {/* Footer / Confirmation Bar */}
-      <View className="border-t border-gray-100 bg-white p-6">
+      {/* Floating Footer Bar */}
+      <View 
+        className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 pt-4 flex-row items-center justify-between"
+        style={{
+          paddingBottom: Math.max(insets.bottom, 16),
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.05,
+          shadowRadius: 12,
+          elevation: 10,
+        }}
+      >
+        <View>
+          <Text className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Payable</Text>
+          <Text className="text-xl font-black text-gray-900 mt-0.5">
+            {isCheckoutLoading ? "..." : isDonationCheckout ? formatMoney(donationTotal) : formatMoney(effectiveTotal)}
+          </Text>
+        </View>
+
         <TouchableOpacity
           onPress={handlePlaceOrder}
           disabled={isLoading || isCheckoutLoading}
           activeOpacity={0.8}
-          className="h-14 rounded-2xl overflow-hidden shadow-md"
+          className="h-14 rounded-full overflow-hidden flex-1 ml-6 shadow-md"
           style={{ opacity: (isLoading || isCheckoutLoading) ? 0.6 : 1 }}
         >
           <LinearGradient
             colors={["#F5C518", "#E29E10"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{
-              height: '100%',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={{ width: "100%", height: "100%" }}
           >
-            {isLoading ? (
-              <ActivityIndicator color="#ffffff" />
-            ) : (
-              <Text className="text-white font-bold text-base">
-                {isCheckoutLoading ? (
-                  "Loading Order Details..."
-                ) : isDonationCheckout ? (
-                  `Donate ${donationMealCount} ${donationMealLabel} • ${formatMoney(donationTotal)}`
-                ) : (
-                  `Place Order • ${formatMoney(effectiveTotal)}`
-                )}
-              </Text>
-            )}
+            <View className="w-full h-full flex-row items-center justify-center rounded-full gap-2">
+              {isLoading ? (
+                <ActivityIndicator color="#ffffff" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="card" size={18} color="#fff" />
+                  <Text className="text-white font-extrabold text-base">
+                    {isCheckoutLoading ? (
+                      "Loading..."
+                    ) : isDonationCheckout ? (
+                      "Donate Now"
+                    ) : (
+                      "Place Order"
+                    )}
+                  </Text>
+                </>
+              )}
+            </View>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -780,8 +910,6 @@ function CheckoutContent() {
           } as any);
         }}
       />
-
-
     </SafeAreaView>
   );
 }
