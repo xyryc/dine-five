@@ -584,15 +584,26 @@ function ProductDetailsInner() {
             </View>
 
             {/* Interactive CTA button */}
-            <View className="mb-8">
+            <View style={{ marginBottom: 32 }}>
               {isFreeMeal ? (
                 currentTokenId ? (
                   <TouchableOpacity
                     onPress={handlePlaceFreeOrder}
                     disabled={isPlacingFreeOrder}
-                    className="bg-emerald-500 w-full py-4 rounded-2xl shadow-sm items-center"
+                    style={{
+                      backgroundColor: "#10B981",
+                      width: "100%",
+                      paddingVertical: 16,
+                      borderRadius: 16,
+                      alignItems: "center",
+                      shadowColor: "#10B981",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 2,
+                    }}
                   >
-                    <Text className="text-white font-extrabold text-base">
+                    <Text style={{ color: "#FFFFFF", fontWeight: "bold", fontSize: 16 }}>
                       {isPlacingFreeOrder
                         ? "Placing Order..."
                         : "Place Free Order"}
@@ -614,7 +625,7 @@ function ProductDetailsInner() {
                       elevation: 4,
                     }}
                   >
-                    <Text className="text-gray-900 font-extrabold text-base">
+                    <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
                       {isClaimingMeal ? "Claiming..." : "Claim Free Meal Now"}
                     </Text>
                   </TouchableOpacity>
@@ -634,7 +645,7 @@ function ProductDetailsInner() {
                     elevation: 4,
                   }}
                 >
-                  <Text className="text-gray-900 font-extrabold text-base">
+                  <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
                     Add to Cart • $
                     {(quantity * parseFloat(product.price)).toFixed(2)}
                   </Text>
@@ -659,27 +670,27 @@ function ProductDetailsInner() {
               visible={showSuccessModal}
               onRequestClose={() => setShowSuccessModal(false)}
             >
-              <View className="flex-1 justify-center items-center bg-black/50 px-6">
-                <View className="bg-white w-full rounded-3xl p-8 items-center shadow-xl">
-                  <View className="w-20 h-20 bg-green-100 rounded-full items-center justify-center mb-6">
+              <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+                <View style={{ backgroundColor: '#FFFFFF', width: '100%', borderRadius: 24, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 5 }}>
+                  <View style={{ width: 80, height: 80, backgroundColor: '#DCFCE7', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
                     <Ionicons
                       name="checkmark-circle"
                       size={50}
                       color="#22C55E"
                     />
                   </View>
-                  <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">
+                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#111827', marginBottom: 8, textAlign: 'center' }}>
                     Claim Successful!
                   </Text>
-                  <Text className="text-gray-500 text-center mb-8 leading-5 font-semibold">
+                  <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 32, lineHeight: 20, fontWeight: '600' }}>
                     You have successfully claimed this meal. You can now place 1
                     free order with this token.
                   </Text>
                   <TouchableOpacity
                     onPress={() => setShowSuccessModal(false)}
-                    className="bg-green-500 w-full py-4 rounded-2xl items-center shadow-sm"
+                    style={{ backgroundColor: '#22C55E', width: '100%', paddingVertical: 16, borderRadius: 16, alignItems: 'center', shadowColor: '#22C55E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
                   >
-                    <Text className="text-white font-bold text-lg">
+                    <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 18 }}>
                       Continue to Order
                     </Text>
                   </TouchableOpacity>

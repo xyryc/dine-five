@@ -15,12 +15,31 @@ export default function LocationScreen() {
   }, [setRadiusMeters]);
 
   const handleOpenRestaurant = (restaurant: Restaurant) => {
-    router.push({
-      pathname: "/screens/home/restaurant-details",
-      params: {
-        providerId: restaurant.providerId || restaurant.id,
-      },
-    });
+    if (restaurant.isFreeAvailable) {
+      router.push({
+        pathname: "/screens/home/product-details",
+        params: {
+          id: restaurant.id,
+          foodId: (restaurant as any).foodId || restaurant.id,
+          name: (restaurant as any).name || (restaurant as any).title || (restaurant as any).mealName || restaurant.restaurantName,
+          price: "0.00",
+          image: (restaurant as any).image || (restaurant as any).foodImage || (restaurant as any).mealImage || (restaurant as any).profile || "",
+          description: (restaurant as any).description || "",
+          restaurantName: restaurant.restaurantName || "Donated Meal",
+          restaurantProfile: (restaurant as any).profile || "",
+          providerId: restaurant.providerId || (restaurant as any).restaurantId || restaurant.id,
+          isFreeAvailable: "true",
+          freeTokenCount: String(restaurant.freeTokenCount || 1),
+        },
+      });
+    } else {
+      router.push({
+        pathname: "/screens/home/restaurant-details",
+        params: {
+          providerId: restaurant.providerId || restaurant.id,
+        },
+      });
+    }
   };
 
   return (
