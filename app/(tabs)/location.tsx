@@ -15,31 +15,19 @@ export default function LocationScreen() {
   }, [setRadiusMeters]);
 
   const handleOpenRestaurant = (restaurant: Restaurant) => {
-    if (restaurant.isFreeAvailable) {
-      router.push({
-        pathname: "/screens/home/product-details",
-        params: {
-          id: restaurant.id,
-          foodId: (restaurant as any).foodId || restaurant.id,
-          name: (restaurant as any).name || (restaurant as any).title || (restaurant as any).mealName || restaurant.restaurantName,
-          price: "0.00",
-          image: (restaurant as any).image || (restaurant as any).foodImage || (restaurant as any).mealImage || (restaurant as any).profile || "",
-          description: (restaurant as any).description || "",
-          restaurantName: restaurant.restaurantName || "Donated Meal",
-          restaurantProfile: (restaurant as any).profile || "",
-          providerId: restaurant.providerId || (restaurant as any).restaurantId || restaurant.id,
-          isFreeAvailable: "true",
-          freeTokenCount: String(restaurant.freeTokenCount || 1),
-        },
-      });
-    } else {
-      router.push({
-        pathname: "/screens/home/restaurant-details",
-        params: {
-          providerId: restaurant.providerId || restaurant.id,
-        },
-      });
-    }
+    router.push({
+      pathname: "/screens/home/restaurant-details",
+      params: {
+        providerId: restaurant.providerId || restaurant.id,
+        isFreeAvailable: restaurant.isFreeAvailable ? "true" : "false",
+        freeTokenCount: String(restaurant.freeTokenCount || 0),
+        name: restaurant.restaurantName || (restaurant as any).name || (restaurant as any).title || "",
+        image: (restaurant as any).image || (restaurant as any).profile || "",
+        rating: restaurant.rating !== undefined && restaurant.rating !== null ? String(restaurant.rating) : "",
+        address: restaurant.restaurantAddress || "",
+        distance: (restaurant as any).distance || "",
+      },
+    });
   };
 
   return (

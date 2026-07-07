@@ -8,12 +8,14 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRestaurantStore } from "@/stores/useRestaurantStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type MenuItemType = {
@@ -163,11 +165,13 @@ function MenuItem({
   isAdding,
   onAdd,
   onOpen,
+  isFreeFlow,
 }: {
   item: MenuItemType;
   isAdding: boolean;
   onAdd: () => void;
   onOpen: () => void;
+  isFreeFlow?: boolean;
 }) {
   return (
     <TouchableOpacity
@@ -221,7 +225,7 @@ function MenuItem({
 
         <View className="flex-row items-center justify-between">
           <Text className="text-base font-black text-gray-900">
-            ${item.price}
+            {isFreeFlow ? "FREE" : `$${item.price}`}
           </Text>
 
           <View className="flex-row items-center bg-gray-100 px-2.5 py-1 rounded-full">
@@ -246,7 +250,7 @@ function MenuItem({
           width: 40,
           height: 40,
           borderRadius: 16,
-          backgroundColor: "#F5C518",
+          backgroundColor: isFreeFlow ? "#10B981" : "#F5C518",
           alignItems: "center",
           justifyContent: "center",
           marginLeft: 8,
@@ -258,9 +262,9 @@ function MenuItem({
         }}
       >
         {isAdding ? (
-          <ActivityIndicator size="small" color="#1F2937" />
+          <ActivityIndicator size="small" color={isFreeFlow ? "#FFFFFF" : "#1F2937"} />
         ) : (
-          <Ionicons name="add" size={22} color="#1F2937" />
+          <Ionicons name={isFreeFlow ? "arrow-forward" : "add"} size={22} color={isFreeFlow ? "#FFFFFF" : "#1F2937"} />
         )}
       </TouchableOpacity>
     </TouchableOpacity>
@@ -281,6 +285,14 @@ function RestaurantDetailScreenInner() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { requestWithAuth, addToCart, fetchCartCount } = useStore() as any;
+
+  const isFreeFlow = params.isFreeAvailable === "true";
+  const { claimToken, getAvailableTokens } = useRestaurantStore();
+  const [currentTokenId, setCurrentTokenId] = React.useState<string | null>(
+    pickString(params.tokenId) || null
+  );
+  const [isClaimingMeal, setIsClaimingMeal] = React.useState(false);
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
 
   const scrollViewRef = React.useRef<ScrollView>(null);
   const sectionPositions = React.useRef<Record<string, number>>({});
@@ -309,6 +321,44 @@ function RestaurantDetailScreenInner() {
   const [menuSections, setMenuSections] = React.useState<MenuSectionType[]>([]);
   const [menuLoading, setMenuLoading] = React.useState(true);
   const [menuError, setMenuError] = React.useState<string | null>(null);
+
+  const handleClaimMeal = async () => {
+    if (isClaimingMeal) return;
+
+    setIsClaimingMeal(true);
+    try {
+      console.log("[RestaurantDetails] Fetching available tokens...");
+      const tokenResult = await getAvailableTokens();
+      const tokens = tokenResult?.data?.tokens;
+      console.log(
+        "[RestaurantDetails] Available tokens found:",
+        tokens?.length || 0,
+      );
+
+      if (!tokens || tokens.length === 0) {
+        Alert.alert(
+          "No Tokens",
+          "Sorry, there are no free meal tokens available right now.",
+        );
+        return;
+      }
+
+      const tokenIdToClaim = tokens[0].tokenId;
+      console.log("[RestaurantDetails] Claiming token:", tokenIdToClaim);
+
+      const result = await claimToken(tokenIdToClaim);
+      console.log("[RestaurantDetails] Claim result:", result);
+
+      const newTokenId = result?.data?.token?.tokenId || tokenIdToClaim;
+      setCurrentTokenId(newTokenId);
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      console.error("[RestaurantDetails] Claim error:", error);
+      Alert.alert("Claim Failed", error.message || "Could not claim free meal");
+    } finally {
+      setIsClaimingMeal(false);
+    }
+  };
 
   const updateCartCount = React.useCallback(async () => {
     try {
@@ -430,8 +480,44 @@ function RestaurantDetailScreenInner() {
     }
   };
 
+  const openFoodDetail = React.useCallback(
+    (item: MenuItemType) => {
+      router.push({
+        pathname: "/screens/home/product-details",
+        params: {
+          id: item.id,
+          foodId: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          description: item.description,
+          restaurantName,
+          restaurantProfile: restaurantImage,
+          isFreeAvailable: isFreeFlow ? "true" : "false",
+          tokenId: currentTokenId || "",
+        },
+      } as any);
+    },
+    [restaurantImage, restaurantName, router, isFreeFlow, currentTokenId],
+  );
+
   const handleAdd = React.useCallback(
     async (item: MenuItemType) => {
+      if (isFreeFlow) {
+        if (!currentTokenId) {
+          Alert.alert(
+            "Claim Token First",
+            "Please claim your free meal token before ordering.",
+            [
+              { text: "Claim Now", onPress: handleClaimMeal },
+              { text: "Cancel", style: "cancel" }
+            ]
+          );
+          return;
+        }
+        openFoodDetail(item);
+        return;
+      }
       setAddingItemId(item.id);
       try {
         const result = await addToCart(
@@ -467,26 +553,7 @@ function RestaurantDetailScreenInner() {
         setAddingItemId(null);
       }
     },
-    [addToCart, fetchCartCount, updateCartCount],
-  );
-
-  const openFoodDetail = React.useCallback(
-    (item: MenuItemType) => {
-      router.push({
-        pathname: "/screens/home/product-details",
-        params: {
-          id: item.id,
-          foodId: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          description: item.description,
-          restaurantName,
-          restaurantProfile: restaurantImage,
-        },
-      } as any);
-    },
-    [restaurantImage, restaurantName, router],
+    [isFreeFlow, currentTokenId, openFoodDetail, addToCart, fetchCartCount, updateCartCount, handleClaimMeal],
   );
 
   if (menuLoading && !fetchedDetails) {
@@ -512,7 +579,7 @@ function RestaurantDetailScreenInner() {
         <ScrollView
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: cartCount > 0 ? 150 : 100 }}
+          contentContainerStyle={{ paddingBottom: (!isFreeFlow && cartCount > 0) ? 150 : 100 }}
           onScroll={(e) => {
             if (isManualScroll.current) return;
             const scrollY = e.nativeEvent.contentOffset.y;
@@ -649,6 +716,90 @@ function RestaurantDetailScreenInner() {
               </View>
             </View>
 
+            {isFreeFlow && (
+              <View
+                className="mb-6 p-5 rounded-[24px] border"
+                style={{
+                  backgroundColor: currentTokenId ? "#ECFDF5" : "#FEF3C7",
+                  borderColor: currentTokenId ? "#A7F3D0" : "#FDE68A",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 10,
+                  elevation: 2,
+                }}
+              >
+                <View className="flex-row items-start gap-3">
+                  <View
+                    className="w-10 h-10 rounded-2xl items-center justify-center"
+                    style={{
+                      backgroundColor: currentTokenId ? "#10B981" : "#F5C518",
+                    }}
+                  >
+                    <Ionicons
+                      name={currentTokenId ? "checkmark-circle" : "gift"}
+                      size={22}
+                      color={currentTokenId ? "#FFFFFF" : "#1F2937"}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text
+                      className="text-base font-black text-gray-900 mb-1"
+                      style={{ color: currentTokenId ? "#065F46" : "#78350F" }}
+                    >
+                      {currentTokenId
+                        ? "Token Claimed!"
+                        : "Free Meal Token Available"}
+                    </Text>
+                    <Text
+                      className="text-xs font-semibold leading-normal mb-3"
+                      style={{ color: currentTokenId ? "#047857" : "#B45309" }}
+                    >
+                      {currentTokenId
+                        ? "You have claimed a token for this session. Select any food item below to place your free order."
+                        : "Claim a free meal token to order one food item from this restaurant for free."}
+                    </Text>
+
+                    {!currentTokenId ? (
+                      <TouchableOpacity
+                        onPress={handleClaimMeal}
+                        disabled={isClaimingMeal}
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor: "#1F2937",
+                          paddingVertical: 12,
+                          paddingHorizontal: 20,
+                          borderRadius: 14,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.1,
+                          shadowRadius: 4,
+                          elevation: 2,
+                        }}
+                      >
+                        {isClaimingMeal ? (
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                        ) : (
+                          <Text className="text-white font-extrabold text-xs">
+                            Claim Free Meal Token
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    ) : (
+                      <View className="flex-row items-center gap-1.5 bg-emerald-100 border border-emerald-200 self-start px-3 py-1.5 rounded-full">
+                        <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <Text className="text-[10px] font-black text-emerald-800 uppercase tracking-wider">
+                          Ready to order
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </View>
+            )}
+
             <View className="mb-6">
               <View className="flex-row items-center rounded-2xl px-4 py-2 bg-gray-50 border border-gray-100">
                 <Ionicons name="search-outline" size={18} color="#9CA3AF" />
@@ -750,6 +901,7 @@ function RestaurantDetailScreenInner() {
                       isAdding={addingItemId === item.id}
                       onAdd={() => handleAdd(item)}
                       onOpen={() => openFoodDetail(item)}
+                      isFreeFlow={isFreeFlow}
                     />
                   ))}
                 </View>
@@ -763,7 +915,7 @@ function RestaurantDetailScreenInner() {
           </View>
         </ScrollView>
 
-        {cartCount > 0 && (
+        {!isFreeFlow && cartCount > 0 && (
           <View
             className="absolute bottom-6 left-5 right-5 bg-gray-900 rounded-[24px] p-4 flex-row items-center justify-between shadow-lg"
             style={{
@@ -798,6 +950,40 @@ function RestaurantDetailScreenInner() {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Success Modal */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={showSuccessModal}
+          onRequestClose={() => setShowSuccessModal(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+            <View style={{ backgroundColor: '#FFFFFF', width: '100%', borderRadius: 24, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 5 }}>
+              <View style={{ width: 80, height: 80, backgroundColor: '#DCFCE7', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={50}
+                  color="#22C55E"
+                />
+              </View>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#111827', marginBottom: 8, textAlign: 'center' }}>
+                Claim Successful!
+              </Text>
+              <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 32, lineHeight: 20, fontWeight: '600' }}>
+                You have successfully claimed a free meal token. Select any item from the menu below to order it for free!
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowSuccessModal(false)}
+                style={{ backgroundColor: '#22C55E', width: '100%', paddingVertical: 16, borderRadius: 16, alignItems: 'center', shadowColor: '#22C55E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }}
+              >
+                <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 18 }}>
+                  Continue
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   } catch (error: any) {
