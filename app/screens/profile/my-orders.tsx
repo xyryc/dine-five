@@ -3,7 +3,7 @@ import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -133,7 +133,22 @@ function PreviousOrderCard({
 
   if (isDonation) {
     return (
-      <View className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-rose-100">
+      <TouchableOpacity
+        activeOpacity={0.95}
+        onPress={() => {
+          const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+          router.push({
+            pathname: "/screens/profile/order-details",
+            params: {
+              orderId: order.orderId,
+              _id: order._id,
+              state: order.status,
+              foodId: foodId
+            },
+          });
+        }}
+        className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-rose-100"
+      >
         {/* Header section of card */}
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 mr-2">
@@ -229,14 +244,29 @@ function PreviousOrderCard({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 
   const isCancelled = order.status?.toLowerCase() === "cancelled";
 
   return (
-    <View className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-gray-100">
+    <TouchableOpacity
+      activeOpacity={0.95}
+      onPress={() => {
+        const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+        router.push({
+          pathname: "/screens/profile/order-details",
+          params: {
+            orderId: order.orderId,
+            _id: order._id,
+            state: order.status,
+            foodId: foodId
+          },
+        });
+      }}
+      className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-gray-100"
+    >
       {/* Header section of card */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
@@ -349,7 +379,7 @@ function PreviousOrderCard({
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -380,8 +410,12 @@ export default function MyOrdersScreen() {
   useFocusEffect(
     useCallback(() => {
       loadOrders();
-    }, [loadOrders]),
+    }, [])
   );
+
+  useEffect(() => {
+    loadOrders();
+  }, [activeTab]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -538,10 +572,25 @@ export default function MyOrdersScreen() {
 
       {/* Tabs */}
       <View className="px-6 mb-6">
-        <View className="flex-row bg-[#FFE69C33] rounded-xl p-1 h-14 items-center">
+        <View 
+          className="flex-row rounded-xl p-1 h-14 items-center" 
+          style={{ backgroundColor: "rgba(255, 230, 156, 0.2)" }}
+        >
           <TouchableOpacity
             onPress={() => setActiveTab("current")}
-            className={`flex-1 h-full items-center justify-center rounded-xl relative ${activeTab === "current" ? "bg-[#FFC107] shadow-sm" : "bg-transparent"}`}
+            style={[
+              { flex: 1, height: "100%", alignItems: "center", justifyContent: "center", borderRadius: 12 },
+              activeTab === "current" 
+                ? { 
+                    backgroundColor: "#FFC107", 
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 1.5,
+                    elevation: 1 
+                  } 
+                : { backgroundColor: "transparent" }
+            ]}
           >
             <Text
               className={`text-base font-semibold ${activeTab === "current" ? "text-gray-900" : "text-gray-600"}`}
@@ -551,7 +600,19 @@ export default function MyOrdersScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setActiveTab("previous")}
-            className={`flex-1 h-full items-center justify-center rounded-xl ${activeTab === "previous" ? "bg-[#FFC107] shadow-sm" : "bg-transparent"}`}
+            style={[
+              { flex: 1, height: "100%", alignItems: "center", justifyContent: "center", borderRadius: 12 },
+              activeTab === "previous" 
+                ? { 
+                    backgroundColor: "#FFC107", 
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 1.5,
+                    elevation: 1 
+                  } 
+                : { backgroundColor: "transparent" }
+            ]}
           >
             <Text
               className={`text-base font-semibold ${activeTab === "previous" ? "text-gray-900" : "text-gray-600"}`}
