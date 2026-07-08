@@ -1,11 +1,10 @@
 import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface OrderCardProps {
@@ -110,9 +109,9 @@ function CurrentOrderCard({
             }}
             className="bg-[#FFC107] px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
           >
-            <Ionicons name="location-outline" size={14} color="#1F2937" />
+            <Ionicons name="eye-outline" size={14} color="#1F2937" />
             <Text className="text-gray-900 font-bold text-xs ml-1">
-              Track Order
+              Details
             </Text>
           </TouchableOpacity>
         </View>
@@ -171,7 +170,7 @@ function PreviousOrderCard({
                 <Image
                   source={{ uri: order.restaurantImage }}
                   className="w-full h-full"
-                  contentFit="cover"
+                  resizeMode="cover"
                 />
               ) : (
                 <Ionicons name="gift-outline" size={24} color="#E11D48" />
@@ -483,14 +482,14 @@ export default function MyOrdersScreen() {
             <Image
               source={{ uri: order.restaurants[0]?.restaurantImage || order.items?.[0]?.image }}
               className="w-full h-full"
-              contentFit="cover"
+              resizeMode="cover"
             />
           </View>
           <View className="absolute top-0 right-0 w-11 h-11 rounded-xl border border-white overflow-hidden bg-gray-100 shadow-md">
             <Image
               source={{ uri: order.restaurants[1]?.restaurantImage || order.items?.[1]?.image || order.restaurants[0]?.restaurantImage }}
               className="w-full h-full"
-              contentFit="cover"
+              resizeMode="cover"
             />
           </View>
           {order.restaurants.length > 2 && (
@@ -509,7 +508,7 @@ export default function MyOrdersScreen() {
           <Image
             source={{ uri: imageUri }}
             className="w-full h-full"
-            contentFit="cover"
+            resizeMode="cover"
           />
         ) : (
           <View className="bg-amber-50 w-full h-full items-center justify-center">
