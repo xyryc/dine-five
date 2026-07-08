@@ -1,11 +1,358 @@
 import { EmptyState } from "@/components/common/EmptyState";
 import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useState } from "react";
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+interface OrderCardProps {
+  order: any;
+  router: any;
+  formatDate: (date: string) => string;
+  formatStatus: (status: string) => string;
+  getProviderName: (order: any) => string;
+  getStatusBadgeStyle: (status: string) => { container: string; text: string };
+  renderOrderImage: (order: any) => React.ReactNode;
+}
+
+function CurrentOrderCard({
+  order,
+  router,
+  formatDate,
+  formatStatus,
+  getProviderName,
+  getStatusBadgeStyle,
+  renderOrderImage,
+}: OrderCardProps) {
+  return (
+    <View className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-gray-100">
+      {/* Header section of card */}
+      <View className="flex-row justify-between items-start mb-3">
+        <View className="flex-1 mr-2">
+          <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
+            {getProviderName(order)}
+          </Text>
+          <View className="flex-row items-center mt-1">
+            <Text className="text-xs text-gray-400 font-medium">
+              #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
+            </Text>
+            <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
+            <Text className="text-xs text-gray-400">
+              {formatDate(order.createdAt)}
+            </Text>
+          </View>
+        </View>
+        <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
+          <Text className={`text-[10px] font-bold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+            {formatStatus(order.status)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Items content section */}
+      <View className="flex-row items-center py-3 border-t border-b border-gray-50 mb-4">
+        {renderOrderImage(order)}
+        <View className="flex-1 justify-center">
+          <Text className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
+            {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
+          </Text>
+          <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+            {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
+          </Text>
+          
+          <View className="flex-row items-center gap-2">
+            <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              <Ionicons
+                name={order.logisticsType?.toLowerCase() === "pickup" ? "walk-outline" : "bicycle-outline"}
+                size={12}
+                color="#6B7280"
+              />
+              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+                {order.logisticsType || "Delivery"}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              <Ionicons name="card-outline" size={12} color="#6B7280" />
+              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+                {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Action buttons and pricing */}
+      <View className="flex-row items-center justify-between">
+        <View>
+          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-base font-black text-gray-900 mt-0.5">
+            ${order.totalPrice?.toFixed(2)}
+          </Text>
+        </View>
+
+        <View className="flex-row gap-2 flex-1 justify-end ml-4">
+          <TouchableOpacity
+            onPress={() => {
+              const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+              router.push({
+                pathname: "/screens/profile/order-details",
+                params: {
+                  orderId: order.orderId,
+                  _id: order._id,
+                  state: order.status,
+                  foodId: foodId
+                },
+              });
+            }}
+            className="bg-[#FFC107] px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
+          >
+            <Ionicons name="location-outline" size={14} color="#1F2937" />
+            <Text className="text-gray-900 font-bold text-xs ml-1">
+              Track Order
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function PreviousOrderCard({
+  order,
+  router,
+  formatDate,
+  formatStatus,
+  getProviderName,
+  getStatusBadgeStyle,
+  renderOrderImage,
+}: OrderCardProps) {
+  const isDonation = order.isDonation || order.orderType === "donation" || order.logisticsType === "donation";
+
+  if (isDonation) {
+    return (
+      <View className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-rose-100">
+        {/* Header section of card */}
+        <View className="flex-row justify-between items-start mb-3">
+          <View className="flex-1 mr-2">
+            <View className="flex-row items-center">
+              <View className="bg-rose-50 p-1 rounded-md mr-1.5">
+                <Ionicons name="heart" size={14} color="#E11D48" />
+              </View>
+              <Text className="text-base font-bold text-gray-950" numberOfLines={1}>
+                Meal Donation
+              </Text>
+            </View>
+            <View className="flex-row items-center mt-1">
+              <Text className="text-xs text-gray-400 font-medium">
+                #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
+              </Text>
+              <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
+              <Text className="text-xs text-gray-400">
+                {formatDate(order.createdAt)}
+              </Text>
+            </View>
+          </View>
+          <View className="px-2.5 py-1 rounded-full border bg-emerald-50 border-emerald-100">
+            <Text className="text-[10px] font-bold tracking-wide uppercase text-emerald-700">
+              Completed
+            </Text>
+          </View>
+        </View>
+
+        {/* Content section */}
+        <View className="flex-row items-center py-3 border-t border-b border-gray-50 mb-4">
+          <View className="relative w-16 h-16 mr-3">
+            <View className="w-full h-full rounded-xl overflow-hidden bg-rose-50 border border-rose-100 items-center justify-center">
+              {order.restaurantImage ? (
+                <Image
+                  source={{ uri: order.restaurantImage }}
+                  className="w-full h-full"
+                  contentFit="cover"
+                />
+              ) : (
+                <Ionicons name="gift-outline" size={24} color="#E11D48" />
+              )}
+            </View>
+            <View className="absolute -bottom-1 -right-1 bg-rose-500 rounded-full w-5 h-5 items-center justify-center border border-white shadow-sm">
+              <Ionicons name="heart" size={10} color="#FFF" />
+            </View>
+          </View>
+
+          <View className="flex-1 justify-center">
+            <Text className="text-[10px] text-rose-500 font-bold uppercase tracking-wider mb-1">
+              Community Contribution
+            </Text>
+            <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+              {order.items?.[0]?.description || `${order.items?.[0]?.quantity || order.itemCount || 1} meal token(s) added to the community pool`}
+            </Text>
+            
+            <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                <Ionicons name="heart-outline" size={12} color="#E11D48" />
+                <Text className="text-[10px] text-rose-700 font-medium ml-1 capitalize">
+                  Donation
+                </Text>
+              </View>
+              <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                <Ionicons name="card-outline" size={12} color="#6B7280" />
+                <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+                  {order.paymentMethod || "Card"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Pricing and actions */}
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Donated</Text>
+            <Text className="text-base font-black text-rose-600 mt-0.5">
+              ${order.totalPrice?.toFixed(2)}
+            </Text>
+          </View>
+
+          <View className="flex-row gap-2 flex-1 justify-end ml-4">
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/screens/profile/donation-tokens");
+              }}
+              className="bg-rose-500 px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
+            >
+              <Ionicons name="heart" size={14} color="#FFF" />
+              <Text className="text-white font-bold text-xs ml-1">
+                Donate Again
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  const isCancelled = order.status?.toLowerCase() === "cancelled";
+
+  return (
+    <View className="bg-white p-5 rounded-3xl mb-4 shadow-sm border border-gray-100">
+      {/* Header section of card */}
+      <View className="flex-row justify-between items-start mb-3">
+        <View className="flex-1 mr-2">
+          <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
+            {getProviderName(order)}
+          </Text>
+          <View className="flex-row items-center mt-1">
+            <Text className="text-xs text-gray-400 font-medium">
+              #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
+            </Text>
+            <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
+            <Text className="text-xs text-gray-400">
+              {formatDate(order.createdAt)}
+            </Text>
+          </View>
+        </View>
+        <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
+          <Text className={`text-[10px] font-bold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+            {formatStatus(order.status)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Items content section */}
+      <View className="flex-row items-center py-3 border-t border-b border-gray-50 mb-3">
+        {renderOrderImage(order)}
+        <View className="flex-1 justify-center">
+          <Text className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
+            {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
+          </Text>
+          <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+            {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
+          </Text>
+          
+          <View className="flex-row items-center gap-2">
+            <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              <Ionicons
+                name={order.logisticsType?.toLowerCase() === "pickup" ? "walk-outline" : "bicycle-outline"}
+                size={12}
+                color="#6B7280"
+              />
+              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+                {order.logisticsType || "Delivery"}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              <Ionicons name="card-outline" size={12} color="#6B7280" />
+              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+                {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Cancellation Reason if cancelled */}
+      {isCancelled && order.cancellationReason && (
+        <View className="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5 mb-4 flex-row items-start">
+          <Ionicons name="alert-circle-outline" size={16} color="#E11D48" className="mt-0.5" />
+          <Text className="text-xs text-rose-700 font-medium ml-1.5 flex-1">
+            Reason: {order.cancellationReason}
+          </Text>
+        </View>
+      )}
+
+      {/* Action buttons and pricing */}
+      <View className="flex-row items-center justify-between">
+        <View>
+          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-base font-black text-gray-900 mt-0.5">
+            {order.orderType === "free_meal" || order.totalPrice === 0 ? "FREE" : `$${order.totalPrice?.toFixed(2)}`}
+          </Text>
+        </View>
+
+        <View className="flex-row gap-2 flex-1 justify-end ml-4">
+          <TouchableOpacity
+            onPress={() => {
+              // Logic for reordering could be added here
+            }}
+            className="border border-gray-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row bg-white active:bg-gray-50"
+          >
+            <Ionicons name="refresh-outline" size={14} color="#4B5563" />
+            <Text className="text-gray-600 font-bold text-xs ml-1">
+              Reorder
+            </Text>
+          </TouchableOpacity>
+          {!isCancelled && ["picked_up", "delivered", "completed"].includes(order.status?.toLowerCase()) && (
+            <TouchableOpacity
+              onPress={() => {
+                const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+                router.push({
+                  pathname: "/screens/profile/order-details",
+                  params: {
+                    orderId: order.orderId,
+                    _id: order._id,
+                    state: order.status,
+                    autoRate: "true",
+                    foodId: foodId
+                  },
+                });
+              }}
+              className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row active:bg-amber-100"
+            >
+              <Ionicons name="star" size={14} color="#D97706" />
+              <Text className="text-amber-800 font-bold text-xs ml-1">
+                Rate
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export default function MyOrdersScreen() {
   const router = useRouter();
@@ -86,22 +433,91 @@ export default function MyOrdersScreen() {
       order?.items?.[0]?.food?.providerName,
     ) || "Dine Five";
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "text-yellow-600";
+      case "pending_split":
+        return {
+          container: "bg-amber-50 border-amber-100",
+          text: "text-amber-700",
+        };
       case "cancelled":
-        return "text-red-500";
+        return {
+          container: "bg-rose-50 border-rose-100",
+          text: "text-rose-600",
+        };
       case "delivered":
       case "picked_up":
       case "completed":
-        return "text-green-600";
+        return {
+          container: "bg-emerald-50 border-emerald-100",
+          text: "text-emerald-700",
+        };
       case "preparing":
       case "ready_for_pickup":
-        return "text-blue-600";
+        return {
+          container: "bg-blue-50 border-blue-100",
+          text: "text-blue-600",
+        };
       default:
-        return "text-[#1F2A33]";
+        return {
+          container: "bg-slate-50 border-slate-100",
+          text: "text-slate-600",
+        };
     }
+  };
+
+  const getOrderImage = (order: any) => {
+    const img = order.restaurantImage || 
+                order.restaurants?.[0]?.restaurantImage || 
+                order.items?.[0]?.image || 
+                order.items?.[0]?.food?.image;
+    return img || null;
+  };
+
+  const renderOrderImage = (order: any) => {
+    if (order.isMultiVendor && order.restaurants && order.restaurants.length > 1) {
+      return (
+        <View className="relative w-16 h-16 mr-3">
+          <View className="absolute bottom-0 left-0 w-11 h-11 rounded-xl border border-white overflow-hidden bg-gray-100 shadow-sm">
+            <Image
+              source={{ uri: order.restaurants[0]?.restaurantImage || order.items?.[0]?.image }}
+              className="w-full h-full"
+              contentFit="cover"
+            />
+          </View>
+          <View className="absolute top-0 right-0 w-11 h-11 rounded-xl border border-white overflow-hidden bg-gray-100 shadow-md">
+            <Image
+              source={{ uri: order.restaurants[1]?.restaurantImage || order.items?.[1]?.image || order.restaurants[0]?.restaurantImage }}
+              className="w-full h-full"
+              contentFit="cover"
+            />
+          </View>
+          {order.restaurants.length > 2 && (
+            <View className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full w-5 h-5 items-center justify-center border border-white shadow-sm">
+              <Text className="text-[9px] font-bold text-white">+{order.restaurants.length - 2}</Text>
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    const imageUri = getOrderImage(order);
+    return (
+      <View className="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mr-3 items-center justify-center">
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            className="w-full h-full"
+            contentFit="cover"
+          />
+        ) : (
+          <View className="bg-amber-50 w-full h-full items-center justify-center">
+            <Ionicons name="fast-food-outline" size={24} color="#FFC107" />
+          </View>
+        )}
+      </View>
+    );
   };
 
   const ordersToShow = activeTab === "current" ? currentOrders : previousOrders;
@@ -123,10 +539,10 @@ export default function MyOrdersScreen() {
 
       {/* Tabs */}
       <View className="px-6 mb-6">
-        <View className="flex-row bg-[#FFE69C] bg-opacity-20 rounded-xl p-1 h-14 items-center">
+        <View className="flex-row bg-[#FFE69C33] rounded-xl p-1 h-14 items-center">
           <TouchableOpacity
             onPress={() => setActiveTab("current")}
-            className={`flex-1 h-full items-center justify-center rounded-xl relative ${activeTab === "current" ? "bg-[#FFC107]" : "bg-transparent"}`}
+            className={`flex-1 h-full items-center justify-center rounded-xl relative ${activeTab === "current" ? "bg-[#FFC107] shadow-sm" : "bg-transparent"}`}
           >
             <Text
               className={`text-base font-semibold ${activeTab === "current" ? "text-gray-900" : "text-gray-600"}`}
@@ -136,7 +552,7 @@ export default function MyOrdersScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setActiveTab("previous")}
-            className={`flex-1 h-full items-center justify-center rounded-xl ${activeTab === "previous" ? "bg-[#FFC107]" : "bg-transparent"}`}
+            className={`flex-1 h-full items-center justify-center rounded-xl ${activeTab === "previous" ? "bg-[#FFC107] shadow-sm" : "bg-transparent"}`}
           >
             <Text
               className={`text-base font-semibold ${activeTab === "previous" ? "text-gray-900" : "text-gray-600"}`}
@@ -157,8 +573,9 @@ export default function MyOrdersScreen() {
         }
       >
         {isLoading && !refreshing && ordersToShow.length === 0 ? (
-          <View className="flex-1 items-center justify-center pt-20">
-            <Text className="text-gray-500">Loading orders...</Text>
+          <View className="flex-1 items-center justify-center pt-32">
+            <ActivityIndicator size="large" color="#FFC107" />
+            <Text className="text-gray-500 mt-4 font-medium">Loading your orders...</Text>
           </View>
         ) : ordersToShow.length === 0 ? (
           <View className="flex-1 justify-center">
@@ -175,121 +592,29 @@ export default function MyOrdersScreen() {
           </View>
         ) : (
           ordersToShow.map((order) => (
-            <View
-              key={order._id}
-              className="bg-white p-4 rounded-2xl mb-4 shadow-sm border border-gray-100"
-            >
-              <View className="flex-row mb-4">
-                <View
-                  className="bg-gray-100 items-center justify-center rounded-xl"
-                  style={{ height: 100, width: 80 }}
-                >
-                  <Ionicons
-                    name="fast-food-outline"
-                    size={32}
-                    color="#9CA3AF"
-                  />
-                </View>
-                <View className="flex-1 ml-3">
-                  <View className="flex-row justify-between items-start mb-0.5">
-                    <Text
-                      className={`text-base font-bold flex-1 ${getStatusColor(order.status)}`}
-                    >
-                      {formatStatus(order.status)}
-                    </Text>
-                    <Text className="text-xs font-medium text-gray-400">
-                      #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
-                    </Text>
-                  </View>
-                  <Text className="text-sm text-[#7A7A7A] mb-2">
-                    {activeTab === "current"
-                      ? "Ordered on " + formatDate(order.createdAt)
-                      : "Completed on " + formatDate(order.createdAt)}
-                  </Text>
-
-                  <View className="flex-row justify-between mb-0.5">
-                    <Text className="text-sm text-[#7A7A7A]">Provider</Text>
-                    <Text className="text-sm font-medium text-[#1F2A33]">
-                      {getProviderName(order)}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row justify-between mb-0.5">
-                    <Text className="text-sm text-[#7A7A7A]">Items</Text>
-                    <Text className="text-sm font-medium text-[#1F2A33]">
-                      {order.items?.[0]?.quantity || 0} items
-                    </Text>
-                  </View>
-
-                  <View className="flex-row justify-between mt-1">
-                    <Text className="text-sm text-[#7A7A7A]">
-                      Total price paid
-                    </Text>
-                    <Text className="text-sm font-bold text-[#FFC107]">
-                      ${order.totalPrice}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {activeTab === "current" ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
-                    router.push({
-                      pathname: "/screens/profile/order-details",
-                      params: {
-                        orderId: order.orderId,
-                        _id: order._id,
-                        state: order.status,
-                        foodId: foodId
-                      },
-                    });
-                  }}
-                  className="bg-[#FFFFFF] py-3 rounded-xl items-center border border-[#E3E6F0]"
-                >
-                  <Text className="text-[#000] font-bold text-sm">
-                    View Progress
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => {
-                      // Logic for reordering could be added here
-                    }}
-                    className="flex-1 border border-[#E3E6F0] py-3 rounded-xl items-center bg-[#FFFFFF]"
-                  >
-                    <Text className="text-[#000] font-bold text-sm">
-                      Reorder
-                    </Text>
-                  </TouchableOpacity>
-                  {["picked_up", "delivered", "completed"].includes(order.status?.toLowerCase()) && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
-                        router.push({
-                          pathname: "/screens/profile/order-details",
-                          params: {
-                            orderId: order.orderId,
-                            _id: order._id,
-                            state: order.status,
-                            autoRate: "true",
-                            foodId: foodId
-                          },
-                        });
-                      }}
-                      className="flex-row items-center justify-center border border-yellow-400 py-3 px-4 rounded-xl bg-yellow-50"
-                    >
-                      <Ionicons name="star" size={16} color="#FFC107" className="mr-1" />
-                      <Text className="text-[#332701] font-bold text-sm ml-1">
-                        Rate
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
-            </View>
+            activeTab === "current" ? (
+              <CurrentOrderCard
+                key={order._id}
+                order={order}
+                router={router}
+                formatDate={formatDate}
+                formatStatus={formatStatus}
+                getProviderName={getProviderName}
+                getStatusBadgeStyle={getStatusBadgeStyle}
+                renderOrderImage={renderOrderImage}
+              />
+            ) : (
+              <PreviousOrderCard
+                key={order._id}
+                order={order}
+                router={router}
+                formatDate={formatDate}
+                formatStatus={formatStatus}
+                getProviderName={getProviderName}
+                getStatusBadgeStyle={getStatusBadgeStyle}
+                renderOrderImage={renderOrderImage}
+              />
+            )
           ))
         )}
       </ScrollView>
