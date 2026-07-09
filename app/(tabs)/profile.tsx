@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
 import { ScrollView, Text, TouchableOpacity, View, Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { DonateModal } from "@/components/home/DonateModal";
 
 export default function ProfileScreen() {
   const { user, fetchProfile, logout } = useStore() as any;
@@ -15,6 +16,19 @@ export default function ProfileScreen() {
 
   const avatarUri = getUserAvatarUri(user);
   const avatarSource = avatarUri ? { uri: avatarUri } : require("@/assets/images/user-icon.jpg");
+
+  const [modalVisible, setModalVisible] = React.useState(false);
+
+  const handleConfirm = (mealCount: number) => {
+    setModalVisible(false);
+    router.push({
+      pathname: "/screens/cart/checkout",
+      params: {
+        mealCount: String(mealCount),
+        type: "donation",
+      },
+    } as any);
+  };
 
   useEffect(() => {
     fetchProfile?.();
@@ -72,11 +86,19 @@ export default function ProfileScreen() {
       items: [
         {
           id: "donate",
-          title: "Donate a Meal",
+          title: "Donation Tokens",
           icon: "gift-outline",
           color: "#26A69A",
           bgColor: "#E0F2F1",
           route: "/screens/profile/donation-tokens",
+        },
+        {
+          id: "donate-action",
+          title: "Donate a Meal",
+          icon: "heart-outline",
+          color: "#EC407A",
+          bgColor: "#FCE4EC",
+          action: () => setModalVisible(true),
         },
         {
           id: "cart",
@@ -172,7 +194,13 @@ export default function ProfileScreen() {
                 {section.items.map((item, index) => (
                   <TouchableOpacity
                     key={item.id}
-                    onPress={() => router.push(item.route as any)}
+                    onPress={() => {
+                      if (item.action) {
+                        item.action();
+                      } else if (item.route) {
+                        router.push(item.route as any);
+                      }
+                    }}
                     activeOpacity={0.7}
                     className={`flex-row items-center justify-between p-4 ${
                       index < section.items.length - 1 ? "border-b border-gray-50" : ""
@@ -211,6 +239,12 @@ export default function ProfileScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <DonateModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={handleConfirm}
+      />
     </SafeAreaView>
   );
 }
