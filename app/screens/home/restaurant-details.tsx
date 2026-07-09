@@ -665,16 +665,7 @@ function RestaurantDetailScreenInner() {
             </View>
           </View>
 
-          <View
-            className="bg-white px-5 pt-6 -mt-8 rounded-t-[32px] flex-1"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -4 },
-              shadowOpacity: 0.04,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
-          >
+          <View className="bg-white px-5 pt-6 pb-6 -mt-8 rounded-t-[32px] flex-1">
             <View className="mb-4">
               <Text className="text-2xl font-black text-gray-900 leading-tight">
                 {restaurantName}

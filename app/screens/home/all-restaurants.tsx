@@ -546,18 +546,42 @@ export default function AllRestaurantsScreen() {
         }
         ListEmptyComponent={
           loading ? null : (
-            <View className="py-20 items-center justify-center">
-              <Ionicons name="restaurant-outline" size={48} color="#D1D5DB" />
-              <Text className="text-gray-400 mt-4 text-sm font-semibold">
-                {error ? error : "No restaurants found matching your filters."}
+            <View className="items-center justify-center py-16 px-6">
+              <View className="w-16 h-16 bg-[#FFFBEB] rounded-full items-center justify-center mb-4">
+                <Ionicons name="restaurant-outline" size={28} color="#F5C518" />
+              </View>
+              <Text className="text-base font-bold text-[#1C1C1C] mb-1">
+                No Restaurants Found
               </Text>
-              {error && (
+              <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed">
+                {error ? error : "We couldn't find any restaurants matching your filters or location. Try searching for something else or adjusting your filters."}
+              </Text>
+              {error ? (
                 <TouchableOpacity
                   onPress={() => loadRestaurants()}
-                  className="mt-4 bg-[#F5C518] px-5 py-2 rounded-2xl"
+                  className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
                 >
-                  <Text className="text-gray-900 font-extrabold text-xs">Retry</Text>
+                  <Text className="text-white text-xs font-black uppercase tracking-wider">
+                    Retry Loading
+                  </Text>
                 </TouchableOpacity>
+              ) : (
+                (searchText || activeCategory !== "All" || freeMealsOnly || radiusMeters !== 16000) && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSearchText("");
+                      setActiveCategory("All");
+                      setSortBy("distance");
+                      setRadiusMeters(16000);
+                      setFreeMealsOnly(false);
+                    }}
+                    className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
+                  >
+                    <Text className="text-white text-xs font-black uppercase tracking-wider">
+                      Clear Filters
+                    </Text>
+                  </TouchableOpacity>
+                )
               )}
             </View>
           )

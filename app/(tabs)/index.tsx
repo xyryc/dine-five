@@ -2,8 +2,7 @@ import { Categories } from "@/components/home/Categories";
 import { DonateCard } from "@/components/home/DonateCard";
 import { HomeHeader } from "@/components/home/HomeHeader";
 import { PromoBanner } from "@/components/home/PromoBanner";
-import { SearchBar } from "@/components/home/SearchBar";
-import { RestaurantSection } from "@/components/home/RestaurantSection";
+import { RestaurantSection, SectionErrorBoundary } from "@/components/home/RestaurantSection";
 import { useStore } from "@/stores/stores";
 import {
   type Restaurant,
@@ -544,7 +543,6 @@ export default function HomeScreen() {
             </View>
           ) : (
             <>
-              <SearchBar onPress={() => router.push("/screens/home/all-restaurants")} />
               <PromoBanner deals={promoDeals ?? [FALLBACK_PROMO]} />
 
               <Categories
@@ -562,21 +560,42 @@ export default function HomeScreen() {
                 </View>
               )}
 
-              {!isInitialLoading &&
-                sections.map((section) => (
-                  <RestaurantSection
-                    key={section.title}
-                    title={section.title}
-                    restaurants={section.items}
-                    onOpenRestaurant={openRestaurantDetail}
-                  />
-                ))}
+              <SectionErrorBoundary>
+                {!isInitialLoading &&
+                  sections.map((section) => (
+                    <RestaurantSection
+                      key={section.title}
+                      title={section.title}
+                      restaurants={section.items}
+                      onOpenRestaurant={openRestaurantDetail}
+                    />
+                  ))}
+              </SectionErrorBoundary>
 
               {!isInitialLoading && !sections.length && (
-                <View className="px-4 py-8">
-                  <Text className="text-sm text-gray-400 text-center">
-                    No restaurants found.
+                <View className="items-center justify-center py-12 px-6">
+                  <View className="w-16 h-16 bg-[#FFFBEB] rounded-full items-center justify-center mb-4">
+                    <Ionicons name="restaurant-outline" size={28} color="#F5C518" />
+                  </View>
+                  <Text className="text-base font-bold text-[#1C1C1C] mb-1">
+                    No Restaurants Found
                   </Text>
+                  <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed">
+                    We couldn't find any restaurants near your location. Try searching for something else or adjusting your filters.
+                  </Text>
+                  {(searchText || activeCategory !== "All") && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSearchText("");
+                        setActiveCategory("All");
+                      }}
+                      className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
+                    >
+                      <Text className="text-white text-xs font-black uppercase tracking-wider">
+                        Clear Filters
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
 

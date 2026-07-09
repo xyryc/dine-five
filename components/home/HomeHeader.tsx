@@ -137,49 +137,69 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
         </TouchableOpacity>
       </View>
 
-      {/* Row 2: Combined Location Label and Search Input (No Card Wrapper!) */}
-      <View className="mt-1">
-        <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-100 px-3.5 py-1.5 shadow-sm">
-          <Ionicons name="location-outline" size={16} color="#A3A3A3" />
-          
+      {/* Combined 2-Line Searchbar Card (Location + Food/Restaurant Search in 1 Card) */}
+      <View className="mt-3.5 bg-white rounded-2xl border border-[#EDEDEB] shadow-md shadow-gray-100/40 overflow-hidden">
+        {/* Line 1: Location Search & GPS Locator */}
+        <View className="flex-row items-center h-[48px] px-4">
+          <Ionicons name="location-outline" size={18} color="#A3A3A3" />
           <TextInput
             placeholder={displayLocation}
-            placeholderTextColor="#595959"
+            placeholderTextColor="#8C8C8C"
             value={addressSearch}
             onChangeText={setAddressSearch}
             onSubmitEditing={handleLocationSearch}
-            className="flex-1 ml-2 text-[11px] text-[#1C1C1C] py-1 font-semibold"
+            className="flex-1 ml-2.5 text-xs text-[#1C1C1C] font-semibold py-1"
           />
+          
+          <View className="flex-row items-center gap-2">
+            {addressSearch ? (
+              <TouchableOpacity onPress={() => setAddressSearch("")}>
+                <Ionicons name="close-circle" size={16} color="#A3A3A3" />
+              </TouchableOpacity>
+            ) : null}
 
-          {addressSearch ? (
-            <TouchableOpacity onPress={() => setAddressSearch("")} className="mr-2">
-              <Ionicons name="close-circle" size={15} color="#9CA3AF" />
-            </TouchableOpacity>
-          ) : null}
-
-          {/* Locate Me button inside searchbar */}
-          <TouchableOpacity
-            onPress={handleLocateMe}
-            disabled={locationLoading || searching}
-            className="p-1 mr-1"
-          >
-            {(locationLoading || searching) ? (
-              <ActivityIndicator size="small" color="#F5C518" />
-            ) : (
-              <Ionicons name="locate" size={16} color="#F5C518" />
-            )}
-          </TouchableOpacity>
-
-          {addressSearch.trim().length > 0 && (
             <TouchableOpacity
-              onPress={handleLocationSearch}
-              disabled={searching}
-              className="bg-gray-900 px-3 py-1.5 rounded-xl ml-1"
+              onPress={handleLocateMe}
+              disabled={locationLoading || searching}
+              className="p-1 items-center justify-center"
             >
-              <Text className="text-white text-[9px] font-black uppercase">Go</Text>
+              {(locationLoading || searching) ? (
+                <ActivityIndicator size="small" color="#F5C518" />
+              ) : (
+                <Ionicons name="locate" size={18} color="#F5C518" />
+              )}
             </TouchableOpacity>
-          )}
+
+            {addressSearch.trim().length > 0 && (
+              <TouchableOpacity
+                onPress={handleLocationSearch}
+                disabled={searching}
+                className="bg-[#F5C518] px-3 py-1.5 rounded-lg"
+              >
+                <Text className="text-gray-900 text-[10px] font-extrabold uppercase">Go</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
+
+        {/* Premium Thin Divider Line */}
+        <View className="h-[1px] bg-[#F1F1EF] mx-4" />
+
+        {/* Line 2: Food & Restaurant Search (Tappable search box) */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.push("/screens/home/all-restaurants")}
+          className="flex-row items-center h-[48px] px-4"
+        >
+          <Ionicons name="search-outline" size={18} color="#A3A3A3" />
+          <Text className="flex-1 ml-2.5 text-xs text-gray-400 font-medium">
+            Search dishes, restaurants...
+          </Text>
+          
+          <View className="p-1 items-center justify-center">
+            <Ionicons name="options-outline" size={18} color="#595959" />
+          </View>
+        </TouchableOpacity>
       </View>
     </View>
   );

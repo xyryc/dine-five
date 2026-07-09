@@ -18,8 +18,8 @@ export const Categories = ({
       : DEFAULT_CATEGORIES;
 
   return (
-    <View className="my-6">
-      <View className="flex-row items-center justify-between px-4">
+    <View className="mt-4 mb-5">
+      <View className="flex-row items-center justify-between px-5">
         {/* <Text className="text-[16px] font-semibold text-[#171717]">
           Top Categories
         </Text> */}
@@ -34,7 +34,7 @@ export const Categories = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 20 }}
       >
         {categoryList.map((cat, index) => {
           const isActive = activeCategory === cat;

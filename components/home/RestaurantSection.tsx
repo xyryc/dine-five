@@ -45,6 +45,24 @@ class CardErrorBoundary extends React.Component<{ children: React.ReactNode }, E
   }
 }
 
+// ---- Error Boundary for full sections block ----
+export class SectionErrorBoundary extends React.Component<{ children: React.ReactNode }, EBState> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any, info: any) {
+    console.error("[SectionErrorBoundary] Caught render error:", error, info);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
 // ---- Card component ----
 function SectionRestaurantCardInner({
   restaurant,
@@ -142,7 +160,7 @@ export function RestaurantSection({
 
   return (
     <View style={{ marginBottom: 24 }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, marginBottom: 8 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 8 }}>
         <Text style={{ fontSize: 18, fontWeight: "700", color: "#111827", flex: 1, marginRight: 8 }} numberOfLines={1}>
           {title}
         </Text>
@@ -154,7 +172,7 @@ export function RestaurantSection({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 20 }}
       >
         {restaurants.filter(Boolean).map((restaurant, index) => {
           const key = String(restaurant?.providerId || restaurant?.id || restaurant?.foodId || index);
