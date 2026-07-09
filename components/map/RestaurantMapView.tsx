@@ -216,7 +216,7 @@ export default function RestaurantMapView({
   }, [location]);
 
   const handleAutoLocate = async () => {
-    await fetchLocation();
+    await fetchLocation(true);
     const { location: updatedLocation } = useRestaurantStore.getState();
     if (updatedLocation && mapRef.current) {
       mapRef.current.animateToRegion({

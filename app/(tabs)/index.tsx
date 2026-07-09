@@ -449,7 +449,7 @@ export default function HomeScreen() {
         },
         {
           text: "Use GPS Location",
-          onPress: () => fetchLocation(),
+          onPress: () => fetchLocation(true),
         },
         {
           text: "Enter Address Manually",
@@ -498,7 +498,7 @@ export default function HomeScreen() {
               
               <View className="w-full mt-2 px-4 gap-y-3">
                 <TouchableOpacity
-                  onPress={fetchLocation}
+                  onPress={() => fetchLocation(true)}
                   className="bg-[#E29E10] h-12 rounded-2xl flex-row items-center justify-center gap-2 shadow-sm"
                 >
                   <Ionicons name="pin" size={16} color="#FFF" />

@@ -2,6 +2,7 @@ import * as Location from "expo-location";
 import { create } from "zustand";
 import type { NearbyParams, Restaurant } from "./restaurantService";
 import { restaurantService } from "./restaurantService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type { NearbyParams, Restaurant } from "./restaurantService";
 
@@ -27,7 +28,7 @@ interface RestaurantState {
   cuisineFilter: string | undefined;
   radiusMeters: number;
   availableTokenCount: number;
-  fetchLocation: () => Promise<void>;
+  fetchLocation: (forceGPS?: boolean) => Promise<void>;
   setLocationManually: (address: string) => Promise<any>;
   fetchNearbyRestaurants: (params: NearbyParams) => Promise<void>;
   fetchFreeMeals: (params: { page?: number; limit?: number; search?: string }) => Promise<void>;
@@ -75,6 +76,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
           locationPermissionGranted: true,
           locationLoading: false,
         });
+        await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(newLoc));
         return { success: true, location: newLoc };
       }
       return { success: false, error: "Address not found" };
@@ -83,9 +85,27 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
     }
   },
 
-  fetchLocation: async () => {
+  fetchLocation: async (forceGPS = false) => {
     set({ locationLoading: true });
     try {
+      // Try to load cached location first if not forced
+      if (!forceGPS) {
+        const savedLoc = await AsyncStorage.getItem("DINE_FIVE_USER_LOCATION");
+        if (savedLoc) {
+          const parsed = JSON.parse(savedLoc);
+          if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+            set({
+              location: parsed,
+              locationPermissionGranted: true,
+              locationLoading: false,
+            });
+            console.log("Loaded cached location from AsyncStorage:", parsed);
+            return;
+          }
+        }
+      }
+
+      // Fallback to GPS
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         set({ location: null, locationPermissionGranted: false, locationLoading: false });
@@ -96,27 +116,34 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
 
       const lastKnown = await Location.getLastKnownPositionAsync({});
       if (lastKnown) {
+        const coords = {
+          latitude: lastKnown.coords.latitude,
+          longitude: lastKnown.coords.longitude,
+        };
         set({
-          location: {
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude,
-          },
+          location: coords,
           locationLoading: false,
         });
+        await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(coords));
       }
 
       const current = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
 
+      const coords = {
+        latitude: current.coords.latitude,
+        longitude: current.coords.longitude,
+      };
       set({
-        location: {
-          latitude: current.coords.latitude,
-          longitude: current.coords.longitude,
-        },
+        location: coords,
       });
-    } catch {
-      set({ location: null });
+      await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(coords));
+    } catch (err) {
+      console.log("Error in fetchLocation:", err);
+      if (!get().location) {
+        set({ location: null });
+      }
     } finally {
       set({ locationLoading: false });
     }

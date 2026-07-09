@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -16,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Location from "expo-location";
 
 type Restaurant = any;
 
@@ -31,7 +33,7 @@ const getCuisineLabel = (restaurant: Restaurant) =>
 
 export default function AllRestaurantsScreen() {
   const router = useRouter();
-  const { location, fetchLocation } = useRestaurantStore();
+  const { location, fetchLocation, setLocationManually, locationLoading } = useRestaurantStore();
   const { fetchCategories } = useStore() as any;
 
   // Filter and Search States
@@ -41,12 +43,66 @@ export default function AllRestaurantsScreen() {
   const [radiusMeters, setRadiusMeters] = useState(16000); // Default 10 miles
   const [freeMealsOnly, setFreeMealsOnly] = useState(false);
 
+  // Location States
+  const [locationName, setLocationName] = useState<string>("Detecting location...");
+  const [addressSearch, setAddressSearch] = useState("");
+  const [locationSearching, setLocationSearching] = useState(false);
+
   // Data Loading States
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
+
+  // Reverse geocode user location to display address name
+  useEffect(() => {
+    const getAddress = async () => {
+      if (location) {
+        try {
+          const reverse = await Location.reverseGeocodeAsync({
+            latitude: location.latitude,
+            longitude: location.longitude,
+          });
+          if (reverse && reverse.length > 0) {
+            const addr = reverse[0];
+            const city = addr.city || addr.subregion || "";
+            const street = addr.street || addr.name || "";
+            const region = addr.region || "";
+            const name = [street, city, region].filter(Boolean).join(", ");
+            setLocationName(name || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+          } else {
+            setLocationName(`${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+          }
+        } catch (err) {
+          setLocationName(`${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+        }
+      } else {
+        setLocationName("Unknown Location");
+      }
+    };
+    getAddress();
+  }, [location]);
+
+  const handleLocationSearch = async () => {
+    if (!addressSearch.trim()) return;
+    setLocationSearching(true);
+    try {
+      const result = await setLocationManually(addressSearch);
+      if (result.success) {
+        setAddressSearch(""); // Clear search field
+      } else {
+        Alert.alert(
+          "Location Not Found",
+          "Could not find coordinates for this address. Please try another query."
+        );
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err?.message || "Failed to search location.");
+    } finally {
+      setLocationSearching(false);
+    }
+  };
 
   // Fetch Categories
   const fetchCategoriesData = useCallback(async () => {
@@ -298,6 +354,59 @@ export default function AllRestaurantsScreen() {
         }
         ListHeaderComponent={
           <View className="pt-4 pb-3">
+            {/* Location Selector Card */}
+            <View className="bg-amber-50 border border-amber-100 rounded-3xl p-4 mb-4 shadow-sm">
+              <View className="flex-row items-center justify-between mb-3">
+                <View className="flex-row items-center flex-1 mr-2">
+                  <Ionicons name="location" size={18} color="#F5C518" />
+                  <Text className="text-xs font-black text-gray-900 ml-1.5 flex-1" numberOfLines={1}>
+                    {locationName}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    setLocationSearching(true);
+                    await fetchLocation(true);
+                    setLocationSearching(false);
+                  }}
+                  disabled={locationLoading || locationSearching}
+                  className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full"
+                >
+                  {(locationLoading || locationSearching) ? (
+                    <ActivityIndicator size="small" color="#1F2937" style={{ marginRight: 4 }} />
+                  ) : (
+                    <Ionicons name="locate" size={14} color="#1F2937" style={{ marginRight: 4 }} />
+                  )}
+                  <Text className="text-[10px] font-black text-gray-800">Locate Me</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Location Search Bar */}
+              <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-3 shadow-inner">
+                <Ionicons name="map-outline" size={16} color="#9CA3AF" />
+                <TextInput
+                  placeholder="Enter city, address or zip code..."
+                  className="flex-1 ml-2 text-gray-700 text-xs py-2"
+                  placeholderTextColor="#9CA3AF"
+                  value={addressSearch}
+                  onChangeText={setAddressSearch}
+                  onSubmitEditing={handleLocationSearch}
+                />
+                {addressSearch ? (
+                  <TouchableOpacity onPress={() => setAddressSearch("")} className="mr-1.5">
+                    <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+                  </TouchableOpacity>
+                ) : null}
+                <TouchableOpacity
+                  onPress={handleLocationSearch}
+                  disabled={!addressSearch.trim() || locationSearching}
+                  className="bg-gray-900 px-3 py-1.5 rounded-xl"
+                >
+                  <Text className="text-white text-[10px] font-black">Search</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Search Input */}
             <View className="flex-row items-center bg-gray-50 rounded-2xl border border-gray-100 px-3 shadow-sm mb-4">
               <Ionicons name="search-outline" size={18} color="#9CA3AF" />
