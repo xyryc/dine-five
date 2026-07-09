@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Modal,
   ScrollView,
   Text,
@@ -176,6 +177,16 @@ export default function OrderDetailsScreen() {
         );
       }
     }
+  };
+
+  const handleCall = (phoneNumber: string) => {
+    if (!phoneNumber) {
+      Alert.alert("Error", "Phone number is not available");
+      return;
+    }
+    Linking.openURL(`tel:${phoneNumber}`).catch((err) => {
+      Alert.alert("Error", "Could not open phone app");
+    });
   };
 
   const formatStatus = (status: string) => {
@@ -456,26 +467,53 @@ export default function OrderDetailsScreen() {
 
         {/* Items Grouped by Restaurant */}
         <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-3 px-1">Items Grouped by Restaurant</Text>
-        {groups.map((group: any, index: number) => (
-          <View key={group.subOrderId || index} className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-4">
-            <View className="flex-row items-center justify-between pb-3 border-b border-gray-50 mb-3">
-              <View className="flex-row items-center flex-1 mr-2">
-                <View className="w-9 h-9 rounded-full bg-gray-50 border border-gray-100 overflow-hidden items-center justify-center mr-2.5">
-                  {group.restaurantImage ? (
-                    <Image source={{ uri: group.restaurantImage }} className="w-full h-full" resizeMode="cover" />
-                  ) : (
-                    <Ionicons name="restaurant-outline" size={16} color="#FFC107" />
-                  )}
+        {groups.map((group: any, index: number) => {
+          const phone =
+            group.phoneNumber ||
+            group.provider?.phoneNumber ||
+            orderData?.restaurants?.find(
+              (r: any) =>
+                r.providerId === group.providerId ||
+                r.restaurantName === group.restaurantName,
+            )?.phoneNumber ||
+            orderData?.phoneNumber;
+
+          return (
+            <View key={group.subOrderId || index} className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-4">
+              <View className="flex-row items-center justify-between pb-3 border-b border-gray-50 mb-3">
+                <View className="flex-row items-center flex-1 mr-2">
+                  <View className="w-9 h-9 rounded-full bg-gray-50 border border-gray-100 overflow-hidden items-center justify-center mr-2.5">
+                    {group.restaurantImage ? (
+                      <Image source={{ uri: group.restaurantImage }} className="w-full h-full" resizeMode="cover" />
+                    ) : (
+                      <Ionicons name="restaurant-outline" size={16} color="#FFC107" />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-xs font-bold text-gray-900" numberOfLines={1}>
+                      {group.restaurantName}
+                    </Text>
+                    <Text className="text-[10px] text-gray-400 font-medium mt-0.5" numberOfLines={1}>
+                      {group.restaurantAddress}
+                    </Text>
+                    {phone ? (
+                      <View className="flex-row items-center gap-1 mt-1">
+                        <Ionicons name="call-outline" size={10} color="#9CA3AF" />
+                        <Text className="text-[10px] text-gray-400 font-semibold">
+                          {phone}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => handleCall(phone)}
+                          className="ml-2 bg-[#FFC107] px-2 py-0.5 rounded-full flex-row items-center gap-0.5"
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name="call" size={8} color="#1F2937" />
+                          <Text className="text-[8px] font-black text-gray-900">Call</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : null}
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-xs font-bold text-gray-900" numberOfLines={1}>
-                    {group.restaurantName}
-                  </Text>
-                  <Text className="text-[10px] text-gray-400 font-medium" numberOfLines={1}>
-                    {group.restaurantAddress}
-                  </Text>
-                </View>
-              </View>
               
               <View className={`px-2 py-0.5 rounded-full border ${getStatusBadgeStyle(group.status || currentOrderStatus).container}`}>
                 <Text className={`text-[9px] font-bold uppercase ${getStatusBadgeStyle(group.status || currentOrderStatus).text}`}>
@@ -517,7 +555,8 @@ export default function OrderDetailsScreen() {
               })}
             </View>
           </View>
-        ))}
+        );
+      })}
 
         {/* Logistics & Payment details */}
         <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6">
