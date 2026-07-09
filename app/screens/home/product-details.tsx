@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -54,7 +55,6 @@ const normalizeImageUri = (value: string | string[] | undefined): string => {
     return `${API_BASE_URL}${raw}`;
   }
 
-  // Handle backend relative paths like "uploads/..." or "public/uploads/..."
   return `${API_BASE_URL}/${raw.replace(/^\.?\//, "")}`;
 };
 
@@ -78,6 +78,7 @@ function ProductDetailsInner() {
     fetchFavorites,
     fetchReviewsByFoodId,
   } = useStore() as any;
+  
   const {
     id,
     foodId,
@@ -92,12 +93,15 @@ function ProductDetailsInner() {
 
   const { claimToken, placeFreeOrder, getAvailableTokens } =
     useRestaurantStore();
+  
   const [currentTokenId, setCurrentTokenId] = useState<string | null>(
     firstParam(tokenId as string | string[] | undefined) || null,
   );
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isClaimingMeal, setIsClaimingMeal] = useState(false);
   const [isPlacingFreeOrder, setIsPlacingFreeOrder] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   const productId =
     firstParam(id as string | string[] | undefined) ||
@@ -134,13 +138,13 @@ function ProductDetailsInner() {
         firstParam(foodId as string | string[] | undefined) ||
         firstParam(id as string | string[] | undefined);
       if (targetId) {
+        setReviewsLoading(true);
         try {
           const result = await fetchReviewsByFoodId(targetId);
           if (result && result.data) {
             setReviewsData(result.data);
             setTotalReviews(result.meta?.total || result.data.length || 0);
 
-            // Calculate average rating if not provided by backend
             if (result.data.length > 0) {
               const total = result.data.reduce(
                 (sum: number, review: any) => sum + (review.rating || 0),
@@ -152,7 +156,11 @@ function ProductDetailsInner() {
           }
         } catch (error) {
           console.log("Error loading reviews:", error);
+        } finally {
+          setReviewsLoading(false);
         }
+      } else {
+        setReviewsLoading(false);
       }
     };
     loadReviews();
@@ -257,6 +265,7 @@ function ProductDetailsInner() {
   };
 
   const handlePlaceFreeOrder = async () => {
+    if (isPlacingFreeOrder) return;
     if (!currentTokenId) {
       Alert.alert("Error", "Missing token information for order");
       return;
@@ -295,10 +304,11 @@ function ProductDetailsInner() {
   };
 
   const handleAddToCart = async () => {
+    if (isAddingToCart) return;
+    setIsAddingToCart(true);
     try {
       const result = await addToCart(product, quantity);
       if (result) {
-        // Only navigate if successful
         router.push("/(tabs)/cart");
       } else {
         const latestError = (useStore.getState() as any)?.error;
@@ -310,6 +320,8 @@ function ProductDetailsInner() {
     } catch (error) {
       console.log("Error adding to cart:", error);
       Alert.alert("Failed", "Something went wrong while adding to cart.");
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -319,7 +331,7 @@ function ProductDetailsInner() {
 
       await Share.share({
         message: message,
-        url: product.image, // For iOS support
+        url: product.image,
         title: product.name,
       });
     } catch (error: any) {
@@ -332,7 +344,7 @@ function ProductDetailsInner() {
       <View className="flex-1 bg-[#FBF9F6]">
         <StatusBar style="light" />
 
-        {/* Top Header Buttons Overlay (fixed at top of screen) */}
+        {/* Top Header Buttons Overlay */}
         <SafeAreaView className="absolute top-0 w-full z-50">
           <View className="flex-row justify-between px-4 pt-3">
             <TouchableOpacity
@@ -355,39 +367,26 @@ function ProductDetailsInner() {
             </TouchableOpacity>
 
             <View className="flex-row gap-3">
-              {/* <TouchableOpacity 
-                onPress={handleShare}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: "rgba(0, 0, 0, 0.25)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: "rgba(255, 255, 255, 0.2)",
-                }}
-              >
-                <Ionicons name="share-outline" size={20} color="#fff" />
-              </TouchableOpacity> */}
-
               <TouchableOpacity
                 onPress={handleToggleFavorite}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: 20,
-                  backgroundColor: "rgba(0, 0, 0, 0.25)",
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
                   alignItems: "center",
                   justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: "rgba(255, 255, 255, 0.2)",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
               >
                 <Ionicons
                   name={isFav ? "heart" : "heart-outline"}
                   size={20}
-                  color={isFav ? "#EF4444" : "#fff"}
+                  color={isFav ? "#EF4444" : "#1F2937"}
                 />
               </TouchableOpacity>
             </View>
@@ -400,7 +399,7 @@ function ProductDetailsInner() {
           contentContainerStyle={{ paddingBottom: 140 }}
           className="flex-1"
         >
-          {/* Hero Product Image in flow */}
+          {/* Hero Product Image */}
           <View className="w-full h-[44vh] bg-gray-100 relative">
             {!!heroImageUri && !heroImageError ? (
               <Image
@@ -421,7 +420,7 @@ function ProductDetailsInner() {
               </View>
             )}
 
-            {/* Subtle top dark overlay for header buttons readability */}
+            {/* Top dark gradient overlay for headers */}
             <LinearGradient
               colors={["rgba(0,0,0,0.35)", "transparent"]}
               style={{
@@ -434,7 +433,7 @@ function ProductDetailsInner() {
             />
           </View>
 
-          {/* Details Card (no longer fixed, doesn't scroll internally) */}
+          {/* Details Card */}
           <View
             style={{
               marginTop: -30,
@@ -447,11 +446,14 @@ function ProductDetailsInner() {
               shadowRadius: 10,
               elevation: 5,
               paddingHorizontal: 20,
-              paddingTop: 24,
+              paddingTop: 12,
             }}
           >
+            {/* Sheet Drag Handle */}
+            <View className="w-12 h-1 bg-gray-200 rounded-full self-center mb-5" />
+
             {/* Restaurant Info Bar */}
-            <View className="flex-row items-center justify-between mb-5 bg-gray-50 border border-gray-100 rounded-3xl p-3">
+            <View className="flex-row items-center justify-between mb-5 bg-slate-50/50 border border-slate-100 rounded-2xl p-3.5">
               <View className="flex-row items-center gap-3">
                 {product.restaurantProfile ? (
                   <Image
@@ -481,7 +483,7 @@ function ProductDetailsInner() {
               </View>
             </View>
 
-            {/* Title, Pricing & Quantity Row */}
+            {/* Title, Pricing */}
             <View className="mb-6">
               <View className="flex-row items-start justify-between">
                 <Text className="text-2xl font-black text-gray-900 leading-tight flex-1 mr-3">
@@ -493,71 +495,87 @@ function ProductDetailsInner() {
               </View>
             </View>
 
-            {/* Stats Capsule Row */}
-            <View className="flex-row justify-between mb-6 p-3 bg-gray-50/50 border border-gray-100 rounded-2xl">
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="star" size={14} color="#F5C518" />
-                <Text className="text-xs font-black text-gray-800">
+            {/* Premium Stats Row */}
+            <View className="flex-row gap-3 mb-6">
+              {/* Rating Card */}
+              <View className="flex-1 bg-amber-50/40 border border-amber-100/50 rounded-2xl p-3 items-center justify-center">
+                <Ionicons name="star" size={16} color="#F5C518" />
+                <Text className="text-sm font-black text-gray-900 mt-1">
                   {product.rating}
                 </Text>
-                <Text className="text-[10px] font-bold text-gray-400">
-                  ({product.reviews} reviews)
+                <Text className="text-[9px] font-bold text-amber-800/60 uppercase tracking-wide mt-0.5">
+                  {product.reviews} reviews
                 </Text>
               </View>
 
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="flame" size={15} color="#FF5A5F" />
-                <Text className="text-xs font-bold text-gray-600">
-                  {product.calories} kcal
+              {/* Calories Card */}
+              <View className="flex-1 bg-rose-50/40 border border-rose-100/50 rounded-2xl p-3 items-center justify-center">
+                <Ionicons name="flame" size={16} color="#FF5A5F" />
+                <Text className="text-sm font-black text-gray-900 mt-1">
+                  {product.calories}
+                </Text>
+                <Text className="text-[9px] font-bold text-rose-800/60 uppercase tracking-wide mt-0.5">
+                  Calories (kcal)
                 </Text>
               </View>
 
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="time-outline" size={15} color="#2D9CDB" />
-                <Text className="text-xs font-bold text-gray-600">
-                  {product.time} mins
+              {/* Delivery Time Card */}
+              <View className="flex-1 bg-blue-50/40 border border-blue-100/50 rounded-2xl p-3 items-center justify-center">
+                <Ionicons name="time" size={16} color="#2D9CDB" />
+                <Text className="text-sm font-black text-gray-900 mt-1">
+                  {product.time}
+                </Text>
+                <Text className="text-[9px] font-bold text-blue-800/60 uppercase tracking-wide mt-0.5">
+                  Est. Minutes
                 </Text>
               </View>
             </View>
 
             {/* Quantity Controller Capsule */}
-            <View className="flex-row items-center justify-between mb-6 bg-gray-50 border border-gray-100/80 rounded-2xl px-4 py-3">
-              <Text className="text-sm font-extrabold text-gray-800">
-                Quantity
-              </Text>
-              <View className="flex-row items-center gap-x-4">
+            <View className="flex-row items-center justify-between mb-6 bg-slate-50/50 border border-slate-100 rounded-2xl px-4 py-3.5">
+              <View>
+                <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  Select Quantity
+                </Text>
+                <Text className="text-sm font-black text-gray-800 mt-0.5">
+                  Quantity
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-x-4 bg-white border border-gray-100 rounded-xl px-2 py-1 shadow-sm">
                 <TouchableOpacity
                   onPress={() =>
                     !isFreeMeal && quantity > 1 && setQuantity((q) => q - 1)
                   }
                   disabled={isFreeMeal}
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
-                    backgroundColor: isFreeMeal ? "#E5E7EB" : "#F5C518",
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    backgroundColor: isFreeMeal ? "#F3F4F6" : "#F5C518",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
+                  activeOpacity={0.8}
                 >
-                  <Ionicons name="remove" size={18} color="#1F2937" />
+                  <Ionicons name="remove" size={16} color={isFreeMeal ? "#9CA3AF" : "#1F2937"} />
                 </TouchableOpacity>
-                <Text className="text-base font-black text-gray-900 min-w-[20px] text-center">
+                <Text className="text-sm font-black text-gray-950 min-w-[20px] text-center">
                   {quantity}
                 </Text>
                 <TouchableOpacity
                   onPress={() => !isFreeMeal && setQuantity((q) => q + 1)}
                   disabled={isFreeMeal}
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
-                    backgroundColor: isFreeMeal ? "#E5E7EB" : "#F5C518",
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    backgroundColor: isFreeMeal ? "#F3F4F6" : "#F5C518",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
+                  activeOpacity={0.8}
                 >
-                  <Ionicons name="add" size={18} color="#1F2937" />
+                  <Ionicons name="add" size={16} color={isFreeMeal ? "#9CA3AF" : "#1F2937"} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -596,6 +614,7 @@ function ProductDetailsInner() {
                       paddingVertical: 16,
                       borderRadius: 16,
                       alignItems: "center",
+                      justifyContent: "center",
                       shadowColor: "#10B981",
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: 0.1,
@@ -603,11 +622,13 @@ function ProductDetailsInner() {
                       elevation: 2,
                     }}
                   >
-                    <Text style={{ color: "#FFFFFF", fontWeight: "bold", fontSize: 16 }}>
-                      {isPlacingFreeOrder
-                        ? "Placing Order..."
-                        : "Place Free Order"}
-                    </Text>
+                    {isPlacingFreeOrder ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <Text style={{ color: "#FFFFFF", fontWeight: "bold", fontSize: 16 }}>
+                        Place Free Order
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
@@ -618,6 +639,7 @@ function ProductDetailsInner() {
                       borderRadius: 16,
                       paddingVertical: 16,
                       alignItems: "center",
+                      justifyContent: "center",
                       shadowColor: "#F5C518",
                       shadowOffset: { width: 0, height: 4 },
                       shadowOpacity: 0.25,
@@ -625,19 +647,25 @@ function ProductDetailsInner() {
                       elevation: 4,
                     }}
                   >
-                    <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
-                      {isClaimingMeal ? "Claiming..." : "Claim Free Meal Now"}
-                    </Text>
+                    {isClaimingMeal ? (
+                      <ActivityIndicator size="small" color="#111827" />
+                    ) : (
+                      <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
+                        Claim Free Meal Now
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 )
               ) : (
                 <TouchableOpacity
                   onPress={handleAddToCart}
+                  disabled={isAddingToCart}
                   style={{
                     backgroundColor: "#F5C518",
                     borderRadius: 16,
                     paddingVertical: 16,
                     alignItems: "center",
+                    justifyContent: "center",
                     shadowColor: "#F5C518",
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.25,
@@ -645,10 +673,13 @@ function ProductDetailsInner() {
                     elevation: 4,
                   }}
                 >
-                  <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
-                    Add to Cart • $
-                    {(quantity * parseFloat(product.price)).toFixed(2)}
-                  </Text>
+                  {isAddingToCart ? (
+                    <ActivityIndicator size="small" color="#111827" />
+                  ) : (
+                    <Text style={{ color: "#111827", fontWeight: "bold", fontSize: 16 }}>
+                      Add to Cart • ${(quantity * parseFloat(product.price)).toFixed(2)}
+                    </Text>
+                  )}
                 </TouchableOpacity>
               )}
             </View>
@@ -698,8 +729,31 @@ function ProductDetailsInner() {
               </View>
             </Modal>
 
-            {/* Customer Reviews */}
-            <CustomerReviews reviews={reviewsData} />
+            {/* Customer Reviews Section */}
+            {reviewsLoading ? (
+              <View className="mb-4">
+                <Text className="text-lg font-bold text-[#1F2A33] mb-4">
+                  Customer Reviews
+                </Text>
+                {/* 2 skeleton reviews */}
+                {[1, 2].map((i) => (
+                  <View key={i} className="flex-row items-start mb-6">
+                    <View className="w-12 h-12 rounded-full bg-gray-100" />
+                    <View className="flex-1 ml-4 gap-1.5">
+                      <View className="w-28 h-3.5 bg-gray-100 rounded" />
+                      <View className="flex-row items-center gap-1">
+                        <View className="w-16 h-3 bg-amber-50 rounded" />
+                        <View className="w-12 h-2.5 bg-gray-50 rounded" />
+                      </View>
+                      <View className="w-full h-3 bg-gray-50 rounded mt-1" />
+                      <View className="w-4/5 h-3 bg-gray-50 rounded" />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <CustomerReviews reviews={reviewsData} />
+            )}
           </View>
         </ScrollView>
 
