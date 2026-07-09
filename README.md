@@ -78,6 +78,7 @@ Create a `.env` file in the root directory of the project and specify your backe
 
 ```env
 EXPO_PUBLIC_API_URL=backend_api_url
+GOOGLE_MAPS_API_KEY=google_maps_api_key
 ```
 
 - **Note:** LAN and Emulator host redirects are automatically handled in `utils/api.ts` when running against a local development backend.
