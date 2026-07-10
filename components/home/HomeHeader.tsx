@@ -116,7 +116,7 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
           <View className="w-11 h-11 rounded-full overflow-hidden bg-[#F1F1EF] items-center justify-center border border-gray-100">
             <Image
               source={avatarSource}
-              contentFit="contain"
+              contentFit="cover"
               style={{ width: "100%", height: "100%", borderRadius: 100 }}
             />
           </View>

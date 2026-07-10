@@ -149,11 +149,15 @@ export default function ProfileScreen() {
 
           {/* Profile Card Container (centered absolute overlap) */}
           <View 
-            className="absolute left-6 right-6 bg-white p-6 rounded-3xl shadow-xl flex-col items-center gap-3 border border-gray-100"
+            className="absolute left-6 right-6 bg-white p-6 rounded-3xl flex-col items-center gap-3 border border-gray-100"
             style={{
               top: 70,
               zIndex: 10,
-              elevation: 10,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.06,
+              shadowRadius: 12,
+              elevation: 4,
             }}
           >
             <View 
