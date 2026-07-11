@@ -641,7 +641,6 @@ function CheckoutContent() {
               colors={["#10B981", "#059669"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={{ width: "100%", height: "100%" }}
             >
               <View className="p-5 flex-row items-center justify-between">
                 <View className="flex-1 mr-4">
