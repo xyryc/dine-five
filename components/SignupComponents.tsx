@@ -12,6 +12,7 @@ import {
 import CustomInput from "./CustomInput";
 import GoogleLogin from "./GoogleLogin";
 import GradientButton from "./GradientButton";
+import TermsModal from "./TermsModal";
 
 const SignupComponents = () => {
   const [name, setName] = useState("");
@@ -19,6 +20,13 @@ const SignupComponents = () => {
   const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"terms" | "privacy">("terms");
+
+  const openModal = (type: "terms" | "privacy") => {
+    setModalType(type);
+    setModalVisible(true);
+  };
 
   const { signup, isLoading } = useStore() as any;
 
@@ -108,15 +116,34 @@ const SignupComponents = () => {
       />
 
       {/* terms & conditions */}
-      <View className="mt-3 flex-row items-center">
+      <TermsModal
+        visible={modalVisible}
+        type={modalType}
+        onClose={() => setModalVisible(false)}
+      />
+      <View className="mt-3 flex-row items-start">
         <TouchableOpacity
-          className="h-6 w-6 border-2 border-black rounded-md flex-row items-center justify-center"
+          className="h-6 w-6 border-2 border-black rounded-md flex-row items-center justify-center mt-0.5"
           onPress={() => setAgree(!agree)}
         >
           {agree && <Feather name="check" size={18} color="black" />}
         </TouchableOpacity>
         <Text className="ml-2 text-[#1F2A33] font-medium text-sm flex-1">
-          I agree to our Terms and Conditions and Privacy Policy.
+          I agree to our{" "}
+          <Text
+            className="text-[#D32F1E] underline"
+            onPress={() => openModal("terms")}
+          >
+            Terms & Conditions
+          </Text>
+          {" "}and{" "}
+          <Text
+            className="text-[#D32F1E] underline"
+            onPress={() => openModal("privacy")}
+          >
+            Privacy Policy
+          </Text>
+          .
         </Text>
       </View>
 

@@ -12,12 +12,21 @@ import {
 import CustomInput from "./CustomInput";
 import GoogleLogin from "./GoogleLogin";
 import GradientButton from "./GradientButton";
+import TermsModal from "./TermsModal";
 
 const LoginComponents = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [termsAgree, setTermsAgree] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"terms" | "privacy">("terms");
+
+  const openModal = (type: "terms" | "privacy") => {
+    setModalType(type);
+    setModalVisible(true);
+  };
 
   const { login, isLoading } = useStore() as any;
 
@@ -103,6 +112,11 @@ const LoginComponents = () => {
       />
 
       {/* remember me & forgot password */}
+      <TermsModal
+        visible={modalVisible}
+        type={modalType}
+        onClose={() => setModalVisible(false)}
+      />
       <View className="mt-3 flex-row items-center justify-between">
         {/* remember me */}
         <View className="flex-row items-center">
@@ -125,6 +139,33 @@ const LoginComponents = () => {
             Forgot Password?
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* terms & conditions checkbox */}
+      <View className="mt-3 flex-row items-start">
+        <TouchableOpacity
+          className="h-6 w-6 border-2 border-black rounded-md flex-row items-center justify-center mt-0.5"
+          onPress={() => setTermsAgree(!termsAgree)}
+        >
+          {termsAgree && <Feather name="check" size={18} color="black" />}
+        </TouchableOpacity>
+        <Text className="ml-2 text-[#1F2A33] font-medium text-sm flex-1">
+          I agree to our{" "}
+          <Text
+            className="text-[#D32F1E] underline"
+            onPress={() => openModal("terms")}
+          >
+            Terms & Conditions
+          </Text>
+          {" "}and{" "}
+          <Text
+            className="text-[#D32F1E] underline"
+            onPress={() => openModal("privacy")}
+          >
+            Privacy Policy
+          </Text>
+          .
+        </Text>
       </View>
 
       <View className="mt-7">
