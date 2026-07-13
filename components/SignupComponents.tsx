@@ -121,7 +121,7 @@ const SignupComponents = () => {
         type={modalType}
         onClose={() => setModalVisible(false)}
       />
-      <View className="mt-3 flex-row items-start">
+      <View className="mt-3 flex-row items-center">
         <TouchableOpacity
           className="h-6 w-6 border-2 border-black rounded-md flex-row items-center justify-center mt-0.5"
           onPress={() => setAgree(!agree)}
@@ -135,8 +135,8 @@ const SignupComponents = () => {
             onPress={() => openModal("terms")}
           >
             Terms & Conditions
-          </Text>
-          {" "}and{" "}
+          </Text>{" "}
+          and{" "}
           <Text
             className="text-[#D32F1E] underline"
             onPress={() => openModal("privacy")}
