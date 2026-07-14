@@ -31,6 +31,7 @@ eas bulds.txt
 
 # IDE / tool configs
 .claude/
+.mimocode
 .vscode/
 
 # Expo generated

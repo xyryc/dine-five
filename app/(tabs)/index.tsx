@@ -41,9 +41,9 @@ type RestaurantSectionData = {
 };
 
 const FALLBACK_PROMO: BannerData = {
-  title: "35% OFF on Burgers!",
-  subtitle: "35% OFF on Burgers!",
-  ctaText: "Buy now",
+  title: "Welcome to Dine Five!",
+  subtitle: "Discover restaurants near you",
+  ctaText: "Explore",
   image:
     "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80",
 };

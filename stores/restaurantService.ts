@@ -397,7 +397,20 @@ export const restaurantService = {
     }
 
     const url = `${BASE_URL}/provider/nearby?${queryParams.toString()}`;
-    console.log("🚀 CALLING API ENDPOINT (getNearby):", url);
+    console.log("🚀 [getNearby] Request:", {
+      url,
+      params: {
+        latitude: params.latitude,
+        longitude: params.longitude,
+        radiusKm,
+        page,
+        limit,
+        sortBy,
+        freeNearYou: params.freeNearYou ? "true" : "false",
+        cuisine: params.cuisine || undefined,
+        search: params.search || undefined,
+      },
+    });
 
     try {
       const res = await fetch(url, {
@@ -412,6 +425,15 @@ export const restaurantService = {
       } catch {
         json = null;
       }
+
+      console.log("📥 [getNearby] Response:", {
+        status: res.status,
+        success: json?.success,
+        message: json?.message,
+        dataCount: Array.isArray(json?.data) ? json.data.length : 0,
+        total: json?.pagination?.total,
+        firstRestaurant: json?.data?.[0]?.restaurantName || json?.data?.[0]?.name || "N/A",
+      });
 
       if (!res.ok) {
         throw new Error(

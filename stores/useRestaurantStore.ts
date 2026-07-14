@@ -170,6 +170,12 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
       let restaurants = response.data ?? [];
       let total = response.pagination?.total ?? restaurants.length;
 
+      console.log("📋 [fetchNearbyRestaurants] Result:", {
+        total,
+        count: restaurants.length,
+        firstRestaurant: restaurants[0]?.restaurantName || "N/A",
+      });
+
       const currentState = get();
       if (
         currentState.restaurantRequestSeq !== requestSeq ||

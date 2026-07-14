@@ -1,6 +1,12 @@
 import { Image } from "expo-image";
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BANNER_WIDTH = SCREEN_WIDTH - 32; // mx-4 means 16 each side
@@ -20,9 +26,9 @@ const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500";
 
 const DEFAULT_DEAL: Deal = {
-  title: "35% OFF on Burgers!",
-  subtitle: "Limited time offer",
-  ctaText: "Order Now",
+  title: "Welcome to Dine Five!",
+  subtitle: "Discover restaurants near you",
+  ctaText: "Explore",
   image: FALLBACK_IMAGE,
 };
 
@@ -93,7 +99,10 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
         newIndex = 0;
       } else if (scrollIndex <= 0) {
         // At the first "fake" item (copy of last item), jump to real last item
-        scrollRef.current?.scrollTo({ x: list.length * BANNER_WIDTH, animated: false });
+        scrollRef.current?.scrollTo({
+          x: list.length * BANNER_WIDTH,
+          animated: false,
+        });
         newIndex = list.length - 1;
       }
     } else {
@@ -113,7 +122,7 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
         onMomentumScrollEnd={handleMomentumScrollEnd}
         scrollEventThrottle={16}
         bounces={false}
-        contentContainerStyle={{ alignItems: 'center' }}
+        contentContainerStyle={{ alignItems: "center" }}
       >
         {extendedList.map((deal, index) => {
           const title = deal?.title || DEFAULT_DEAL.title;
@@ -126,7 +135,7 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
               key={`${index}-${title}`}
               style={{ width: BANNER_WIDTH, paddingHorizontal: 6 }}
             >
-              <View className="bg-[#F6D977] rounded-[28px] px-6 py-5 min-h-[125px] overflow-hidden flex-row flex-1 shadow-sm">
+              <View className="bg-[#F6D977] rounded-[28px] px-6 py-5 min-h-[125px] overflow-hidden flex-row gap-1 flex-1 shadow-sm">
                 {/* Decorative background patterns */}
                 <View className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/20" />
                 <View className="absolute -left-4 -bottom-4 w-16 h-16 rounded-full bg-black/5" />
@@ -141,7 +150,7 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
                   </Text>
                   <Text
                     className="text-[#5D4A00] text-[13px] font-medium mt-1 mb-4 opacity-80"
-                    numberOfLines={1}
+                    numberOfLines={2}
                   >
                     {subtitle}
                   </Text>
@@ -159,14 +168,14 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
                   <View className="absolute w-28 h-28 rounded-full bg-white/40 shadow-sm" />
                   <Image
                     source={{ uri: image }}
-                    style={{ 
-                      width: 130, 
-                      height: 130, 
-                      marginBottom: -15, 
+                    style={{
+                      width: 140,
+                      height: 140,
+                      borderRadius: 24,
                       marginRight: -10,
-                      transform: [{ rotate: '-4deg' }]
+                      transform: [{ rotate: "-4deg" }],
                     }}
-                    contentFit="contain"
+                    contentFit="fill"
                     transition={400}
                     cachePolicy="memory-disk"
                   />
