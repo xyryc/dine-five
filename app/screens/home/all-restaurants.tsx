@@ -33,7 +33,8 @@ const getCuisineLabel = (restaurant: Restaurant) =>
 
 export default function AllRestaurantsScreen() {
   const router = useRouter();
-  const { location, fetchLocation, setLocationManually, locationLoading } = useRestaurantStore();
+  const { location, fetchLocation, setLocationManually, locationLoading } =
+    useRestaurantStore();
   const { fetchCategories } = useStore() as any;
 
   // Filter and Search States
@@ -44,7 +45,9 @@ export default function AllRestaurantsScreen() {
   const [freeMealsOnly, setFreeMealsOnly] = useState(false);
 
   // Location States
-  const [locationName, setLocationName] = useState<string>("Detecting location...");
+  const [locationName, setLocationName] = useState<string>(
+    "Detecting location...",
+  );
   const [addressSearch, setAddressSearch] = useState("");
   const [locationSearching, setLocationSearching] = useState(false);
 
@@ -70,12 +73,19 @@ export default function AllRestaurantsScreen() {
             const street = addr.street || addr.name || "";
             const region = addr.region || "";
             const name = [street, city, region].filter(Boolean).join(", ");
-            setLocationName(name || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+            setLocationName(
+              name ||
+                `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`,
+            );
           } else {
-            setLocationName(`${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+            setLocationName(
+              `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`,
+            );
           }
         } catch (err) {
-          setLocationName(`${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+          setLocationName(
+            `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`,
+          );
         }
       } else {
         setLocationName("Unknown Location");
@@ -94,7 +104,7 @@ export default function AllRestaurantsScreen() {
       } else {
         Alert.alert(
           "Location Not Found",
-          "Could not find coordinates for this address. Please try another query."
+          "Could not find coordinates for this address. Please try another query.",
         );
       }
     } catch (err: any) {
@@ -138,41 +148,47 @@ export default function AllRestaurantsScreen() {
   }, [dynamicCategories, restaurants]);
 
   // Fetch Restaurants
-  const loadRestaurants = useCallback(async (isRefreshing = false) => {
-    if (!isRefreshing) setLoading(true);
-    setError(null);
+  const loadRestaurants = useCallback(
+    async (isRefreshing = false) => {
+      if (!isRefreshing) setLoading(true);
+      setError(null);
 
-    const lat = location?.latitude ?? 40.7128; // fallback coordinates
-    const lng = location?.longitude ?? -74.006;
+      const lat = location?.latitude ?? 40.7128; // fallback coordinates
+      const lng = location?.longitude ?? -74.006;
 
-    try {
-      const params = {
-        latitude: lat,
-        longitude: lng,
-        radius: radiusMeters,
-        sortBy,
-        freeNearYou: freeMealsOnly,
-        cuisine: activeCategory === "All" ? undefined : activeCategory,
-        search: searchText.trim() || undefined,
-        limit: 100,
-      };
+      try {
+        const params = {
+          latitude: lat,
+          longitude: lng,
+          radius: radiusMeters,
+          sortBy,
+          freeNearYou: freeMealsOnly,
+          cuisine: activeCategory === "All" ? undefined : activeCategory,
+          search: searchText.trim() || undefined,
+          limit: 100,
+        };
 
-      console.log("🔍 [AllRestaurantsScreen] Fetching nearby restaurants:", params);
-      const response = await restaurantService.getNearby(params);
-      
-      if (response.success) {
-        setRestaurants(response.data ?? []);
-      } else {
-        setError(response.message || "Failed to load restaurants.");
+        console.log(
+          "🔍 [AllRestaurantsScreen] Fetching nearby restaurants:",
+          params,
+        );
+        const response = await restaurantService.getNearby(params);
+
+        if (response.success) {
+          setRestaurants(response.data ?? []);
+        } else {
+          setError(response.message || "Failed to load restaurants.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        setError(err?.message || "Something went wrong. Please try again.");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } catch (err: any) {
-      console.error(err);
-      setError(err?.message || "Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [location, radiusMeters, sortBy, freeMealsOnly, activeCategory, searchText]);
+    },
+    [location, radiusMeters, sortBy, freeMealsOnly, activeCategory, searchText],
+  );
 
   // Initial load
   useEffect(() => {
@@ -211,7 +227,10 @@ export default function AllRestaurantsScreen() {
         freeTokenCount: String(restaurant.freeTokenCount || 0),
         name: restaurant.restaurantName || restaurant.name || "",
         image: restaurant.profile || restaurant.image || "",
-        rating: restaurant.rating !== undefined && restaurant.rating !== null ? String(restaurant.rating) : "",
+        rating:
+          restaurant.rating !== undefined && restaurant.rating !== null
+            ? String(restaurant.rating)
+            : "",
         address: restaurant.restaurantAddress || "",
         distance: restaurant.distance || "",
       },
@@ -227,7 +246,10 @@ export default function AllRestaurantsScreen() {
     const distanceLabel = formatDistance(item.distance);
     const deliveryMin =
       item.deliveryTimeMinutes ??
-      Math.max(5, Math.min(30, Math.round((Number(item.distance) || 0) * 2) + 5));
+      Math.max(
+        5,
+        Math.min(30, Math.round((Number(item.distance) || 0) * 2) + 5),
+      );
 
     return (
       <TouchableOpacity
@@ -338,7 +360,9 @@ export default function AllRestaurantsScreen() {
           <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
 
-        <Text className="text-base font-black text-gray-900">All Restaurants</Text>
+        <Text className="text-base font-black text-gray-900">
+          All Restaurants{" "}
+        </Text>
 
         <View className="w-10" />
       </View>
@@ -350,7 +374,11 @@ export default function AllRestaurantsScreen() {
         renderItem={renderRestaurantCard}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#F5C518"]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["#F5C518"]}
+          />
         }
         ListHeaderComponent={
           <View className="pt-4 pb-3">
@@ -359,7 +387,10 @@ export default function AllRestaurantsScreen() {
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-row items-center flex-1 mr-2">
                   <Ionicons name="location" size={18} color="#F5C518" />
-                  <Text className="text-xs font-black text-gray-900 ml-1.5 flex-1" numberOfLines={1}>
+                  <Text
+                    className="text-xs font-black text-gray-900 ml-1.5 flex-1"
+                    numberOfLines={1}
+                  >
                     {locationName}
                   </Text>
                 </View>
@@ -372,12 +403,23 @@ export default function AllRestaurantsScreen() {
                   disabled={locationLoading || locationSearching}
                   className="flex-row items-center bg-white border border-gray-200 px-3 py-1.5 rounded-full"
                 >
-                  {(locationLoading || locationSearching) ? (
-                    <ActivityIndicator size="small" color="#1F2937" style={{ marginRight: 4 }} />
+                  {locationLoading || locationSearching ? (
+                    <ActivityIndicator
+                      size="small"
+                      color="#1F2937"
+                      style={{ marginRight: 4 }}
+                    />
                   ) : (
-                    <Ionicons name="locate" size={14} color="#1F2937" style={{ marginRight: 4 }} />
+                    <Ionicons
+                      name="locate"
+                      size={14}
+                      color="#1F2937"
+                      style={{ marginRight: 4 }}
+                    />
                   )}
-                  <Text className="text-[10px] font-black text-gray-800">Locate Me</Text>
+                  <Text className="text-[10px] font-black text-gray-800">
+                    Locate Me
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -393,7 +435,10 @@ export default function AllRestaurantsScreen() {
                   onSubmitEditing={handleLocationSearch}
                 />
                 {addressSearch ? (
-                  <TouchableOpacity onPress={() => setAddressSearch("")} className="mr-1.5">
+                  <TouchableOpacity
+                    onPress={() => setAddressSearch("")}
+                    className="mr-1.5"
+                  >
                     <Ionicons name="close-circle" size={16} color="#9CA3AF" />
                   </TouchableOpacity>
                 ) : null}
@@ -402,7 +447,9 @@ export default function AllRestaurantsScreen() {
                   disabled={!addressSearch.trim() || locationSearching}
                   className="bg-gray-900 px-3 py-1.5 rounded-xl"
                 >
-                  <Text className="text-white text-[10px] font-black">Search</Text>
+                  <Text className="text-white text-[10px] font-black">
+                    Search
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -418,7 +465,10 @@ export default function AllRestaurantsScreen() {
                 onChangeText={setSearchText}
               />
               {searchText ? (
-                <TouchableOpacity onPress={() => setSearchText("")} className="mr-1">
+                <TouchableOpacity
+                  onPress={() => setSearchText("")}
+                  className="mr-1"
+                >
                   <Ionicons name="close-circle" size={18} color="#9CA3AF" />
                 </TouchableOpacity>
               ) : null}
@@ -469,7 +519,9 @@ export default function AllRestaurantsScreen() {
                     sortBy === "distance" ? "bg-white shadow-sm" : ""
                   }`}
                 >
-                  <Text className="text-[10px] font-bold text-gray-700">Distance</Text>
+                  <Text className="text-[10px] font-bold text-gray-700">
+                    Distance
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setSortBy("rating")}
@@ -477,7 +529,9 @@ export default function AllRestaurantsScreen() {
                     sortBy === "rating" ? "bg-white shadow-sm" : ""
                   }`}
                 >
-                  <Text className="text-[10px] font-bold text-gray-700">Rating</Text>
+                  <Text className="text-[10px] font-bold text-gray-700">
+                    Rating
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -554,7 +608,9 @@ export default function AllRestaurantsScreen() {
                 No Restaurants Found
               </Text>
               <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed">
-                {error ? error : "We couldn't find any restaurants matching your filters or location. Try searching for something else or adjusting your filters."}
+                {error
+                  ? error
+                  : "We couldn't find any restaurants matching your filters or location. Try searching for something else or adjusting your filters."}
               </Text>
               {error ? (
                 <TouchableOpacity
@@ -566,7 +622,10 @@ export default function AllRestaurantsScreen() {
                   </Text>
                 </TouchableOpacity>
               ) : (
-                (searchText || activeCategory !== "All" || freeMealsOnly || radiusMeters !== 16000) && (
+                (searchText ||
+                  activeCategory !== "All" ||
+                  freeMealsOnly ||
+                  radiusMeters !== 16000) && (
                   <TouchableOpacity
                     onPress={() => {
                       setSearchText("");

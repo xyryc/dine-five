@@ -28,11 +28,16 @@ export default function GoogleLogin() {
     setIsBusy(true);
     try {
       const result = await signInWithGoogle();
-      console.log("Full Google Sign-In Result:", JSON.stringify(result, null, 2));
+      console.log(
+        "Full Google Sign-In Result:",
+        JSON.stringify(result, null, 2),
+      );
       const idToken = (result as any).data?.idToken || (result as any).idToken;
 
       if (!idToken) {
-        throw new Error("No ID token received from Google. Make sure you've configured the Google Cloud Console correctly.");
+        throw new Error(
+          "No ID token received from Google. Make sure you've configured the Google Cloud Console correctly.",
+        );
       }
 
       console.log("--- START GOOGLE ID TOKEN ---");
@@ -43,7 +48,7 @@ export default function GoogleLogin() {
       const loginResult = await googleLogin({ idToken });
 
       if (loginResult) {
-        Alert.alert("Success", "Signed in successfully!");
+        // Alert.alert("Success", "Signed in successfully!");
         router.replace("/(tabs)");
       }
     } catch (error: any) {
@@ -57,7 +62,7 @@ export default function GoogleLogin() {
   return (
     <View style={styles.outerContainer}>
       <Pressable
-      className="border border-gray-300 py-2.5 px-2 rounded-full"
+        className="border border-gray-300 py-2.5 px-2 rounded-full"
         onPress={handleGoogleSignIn}
         disabled={isBusy}
         style={({ pressed }) => [
@@ -128,4 +133,3 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 });
-

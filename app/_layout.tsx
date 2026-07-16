@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Image } from "expo-image";
+import { useFonts } from "expo-font";
 import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import { useNotificationSync } from "@/hooks/useNotificationSync";
 import { useStore } from "@/stores/stores";
@@ -22,6 +23,12 @@ export default function RootLayout() {
   const { isInitialized, initializeAuth, accessToken, user } = useStore() as any;
   const segments = useSegments();
   const router = useRouter();
+  const [fontsLoaded] = useFonts({
+    Fraunces: require("@/assets/fonts/Fraunces-Variable.ttf"),
+    "Fraunces-Italic": require("@/assets/fonts/Fraunces-Italic-Variable.ttf"),
+    Inter: require("@/assets/fonts/Inter-Variable.ttf"),
+    "Inter-Italic": require("@/assets/fonts/Inter-Italic-Variable.ttf"),
+  });
 
   useEffect(() => {
     initializeAuth();
@@ -68,7 +75,7 @@ export default function RootLayout() {
 
   useNotificationSync();
 
-  if (!isInitialized) {
+  if (!isInitialized || !fontsLoaded) {
     return (
       <View style={{ flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" }}>
         <StatusBar style="dark" />
