@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
@@ -33,6 +34,7 @@ const DEFAULT_DEAL: Deal = {
 };
 
 export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -143,22 +145,23 @@ export const PromoBanner = ({ deals = [] }: PromoBannerProps) => {
 
                 <View className="flex-1 z-10 justify-center">
                   <Text
-                    className="text-[#3A2E00] text-[20px] font-extrabold leading-tight tracking-tight"
+                    className="text-[#3A2E00] text-[20px] font-heading leading-tight tracking-tight"
                     numberOfLines={2}
                   >
                     {title}
                   </Text>
                   <Text
-                    className="text-[#5D4A00] text-[13px] font-medium mt-1 mb-4 opacity-80"
+                    className="text-[#5D4A00] text-[13px] font-body-medium mt-1 mb-4 opacity-80"
                     numberOfLines={2}
                   >
                     {subtitle}
                   </Text>
                   <TouchableOpacity
                     activeOpacity={0.85}
+                    onPress={() => router.push("/screens/home/all-restaurants")}
                     className="bg-[#222] px-5 py-2 rounded-xl self-start shadow-sm"
                   >
-                    <Text className="text-white text-[12px] font-bold">
+                    <Text className="text-white text-[12px] font-body-semibold">
                       {ctaText}
                     </Text>
                   </TouchableOpacity>

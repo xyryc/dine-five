@@ -177,10 +177,10 @@ export default function ProfileScreen() {
               />
             </View>
             <View className="items-center">
-              <Text numberOfLines={1} className="text-xl font-extrabold text-gray-900 leading-6 text-center">
+              <Text numberOfLines={1} className="text-xl font-heading text-gray-900 leading-6 text-center">
                 {user?.name || user?.fullName || "User"}
               </Text>
-              <Text numberOfLines={1} className="text-sm font-medium text-gray-400 mt-1 leading-4 text-center">
+              <Text numberOfLines={1} className="text-sm font-body text-gray-400 mt-1 leading-4 text-center">
                 {user?.email || "No email provided"}
               </Text>
             </View>
@@ -191,7 +191,7 @@ export default function ProfileScreen() {
         <View className="px-6 gap-y-6">
           {menuSections.map((section) => (
             <View key={section.title} className="gap-y-2">
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">
+              <Text className="text-xs font-heading-semibold text-gray-400 uppercase tracking-widest mb-1 ml-1">
                 {section.title}
               </Text>
               <View className="bg-white rounded-2xl overflow-hidden border border-gray-50 shadow-sm">
@@ -217,7 +217,7 @@ export default function ProfileScreen() {
                       >
                         <Ionicons name={item.icon as any} size={18} color={item.color} />
                       </View>
-                      <Text className="text-[15px] font-semibold text-gray-800">
+                      <Text className="text-[15px] font-body-medium text-gray-800">
                         {item.title}
                       </Text>
                     </View>
@@ -236,7 +236,7 @@ export default function ProfileScreen() {
               className="flex-row items-center justify-center gap-2 bg-[#FFF5F5] border border-[#FED7D7] py-4 rounded-2xl shadow-sm"
             >
               <Ionicons name="log-out-outline" size={20} color="#E53E3E" />
-              <Text className="text-[#E53E3E] font-bold text-base">
+              <Text className="text-[#E53E3E] font-body-semibold text-base">
                 Log Out
               </Text>
             </TouchableOpacity>

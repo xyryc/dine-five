@@ -489,8 +489,8 @@ export default function HomeScreen() {
                 <Ionicons name="location-outline" size={32} color="#E29E10" />
               </View>
               <View className="items-center px-4">
-                <Text className="text-base font-bold text-gray-900 text-center">Location Access Required</Text>
-                <Text className="text-xs text-gray-400 font-semibold text-center mt-1.5 leading-relaxed">
+                <Text className="text-base font-heading-semibold text-gray-900 text-center">Location Access Required</Text>
+                <Text className="text-xs font-body text-gray-400 text-center mt-1.5 leading-relaxed">
                   Dine Five uses your location to discover restaurants and food pickup points near you. Please enable location permissions.
                 </Text>
               </View>
@@ -501,11 +501,11 @@ export default function HomeScreen() {
                   className="bg-[#E29E10] h-12 rounded-2xl flex-row items-center justify-center gap-2 shadow-sm"
                 >
                   <Ionicons name="pin" size={16} color="#FFF" />
-                  <Text className="text-white font-extrabold text-sm">Enable Location Access</Text>
+                  <Text className="text-white font-body-semibold text-sm">Enable Location Access</Text>
                 </TouchableOpacity>
 
                 <View className="w-full border-t border-gray-200/60 my-1 pt-3">
-                  <Text className="text-xs font-bold text-gray-500 mb-2">Or enter address manually:</Text>
+                  <Text className="text-xs font-heading-medium text-gray-500 mb-2">Or enter address manually:</Text>
                   <View className="flex-row items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-1.5 shadow-sm">
                     <Ionicons name="search" size={16} color="#9CA3AF" />
                     <TextInput
@@ -533,7 +533,7 @@ export default function HomeScreen() {
                         {isSearchingAddress ? (
                           <ActivityIndicator size="small" color="#FFF" />
                         ) : (
-                          <Text className="text-white text-xs font-extrabold">Set</Text>
+                          <Text className="text-white text-xs font-body-semibold">Set</Text>
                         )}
                       </TouchableOpacity>
                     )}
@@ -554,7 +554,7 @@ export default function HomeScreen() {
               {isInitialLoading && (
                 <View className="py-8 items-center">
                   <ActivityIndicator size="small" color="#F5C518" />
-                  <Text className="text-xs text-gray-400 mt-2">
+                  <Text className="text-xs font-body text-gray-400 mt-2">
                     Loading restaurants...
                   </Text>
                 </View>
@@ -577,10 +577,10 @@ export default function HomeScreen() {
                   <View className="w-16 h-16 bg-[#FFFBEB] rounded-full items-center justify-center mb-4">
                     <Ionicons name="restaurant-outline" size={28} color="#F5C518" />
                   </View>
-                  <Text className="text-base font-bold text-[#1C1C1C] mb-1">
+                  <Text className="text-base font-heading text-[#1C1C1C] mb-1">
                     No Restaurants Found
                   </Text>
-                  <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed">
+                  <Text className="text-xs font-body text-gray-400 text-center max-w-[260px] leading-relaxed">
                     We couldn't find any restaurants near your location. Try searching for something else or adjusting your filters.
                   </Text>
                   {(searchText || activeCategory !== "All") && (
@@ -591,7 +591,7 @@ export default function HomeScreen() {
                       }}
                       className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
                     >
-                      <Text className="text-white text-xs font-black uppercase tracking-wider">
+                      <Text className="text-white text-xs font-body-semibold uppercase tracking-wider">
                         Clear Filters
                       </Text>
                     </TouchableOpacity>
@@ -601,7 +601,7 @@ export default function HomeScreen() {
 
               {!!restaurantsError && (
                 <View className="px-4 pb-4">
-                  <Text className="text-xs text-amber-700 text-center">
+                  <Text className="text-xs font-body text-amber-700 text-center">
                     {restaurantsError}
                   </Text>
                 </View>
@@ -653,12 +653,12 @@ function AddressModal({
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
         <View className="bg-white rounded-[28px] w-full p-6 shadow-xl gap-y-4">
           <View className="flex-row justify-between items-center">
-            <Text className="text-lg font-black text-gray-900">Set Location</Text>
+            <Text className="text-lg font-heading text-gray-900">Set Location</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
-          <Text className="text-xs text-gray-400 font-semibold leading-relaxed">
+          <Text className="text-xs font-body text-gray-400 leading-relaxed">
             Enter your address, city, or zip code below to find nearby restaurants:
           </Text>
           <View className="flex-row items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl px-3 py-2">
@@ -677,7 +677,7 @@ function AddressModal({
               onPress={onClose}
               className="flex-1 bg-gray-50 border border-gray-200/60 h-12 rounded-2xl items-center justify-center"
             >
-              <Text className="text-gray-500 font-extrabold text-sm">Cancel</Text>
+              <Text className="text-gray-500 font-body-semibold text-sm">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSearch}
@@ -687,7 +687,7 @@ function AddressModal({
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text className="text-white font-extrabold text-sm">Search</Text>
+                <Text className="text-white font-body-semibold text-sm">Search</Text>
               )}
             </TouchableOpacity>
           </View>

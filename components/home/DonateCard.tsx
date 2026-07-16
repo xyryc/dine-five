@@ -32,10 +32,10 @@ export const DonateCard = () => {
 
         {/* Text Section */}
         <View className="ml-4">
-          <Text className="text-2xl font-bold text-[#1F2937] leading-tight">
+          <Text className="text-2xl font-heading text-[#1F2937] leading-tight">
             $5.99
           </Text>
-          <Text className="text-base text-[#6B7280] font-medium">
+          <Text className="text-base font-body-medium text-[#6B7280]">
             for Every Meal.
           </Text>
         </View>
@@ -48,7 +48,7 @@ export const DonateCard = () => {
         className="bg-[#F8F9FF] border border-[#D1D5DB] px-3.5 py-2 rounded-xl shadow-sm shrink-0"
         style={{ flexShrink: 0 }}
       >
-        <Text className="text-[#1F2937] text-[11px] font-bold tracking-tight" numberOfLines={1}>
+        <Text className="text-[#1F2937] text-[11px] font-body-semibold tracking-tight" numberOfLines={1}>
           DONATE A MEAL
         </Text>
       </TouchableOpacity>

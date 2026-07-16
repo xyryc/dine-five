@@ -107,28 +107,28 @@ function SectionRestaurantCardInner({
           </View>
         )}
         <View style={{ position: "absolute", top: 8, left: 8, backgroundColor: "#F5C518", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 }}>
-          <Text style={{ fontSize: 10, fontWeight: "900", color: "#111827" }}>
+          <Text className="text-[10px] font-body-semibold text-[#111827]">
             {restaurant.availableFoods > 0 ? `${restaurant.availableFoods} items` : "Open"}
           </Text>
         </View>
       </View>
 
       <View style={{ paddingHorizontal: 4, paddingBottom: 4 }}>
-        <Text style={{ fontSize: 14, fontWeight: "700", color: "#111827" }} numberOfLines={1}>
+        <Text className="text-sm font-heading text-[#111827]" numberOfLines={1}>
           {name}
         </Text>
 
         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4, flexWrap: "wrap", gap: 4 }}>
           <Ionicons name="star" size={11} color="#F5C518" />
-          <Text style={{ fontSize: 11, fontWeight: "700", color: "#374151" }}>{rating}</Text>
+          <Text className="text-[11px] font-body-semibold text-[#374151]">{rating}</Text>
           <Text style={{ fontSize: 10, color: "#D1D5DB" }}>•</Text>
-          <Text style={{ fontSize: 11, color: "#6B7280", flex: 1 }} numberOfLines={1}>{cuisineLabel}</Text>
-          <Text style={{ fontSize: 11, fontWeight: "500", color: "#6B7280" }}>{deliveryMin}min</Text>
+          <Text className="text-[11px] font-body text-[#6B7280] flex-1" numberOfLines={1}>{cuisineLabel}</Text>
+          <Text className="text-[11px] font-body-medium text-[#6B7280]">{deliveryMin}min</Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
           <Ionicons name="location-sharp" size={10} color="#9CA3AF" />
-          <Text style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 2 }} numberOfLines={1}>
+          <Text className="text-[10px] font-body text-[#9CA3AF] ml-0.5" numberOfLines={1}>
             {distanceLabel || "Nearby"}
           </Text>
         </View>
@@ -161,11 +161,11 @@ export function RestaurantSection({
   return (
     <View style={{ marginBottom: 24 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 8 }}>
-        <Text style={{ fontSize: 18, fontWeight: "700", color: "#111827", flex: 1, marginRight: 8 }} numberOfLines={1}>
+        <Text className="text-lg font-heading text-[#111827] flex-1 mr-2" numberOfLines={1}>
           {title}
         </Text>
         <TouchableOpacity onPress={() => router.push("/screens/home/all-restaurants")} style={{ flexShrink: 0 }}>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#F5C518" }}>View all</Text>
+          <Text className="text-sm font-body-semibold text-[#F5C518]">View all</Text>
         </TouchableOpacity>
       </View>
 

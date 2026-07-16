@@ -45,7 +45,7 @@ export const Categories = ({
               className={`mr-2.5 px-5 py-2 rounded-full border ${isActive ? "bg-yellow-400 border-yellow-400" : "bg-white border-gray-200"}`}
             >
               <Text
-                className={`${isActive ? "text-[#2A2200] font-semibold text-[13px]" : "text-[#7B7B7B] text-[13px]"}`}
+                className={`${isActive ? "text-[#2A2200] font-body-semibold text-[13px]" : "text-[#7B7B7B] font-body text-[13px]"}`}
               >
                 {cat}
               </Text>

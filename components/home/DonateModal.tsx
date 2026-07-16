@@ -58,12 +58,12 @@ export const DonateModal = ({ visible, onClose, onConfirm }: DonateModalProps) =
           {/* Content */}
           <View style={styles.modalContent}>
             {/* Title */}
-            <Text className="text-xl font-bold text-[#1F2937] mb-2">
+            <Text className="text-xl font-heading text-[#1F2937] mb-2">
               Donate a meal
             </Text>
 
             {/* Description */}
-            <Text className="text-base text-gray-500 leading-5 mb-5">
+            <Text className="text-base font-body text-gray-500 leading-5 mb-5">
               Your donation helps provide meals to people in need. Select how many meals you want to donate.
             </Text>
 
@@ -79,9 +79,8 @@ export const DonateModal = ({ visible, onClose, onConfirm }: DonateModalProps) =
                     selectedMealCount === mealCount && styles.amountButtonSelected
                   ]}
                 >
-                  <Text style={[
-                    styles.amountText,
-                    selectedMealCount === mealCount && styles.amountTextSelected
+                  <Text className="font-body-semibold" style={[
+                    { fontSize: 15, color: selectedMealCount === mealCount ? '#1F2937' : '#6B7280' },
                   ]}>
                     {mealCount}
                   </Text>

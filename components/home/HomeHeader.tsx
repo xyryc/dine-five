@@ -121,8 +121,8 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
             />
           </View>
           <View>
-            <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Welcome back</Text>
-            <Text numberOfLines={1} className="text-base font-black text-[#1C1C1C] max-w-[190px]">
+            <Text className="text-[10px] font-heading-medium text-gray-400 uppercase tracking-wider">Welcome back</Text>
+            <Text numberOfLines={1} className="text-base font-heading text-[#1C1C1C] max-w-[190px]">
               {displayName}
             </Text>
           </View>
@@ -148,7 +148,7 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
             value={addressSearch}
             onChangeText={setAddressSearch}
             onSubmitEditing={handleLocationSearch}
-            className="flex-1 ml-2.5 text-xs text-[#1C1C1C] font-semibold py-1"
+            className="flex-1 ml-2.5 text-xs text-[#1C1C1C] font-body py-1"
           />
           
           <View className="flex-row items-center gap-2">
@@ -176,7 +176,7 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
                 disabled={searching}
                 className="bg-[#F5C518] px-3 py-1.5 rounded-lg"
               >
-                <Text className="text-gray-900 text-[10px] font-extrabold uppercase">Go</Text>
+                <Text className="text-gray-900 text-[10px] font-body-semibold uppercase">Go</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -192,7 +192,7 @@ export const HomeHeader = ({ name, location: propLocation }: HomeHeaderProps) =>
           className="flex-row items-center h-[48px] px-4"
         >
           <Ionicons name="search-outline" size={18} color="#A3A3A3" />
-          <Text className="flex-1 ml-2.5 text-xs text-gray-400 font-medium">
+          <Text className="flex-1 ml-2.5 text-xs text-gray-400 font-body">
             Search dishes, restaurants...
           </Text>
           

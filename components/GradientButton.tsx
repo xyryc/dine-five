@@ -42,7 +42,7 @@ const GradientButton = ({
       >
         <Text 
           style={{ fontSize, textAlign: "center" }}
-          className={`text-black font-bold text-center ${textClassName}`}
+          className={`text-black font-body-semibold text-center ${textClassName}`}
         >
           {title}
         </Text>

@@ -6,10 +6,14 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ["Fraunces", "serif"],
-        "heading-italic": ["Fraunces-Italic", "serif"],
-        body: ["Inter", "sans-serif"],
-        "body-italic": ["Inter-Italic", "sans-serif"],
+        heading: ["PlusJakartaSans-Bold", "sans-serif"],
+        "heading-semibold": ["PlusJakartaSans-SemiBold", "sans-serif"],
+        "heading-medium": ["PlusJakartaSans-Medium", "sans-serif"],
+        "heading-light": ["PlusJakartaSans-Light", "sans-serif"],
+        body: ["InstrumentSans-Regular", "sans-serif"],
+        "body-medium": ["InstrumentSans-Medium", "sans-serif"],
+        "body-semibold": ["InstrumentSans-SemiBold", "sans-serif"],
+        "body-bold": ["InstrumentSans-Bold", "sans-serif"],
       },
     },
   },
