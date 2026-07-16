@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Dine-Five",
+    "name": "Dine Five",
     "slug": "Dine-Five",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app_icon.png",
     "scheme": "dinefive",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -17,9 +17,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/icon.png",
-        "backgroundImage": "./assets/icon.png",
-        "monochromeImage": "./assets/icon.png"
+        "foregroundImage": "./assets/app_icon.png",
+        "backgroundImage": "./assets/app_icon.png",
+        "monochromeImage": "./assets/app_icon.png"
       },
       "package": "com.dinefive.app",
       "googleServicesFile": "./google-services.json",
@@ -58,7 +58,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
