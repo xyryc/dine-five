@@ -148,7 +148,7 @@ export default function ConfirmOrderScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Confirm Order</Text>
+        <Text className="text-xl font-heading text-gray-900">Confirm Order</Text>
       </View>
 
       {/* List */}
@@ -196,13 +196,13 @@ export default function ConfirmOrderScreen() {
         <View className="mt-8 mb-4">
           <View className="flex-row justify-between mb-2">
             <Text className="text-gray-500 text-base">Subtotal</Text>
-            <Text className="text-gray-900 font-bold text-base">
+            <Text className="text-gray-900 font-body-bold text-base">
               ${subtotal.toFixed(2)}
             </Text>
           </View>
           <View className="flex-row justify-between pt-2 border-t border-gray-200">
-            <Text className="text-gray-900 text-lg font-bold">Total</Text>
-            <Text className="text-gray-900 text-lg font-bold">
+            <Text className="text-gray-900 text-lg font-heading">Total</Text>
+            <Text className="text-gray-900 text-lg font-heading">
               ${total.toFixed(2)}
             </Text>
           </View>
@@ -211,14 +211,14 @@ export default function ConfirmOrderScreen() {
 
       {/* Footer */}
       <View className="absolute bottom-16 left-0 right-0 bg-[#FDFBF7] px-4 py-6 border-t border-gray-100 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-gray-900">
+        <Text className="text-2xl font-heading text-gray-900">
           ${total.toFixed(2)}
         </Text>
         <TouchableOpacity
           onPress={handleContinue}
           className="bg-yellow-400 px-10 py-4 rounded-2xl shadow-md"
         >
-          <Text className="text-gray-900 font-bold text-lg">Continue</Text>
+          <Text className="text-gray-900 font-body-bold text-lg">Continue</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

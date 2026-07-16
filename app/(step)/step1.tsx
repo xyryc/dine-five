@@ -35,7 +35,7 @@ const Step1 = () => {
             className="absolute right-4"
           >
             <TouchableOpacity onPress={() => router.push("/(step)/step2")}>
-              <Text className="text-base font-medium text-[#FFCD39]">Skip</Text>
+              <Text className="text-base font-body-medium text-[#FFCD39]">Skip</Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -61,7 +61,7 @@ const Step1 = () => {
         <Text 
           numberOfLines={2} 
           adjustsFontSizeToFit 
-          className="text-3xl font-bold text-gray-900 mb-4 text-center"
+          className="text-3xl font-heading text-gray-900 mb-4 text-center"
         >
           Fresh Meals for Just $5.99
         </Text>

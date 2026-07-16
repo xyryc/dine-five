@@ -94,13 +94,13 @@ export default function NotificationScreen() {
         />
       </View>
       <View className="flex-1">
-        <Text className="text-base font-semibold text-[#363A33] mb-1">
+        <Text className="text-base font-body-semibold text-[#363A33] mb-1">
           {item.title}
         </Text>
         <Text className="text-[#60655C] text-sm font-normal leading-5 mb-2">
           {item.message}
         </Text>
-        <Text className="text-sm font-semibold text-gray-900">
+        <Text className="text-sm font-body-semibold text-gray-900">
           {item.time || formatTime(item.createdAt)}
         </Text>
       </View>
@@ -121,7 +121,7 @@ export default function NotificationScreen() {
         </TouchableOpacity>
         <View className="flex-row items-center gap-2  mt-2.5">
           <Ionicons name="notifications-outline" size={24} color="#000" />
-          <Text className="text-xl font-bold text-gray-900">Notifications</Text>
+          <Text className="text-xl font-heading text-gray-900">Notifications</Text>
         </View>
       </View>
 
@@ -133,7 +133,7 @@ export default function NotificationScreen() {
             className={`flex-1 h-full items-center justify-center rounded-xl relative ${activeTab === "new" ? "bg-[#FFC107]" : "bg-transparent"}`}
           >
             <Text
-              className={`text-base font-semibold ${activeTab === "new" ? "text-[#1F2A33]" : "text-[#664D03]"}`}
+              className={`text-base font-body-semibold ${activeTab === "new" ? "text-[#1F2A33]" : "text-[#664D03]"}`}
             >
               New
             </Text>
@@ -147,7 +147,7 @@ export default function NotificationScreen() {
             className={`flex-1 h-full items-center justify-center rounded-xl ${activeTab === "old" ? "bg-[#FFC107]" : "bg-transparent"}`}
           >
             <Text
-              className={`text-base font-medium ${activeTab === "old" ? "text-[#1F2A33]" : "text-[#664D03]"}`}
+              className={`text-base font-body-medium ${activeTab === "old" ? "text-[#1F2A33]" : "text-[#664D03]"}`}
             >
               Old
             </Text>

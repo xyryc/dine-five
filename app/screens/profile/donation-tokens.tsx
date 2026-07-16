@@ -423,7 +423,7 @@ export default function DonationTokensScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Donation Tokens</Text>
+        <Text className="text-xl font-heading text-gray-900">Donation Tokens</Text>
         <TouchableOpacity
           onPress={handleDownload}
           disabled={tokens.length === 0 || isDownloading}
@@ -459,26 +459,26 @@ export default function DonationTokensScreen() {
         >
           <View className="mb-5 flex-row gap-3">
             <View className="flex-1 rounded-lg bg-white p-4 shadow-sm">
-              <Text className="text-xs font-semibold uppercase text-gray-500">
+              <Text className="text-xs font-body-semibold uppercase text-gray-500">
                 Total
               </Text>
-              <Text className="mt-2 text-2xl font-bold text-gray-900">
+              <Text className="mt-2 text-2xl font-heading text-gray-900">
                 {summary.total}
               </Text>
             </View>
             <View className="flex-1 rounded-lg bg-white p-4 shadow-sm">
-              <Text className="text-xs font-semibold uppercase text-gray-500">
+              <Text className="text-xs font-body-semibold uppercase text-gray-500">
                 Available
               </Text>
-              <Text className="mt-2 text-2xl font-bold text-green-700">
+              <Text className="mt-2 text-2xl font-heading text-green-700">
                 {summary.available}
               </Text>
             </View>
             <View className="flex-1 rounded-lg bg-white p-4 shadow-sm">
-              <Text className="text-xs font-semibold uppercase text-gray-500">
+              <Text className="text-xs font-body-semibold uppercase text-gray-500">
                 Claimed
               </Text>
-              <Text className="mt-2 text-2xl font-bold text-gray-900">
+              <Text className="mt-2 text-2xl font-heading text-gray-900">
                 {summary.claimed}
               </Text>
             </View>
@@ -489,7 +489,7 @@ export default function DonationTokensScreen() {
               <View className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-yellow-100">
                 <Ionicons name="gift-outline" size={26} color="#92400E" />
               </View>
-              <Text className="text-lg font-bold text-gray-900">
+              <Text className="text-lg font-heading text-gray-900">
                 No donation tokens yet
               </Text>
               <Text className="mt-2 text-center text-gray-500">
@@ -504,7 +504,7 @@ export default function DonationTokensScreen() {
                 }
                 className="mt-6 rounded-lg bg-yellow-400 px-6 py-3"
               >
-                <Text className="font-bold text-gray-900">Donate a meal</Text>
+                <Text className="font-body-bold text-gray-900">Donate a meal</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -520,18 +520,18 @@ export default function DonationTokensScreen() {
                     >
                       <View className="mb-3 flex-row items-start justify-between gap-3">
                         <View className="flex-1">
-                          <Text className="text-xs font-semibold uppercase text-gray-500">
+                          <Text className="text-xs font-body-semibold uppercase text-gray-500">
                             Token ID
                           </Text>
                           <Text
                             selectable
-                            className="mt-1 text-sm font-bold text-gray-900"
+                            className="mt-1 text-sm font-body-semibold text-gray-900"
                           >
                             {token.tokenId || "Not available"}
                           </Text>
                         </View>
                         <View className={`rounded-full px-3 py-1 ${statusStyle.bg}`}>
-                          <Text className={`text-xs font-bold ${statusStyle.text}`}>
+                          <Text className={`text-xs font-body-semibold ${statusStyle.text}`}>
                             {statusStyle.label}
                           </Text>
                         </View>
@@ -539,36 +539,36 @@ export default function DonationTokensScreen() {
 
                       <View className="mb-3 flex-row justify-between">
                         <Text className="text-gray-500">Meals</Text>
-                        <Text className="font-bold text-gray-900">
+                        <Text className="font-body-semibold text-gray-900">
                           {token.mealCount || 0}
                         </Text>
                       </View>
                       <View className="mb-3 flex-row justify-between">
                         <Text className="text-gray-500">Total Paid</Text>
-                        <Text className="font-bold text-gray-900">
+                        <Text className="font-body-semibold text-gray-900">
                           {formatMoney(token.totalPaid)}
                         </Text>
                       </View>
                       <View className="mb-3 flex-row justify-between">
                         <Text className="text-gray-500">Price per meal</Text>
-                        <Text className="font-bold text-gray-900">
+                        <Text className="font-body-semibold text-gray-900">
                           {formatMoney(token.pricePerMeal)}
                         </Text>
                       </View>
                       <View className="mb-3 flex-row justify-between">
                         <Text className="text-gray-500">Platform Fee</Text>
-                        <Text className="font-bold text-gray-900">
+                        <Text className="font-body-semibold text-gray-900">
                           {formatMoney(token.platformFee)}
                         </Text>
                       </View>
                       <View className="mb-3 flex-row justify-between">
                         <Text className="text-gray-500">State Tax</Text>
-                        <Text className="font-bold text-gray-900">
+                        <Text className="font-body-semibold text-gray-900">
                           {formatMoney(token.stateTax)}
                         </Text>
                       </View>
                       <View className="mb-3 border-t border-gray-100 pt-3">
-                        <Text className="text-xs font-semibold uppercase text-gray-500">
+                        <Text className="text-xs font-body-semibold uppercase text-gray-500">
                           Donation Order
                         </Text>
                         <Text selectable className="mt-1 text-xs text-gray-700">
@@ -601,11 +601,11 @@ export default function DonationTokensScreen() {
                       currentPage === 1 ? "opacity-50" : ""
                     }`}
                   >
-                    <Text className="font-semibold text-gray-700">Previous</Text>
+                    <Text className="font-body-semibold text-gray-700">Previous</Text>
                   </TouchableOpacity>
 
                   <View className="flex-row items-center gap-2">
-                    <Text className="text-sm font-bold text-gray-900">
+                    <Text className="text-sm font-heading text-gray-900">
                       Page {currentPage}
                     </Text>
                     <Text className="text-sm text-gray-500">
@@ -626,7 +626,7 @@ export default function DonationTokensScreen() {
                         : ""
                     }`}
                   >
-                    <Text className="font-semibold text-gray-700">Next</Text>
+                    <Text className="font-body-semibold text-gray-700">Next</Text>
                   </TouchableOpacity>
                 </View>
               )}

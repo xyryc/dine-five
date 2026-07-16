@@ -283,14 +283,14 @@ export default function AllRestaurantsScreen() {
         <View className="flex-1 py-1 justify-center">
           <View className="flex-row justify-between items-center pr-1">
             <Text
-              className="text-sm font-black text-gray-900 flex-1 mr-2"
+              className="text-sm font-heading text-gray-900 flex-1 mr-2"
               numberOfLines={1}
             >
               {item.restaurantName || item.name}
             </Text>
             {item.isFreeAvailable && (
               <View className="bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full">
-                <Text className="text-[9px] font-black text-emerald-800 uppercase tracking-wide">
+                <Text className="text-[9px] font-body-bold text-emerald-800 uppercase tracking-wide">
                   Free
                 </Text>
               </View>
@@ -298,7 +298,7 @@ export default function AllRestaurantsScreen() {
           </View>
 
           <Text
-            className="text-[11px] text-gray-400 font-semibold mt-0.5 mb-2 pr-2"
+            className="text-[11px] text-gray-400 font-body-semibold mt-0.5 mb-2 pr-2"
             numberOfLines={1}
           >
             {cuisineLabel}
@@ -309,7 +309,7 @@ export default function AllRestaurantsScreen() {
               {/* Rating */}
               <View className="flex-row items-center bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 gap-1">
                 <Ionicons name="star" size={11} color="#F5C518" />
-                <Text className="text-[10px] font-black text-amber-800">
+                <Text className="text-[10px] font-body-bold text-amber-800">
                   {rating}
                 </Text>
               </View>
@@ -318,7 +318,7 @@ export default function AllRestaurantsScreen() {
               {distanceLabel ? (
                 <View className="flex-row items-center gap-0.5">
                   <Ionicons name="location-outline" size={11} color="#6B7280" />
-                  <Text className="text-[10px] font-bold text-gray-500">
+                  <Text className="text-[10px] font-body-bold text-gray-500">
                     {distanceLabel}
                   </Text>
                 </View>
@@ -328,7 +328,7 @@ export default function AllRestaurantsScreen() {
             {/* Delivery time */}
             <View className="flex-row items-center bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
               <Ionicons name="time-outline" size={10} color="#6B7280" />
-              <Text className="text-[10px] font-bold text-gray-600 ml-1">
+              <Text className="text-[10px] font-body-bold text-gray-600 ml-1">
                 {deliveryMin} min
               </Text>
             </View>
@@ -360,7 +360,7 @@ export default function AllRestaurantsScreen() {
           <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
 
-        <Text className="text-base font-black text-gray-900">
+        <Text className="text-base font-heading text-gray-900">
           All Restaurants{" "}
         </Text>
 
@@ -388,7 +388,7 @@ export default function AllRestaurantsScreen() {
                 <View className="flex-row items-center flex-1 mr-2">
                   <Ionicons name="location" size={18} color="#F5C518" />
                   <Text
-                    className="text-xs font-black text-gray-900 ml-1.5 flex-1"
+                    className="text-xs font-heading text-gray-900 ml-1.5 flex-1"
                     numberOfLines={1}
                   >
                     {locationName}
@@ -417,7 +417,7 @@ export default function AllRestaurantsScreen() {
                       style={{ marginRight: 4 }}
                     />
                   )}
-                  <Text className="text-[10px] font-black text-gray-800">
+                  <Text className="text-[10px] font-body-bold text-gray-800">
                     Locate Me
                   </Text>
                 </TouchableOpacity>
@@ -447,7 +447,7 @@ export default function AllRestaurantsScreen() {
                   disabled={!addressSearch.trim() || locationSearching}
                   className="bg-gray-900 px-3 py-1.5 rounded-xl"
                 >
-                  <Text className="text-white text-[10px] font-black">
+                  <Text className="text-white text-[10px] font-body-bold">
                     Search
                   </Text>
                 </TouchableOpacity>
@@ -498,7 +498,7 @@ export default function AllRestaurantsScreen() {
                     }}
                   >
                     <Text
-                      className={`text-xs font-bold ${
+                      className={`text-xs font-body-semibold ${
                         isActive ? "text-[#F5C518]" : "text-gray-500"
                       }`}
                     >
@@ -519,7 +519,7 @@ export default function AllRestaurantsScreen() {
                     sortBy === "distance" ? "bg-white shadow-sm" : ""
                   }`}
                 >
-                  <Text className="text-[10px] font-bold text-gray-700">
+                  <Text className="text-[10px] font-body-semibold text-gray-700">
                     Distance
                   </Text>
                 </TouchableOpacity>
@@ -529,7 +529,7 @@ export default function AllRestaurantsScreen() {
                     sortBy === "rating" ? "bg-white shadow-sm" : ""
                   }`}
                 >
-                  <Text className="text-[10px] font-bold text-gray-700">
+                  <Text className="text-[10px] font-body-semibold text-gray-700">
                     Rating
                   </Text>
                 </TouchableOpacity>
@@ -551,7 +551,7 @@ export default function AllRestaurantsScreen() {
                   color={freeMealsOnly ? "#10B981" : "#9CA3AF"}
                 />
                 <Text
-                  className={`text-[10px] font-extrabold ml-1.5 ${
+                  className={`text-[10px] font-body-bold ml-1.5 ${
                     freeMealsOnly ? "text-emerald-800" : "text-gray-600"
                   }`}
                 >
@@ -562,7 +562,7 @@ export default function AllRestaurantsScreen() {
 
             {/* Third row: Radius Filters */}
             <View className="mb-2">
-              <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+              <Text className="text-[10px] font-body-semibold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
                 Distance Radius
               </Text>
               <View className="flex-row flex-wrap gap-2">
@@ -585,7 +585,7 @@ export default function AllRestaurantsScreen() {
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-bold ${
+                        className={`text-[10px] font-body-semibold ${
                           isActive ? "text-amber-800" : "text-gray-500"
                         }`}
                       >
@@ -604,10 +604,10 @@ export default function AllRestaurantsScreen() {
               <View className="w-16 h-16 bg-[#FFFBEB] rounded-full items-center justify-center mb-4">
                 <Ionicons name="restaurant-outline" size={28} color="#F5C518" />
               </View>
-              <Text className="text-base font-bold text-[#1C1C1C] mb-1">
+              <Text className="text-base font-heading text-[#1C1C1C] mb-1">
                 No Restaurants Found
               </Text>
-              <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed">
+              <Text className="text-xs font-body text-gray-400 text-center max-w-[260px] leading-relaxed">
                 {error
                   ? error
                   : "We couldn't find any restaurants matching your filters or location. Try searching for something else or adjusting your filters."}
@@ -617,7 +617,7 @@ export default function AllRestaurantsScreen() {
                   onPress={() => loadRestaurants()}
                   className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
                 >
-                  <Text className="text-white text-xs font-black uppercase tracking-wider">
+                  <Text className="text-white text-xs font-body-bold uppercase tracking-wider">
                     Retry Loading
                   </Text>
                 </TouchableOpacity>
@@ -636,7 +636,7 @@ export default function AllRestaurantsScreen() {
                     }}
                     className="mt-5 px-5 py-2.5 bg-gray-900 rounded-xl"
                   >
-                    <Text className="text-white text-xs font-black uppercase tracking-wider">
+                    <Text className="text-white text-xs font-body-bold uppercase tracking-wider">
                       Clear Filters
                     </Text>
                   </TouchableOpacity>

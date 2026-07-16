@@ -161,7 +161,7 @@ export const RestaurantMap = () => {
           }
           className="mt-4 bg-[#FFC107] px-6 py-3 rounded-2xl"
         >
-          <Text className="font-bold text-gray-900">Retry</Text>
+          <Text className="font-body-bold text-gray-900">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -172,7 +172,7 @@ export const RestaurantMap = () => {
     <View className="flex-1 bg-gray-100">
       {/* ── Header ── */}
       <View className="bg-[#FFC107] pt-10 pb-3 px-4 items-center">
-        <Text className="text-gray-900 font-semibold text-sm">
+        <Text className="text-gray-900 font-body-semibold text-sm">
           Nearby Restaurants
         </Text>
       </View>
@@ -218,7 +218,7 @@ export const RestaurantMap = () => {
             <View className="items-center justify-center">
               {/* Distance Badge */}
               <View className="bg-[#FFC107] px-2 py-0.5 rounded-full mb-0.5 shadow-md border border-white">
-                <Text className="text-[11px] font-black text-gray-900">
+                <Text className="text-[11px] font-body-bold text-gray-900">
                   {restaurant.distance < 1
                     ? `${Math.round(restaurant.distance * 1000)}m`
                     : `${restaurant.distance.toFixed(1)}km`}
@@ -260,7 +260,7 @@ export const RestaurantMap = () => {
                 }`}
             >
               <Text
-                className={`text-[11px] font-semibold ${radiusMeters === r.value ? "text-gray-900" : "text-gray-400"
+                className={`text-[11px] font-body-semibold ${radiusMeters === r.value ? "text-gray-900" : "text-gray-400"
                   }`}
               >
                 {r.label}
@@ -281,7 +281,7 @@ export const RestaurantMap = () => {
       {/* ── Bottom pill ── */}
       <View className="absolute bottom-24 left-0 right-0 items-center">
         <View className="bg-[#2D9CDB] px-4 py-1.5 rounded-full shadow-md">
-          <Text className="text-xs font-semibold text-white">
+          <Text className="text-xs font-body-bold text-white">
             {restaurantsLoading
               ? "Searching..."
               : `${restaurants.length} x ${getRadiusLabel(radiusMeters)} Hug`}

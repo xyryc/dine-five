@@ -17,14 +17,14 @@ export const EmptyState = ({ title, message, buttonText, onButtonPress }: EmptyS
                 style={{ width: 180, height: 180, marginBottom: 24 }}
                 contentFit="contain"
             />
-            <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">{title}</Text>
-            <Text className="text-gray-500 text-center mb-8 leading-6 text-base">{message}</Text>
+            <Text className="text-2xl font-heading text-gray-900 mb-2 text-center">{title}</Text>
+            <Text className="text-gray-500 font-body text-center mb-8 leading-6 text-base">{message}</Text>
 
             {buttonText && (
                 <TouchableOpacity
                     onPress={onButtonPress}
                     className="bg-yellow-400 px-12 py-3.5 rounded-2xl shadow-sm">
-                    <Text className="text-gray-900 font-bold text-base">{buttonText}</Text>
+                    <Text className="text-gray-900 font-body-bold text-base">{buttonText}</Text>
                 </TouchableOpacity>
             )}
         </View>

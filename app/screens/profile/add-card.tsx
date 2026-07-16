@@ -65,14 +65,14 @@ export default function AddCardScreen() {
                     className="absolute left-6 z-10 w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm">
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text className="text-2xl font-bold text-gray-900">Add a card</Text>
+                <Text className="text-2xl font-heading text-gray-900">Add a card</Text>
             </View>
 
             <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
 
                 {/* Set Default Switch */}
                 <View className="flex-row justify-between items-center mb-8 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                    <Text className="text-lg font-semibold text-gray-900">Set as default</Text>
+                    <Text className="text-lg font-body-semibold text-gray-900">Set as default</Text>
                     <Switch
                         trackColor={{ false: "#E5E7EB", true: "#FFC107" }}
                         thumbColor={isDefault ? "#fff" : "#f4f3f4"}
@@ -84,7 +84,7 @@ export default function AddCardScreen() {
                 {/* Form */}
                 <View className="space-y-5">
                     <View>
-                        <Text className="text-sm font-medium text-gray-600 mb-2">Cardholder name</Text>
+                        <Text className="text-sm font-body-medium text-gray-600 mb-2">Cardholder name</Text>
                         <TextInput
                             value={cardholderName}
                             onChangeText={setCardholderName}
@@ -95,7 +95,7 @@ export default function AddCardScreen() {
                     </View>
                     
                     <View>
-                        <Text className="text-sm font-medium text-gray-600 mb-2">Card number</Text>
+                        <Text className="text-sm font-body-medium text-gray-600 mb-2">Card number</Text>
                         <TextInput
                             value={cardNumber}
                             onChangeText={setCardNumber}
@@ -109,7 +109,7 @@ export default function AddCardScreen() {
                     
                     <View className="flex-row space-x-4">
                         <View className="flex-1">
-                            <Text className="text-sm font-medium text-gray-600 mb-2">Expiration date</Text>
+                            <Text className="text-sm font-body-medium text-gray-600 mb-2">Expiration date</Text>
                             <TextInput
                                 value={expirationDate}
                                 onChangeText={setExpirationDate}
@@ -121,7 +121,7 @@ export default function AddCardScreen() {
                         </View>
                         
                         <View className="flex-1">
-                            <Text className="text-sm font-medium text-gray-600 mb-2">CVV</Text>
+                            <Text className="text-sm font-body-medium text-gray-600 mb-2">CVV</Text>
                             <TextInput
                                 value={cvv}
                                 onChangeText={setCvv}
@@ -145,7 +145,7 @@ export default function AddCardScreen() {
                 <TouchableOpacity
                     onPress={handleSaveCard}
                     className="bg-[#FFC107] w-full py-4 rounded-2xl items-center shadow-md">
-                    <Text className="text-gray-900 font-bold text-lg">Save</Text>
+                    <Text className="text-gray-900 font-body-bold text-lg">Save</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

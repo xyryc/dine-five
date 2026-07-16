@@ -61,13 +61,13 @@ export default function OrderSuccessScreen() {
                     <Ionicons name="checkmark" size={32} color="#fff" />
                 </View>
 
-                <Text className="text-3xl font-bold text-gray-900 text-center mb-2">
+                <Text className="text-3xl font-heading text-gray-900 text-center mb-2">
                     {isDonationSuccess
                         ? `Thank you! Your donation${'\n'}is complete.`
                         : `Yay! Your order${'\n'}has been placed.`}
                 </Text>
 
-                <Text className="text-gray-500 text-center mb-12">
+                <Text className="text-gray-500 font-body text-center mb-12">
                     {isDonationSuccess
                         ? `${tokensCreated} ${donationMealLabel} can now help people in need.`
                         : `Your order will be ready for pickup in the${'\n'}next 30 mins`}
@@ -80,18 +80,18 @@ export default function OrderSuccessScreen() {
                             <View className="flex-row justify-between items-center">
                                 <View className="flex-row items-center">
                                     <Ionicons name="gift-outline" size={20} color="#666" style={{ marginRight: 8 }} />
-                                    <Text className="text-gray-500 text-base">Meal tokens</Text>
+                                    <Text className="text-gray-500 font-body text-base">Meal tokens</Text>
                                 </View>
-                                <Text className="text-gray-900 font-bold text-base">{tokensCreated}</Text>
+                                <Text className="text-gray-900 font-body-semibold text-base">{tokensCreated}</Text>
                             </View>
 
                             {!!donationOrderId && (
                                 <View className="flex-row justify-between items-start mt-4">
                                     <View className="flex-row items-center">
                                         <Ionicons name="receipt-outline" size={20} color="#666" style={{ marginRight: 8 }} />
-                                        <Text className="text-gray-500 text-base">Donation ID</Text>
+                                        <Text className="text-gray-500 font-body text-base">Donation ID</Text>
                                     </View>
-                                    <Text className="text-gray-500 text-xs text-right flex-1 ml-4" numberOfLines={2}>
+                                    <Text className="text-gray-500 font-body text-xs text-right flex-1 ml-4" numberOfLines={2}>
                                         {donationOrderId}
                                     </Text>
                                 </View>
@@ -102,7 +102,7 @@ export default function OrderSuccessScreen() {
                                     <Ionicons name="card-outline" size={20} color="#666" style={{ marginRight: 8 }} />
                                     <Text className="text-gray-500 text-base">Amount Paid</Text>
                                 </View>
-                                <Text className="text-gray-900 font-bold text-base">{amountPaid}</Text>
+                                <Text className="text-gray-900 font-body-bold text-base">{amountPaid}</Text>
                             </View>
                         </>
                     ) : (
@@ -110,9 +110,9 @@ export default function OrderSuccessScreen() {
                             <View className="flex-row justify-between items-center">
                                 <View className="flex-row items-center">
                                     <Ionicons name="time-outline" size={20} color="#666" style={{ marginRight: 8 }} />
-                                    <Text className="text-gray-500 text-base">Estimated time</Text>
+                                    <Text className="text-gray-500 font-body text-base">Estimated time</Text>
                                 </View>
-                                <Text className="text-gray-900 font-bold text-base">30mins</Text>
+                                <Text className="text-gray-900 font-body-semibold text-base">30mins</Text>
                             </View>
 
                             {/* <View className="flex-row justify-between items-start mt-4">
@@ -130,9 +130,9 @@ export default function OrderSuccessScreen() {
                             <View className="flex-row justify-between items-center mt-4">
                                 <View className="flex-row items-center">
                                     <Ionicons name="card-outline" size={20} color="#666" style={{ marginRight: 8 }} />
-                                    <Text className="text-gray-500 text-base">Amount Paid</Text>
+                                    <Text className="text-gray-500 font-body text-base">Amount Paid</Text>
                                 </View>
-                                <Text className="text-gray-900 font-bold text-base">{amountPaid}</Text>
+                                <Text className="text-gray-900 font-body-semibold text-base">{amountPaid}</Text>
                             </View>
                         </>
                     )}
@@ -144,7 +144,7 @@ export default function OrderSuccessScreen() {
                 <TouchableOpacity
                     onPress={handleBackToHome}
                     className="bg-yellow-400 w-full py-4 rounded-2xl shadow-md items-center">
-                    <Text className="text-gray-900 font-bold text-lg">Back to home</Text>
+                    <Text className="text-gray-900 font-body-bold text-lg">Back to home</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

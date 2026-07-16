@@ -32,7 +32,7 @@ const Step4 = () => {
             className="absolute right-4"
           >
             <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-              <Text className="text-base font-medium text-[#FFCD39]">Skip</Text>
+              <Text className="text-base font-body-medium text-[#FFCD39]">Skip</Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -58,7 +58,7 @@ const Step4 = () => {
         <Text
           numberOfLines={2}
           adjustsFontSizeToFit
-          className="text-3xl font-bold text-[#1F2937] mb-4 text-center"
+          className="text-3xl font-heading text-[#1F2937] mb-4 text-center"
         >
           Your Next Meal is Ready
         </Text>

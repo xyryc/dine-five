@@ -35,7 +35,7 @@ export const CartItem = ({
         <Text className="text-base font-normal text-[#60655C] mb-1">
           {name}
         </Text>
-        <Text className="text-base font-semibold text-[#363A33] mb-2">
+        <Text className="text-base font-body-semibold text-[#363A33] mb-2">
           ${price}
         </Text>
 
@@ -51,7 +51,7 @@ export const CartItem = ({
                 color="#332701"
               />
             </TouchableOpacity>
-            <Text className="text-base font-bold text-gray-900">
+            <Text className="text-base font-body-bold text-gray-900">
               {quantity}
             </Text>
             <TouchableOpacity

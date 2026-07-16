@@ -69,7 +69,7 @@ const SignupComponents = () => {
           className=" flex-1"
           onPress={() => router.push("/(auth)/login")}
         >
-          <Text className="font-bold text-[#91958E] py-4 text-center">
+          <Text className="font-body-bold text-[#91958E] py-4 text-center">
             Login
           </Text>
         </TouchableOpacity>
@@ -128,7 +128,7 @@ const SignupComponents = () => {
         >
           {agree && <Feather name="check" size={18} color="black" />}
         </TouchableOpacity>
-        <Text className="ml-2 text-[#1F2A33] font-medium text-sm flex-1">
+        <Text className="ml-2 text-[#1F2A33] font-body-medium text-sm flex-1">
           I agree to our{" "}
           <Text
             className="text-[#D32F1E] underline"

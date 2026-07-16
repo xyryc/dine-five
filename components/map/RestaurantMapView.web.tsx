@@ -315,7 +315,7 @@ export default function RestaurantMapView({
           }}
           className="mt-4 bg-[#FFC107] px-6 py-3 rounded-2xl"
         >
-          <Text className="font-bold text-gray-900">Retry</Text>
+          <Text className="font-body-bold text-gray-900">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -326,7 +326,7 @@ export default function RestaurantMapView({
     <View className="flex-1 bg-gray-100">
       {/* ── Header ── */}
       <View className="bg-[#FFC107] pt-12 pb-3 px-4 items-center">
-        <Text className="text-gray-900 font-bold text-lg">
+        <Text className="text-gray-900 font-heading text-lg">
           Nearby Restaurants
         </Text>
       </View>
@@ -343,7 +343,7 @@ export default function RestaurantMapView({
               }}
             >
               <Text
-                className={`text-xs font-semibold ${
+                className={`text-xs font-body-semibold ${
                   radiusMeters === r ? "text-[#FFC107]" : "text-gray-400"
                 }`}
               >
@@ -382,7 +382,7 @@ export default function RestaurantMapView({
                 }`}
               >
                 <Text
-                  className={`text-xs font-semibold ${
+                  className={`text-xs font-body-semibold ${
                     cuisineFilter === c.value ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
@@ -407,7 +407,7 @@ export default function RestaurantMapView({
             className={`px-5 py-2 rounded-full ${mealFilter === "all" ? "bg-[#FFC107]" : ""}`}
           >
             <Text
-              className={`text-xs font-semibold ${mealFilter === "all" ? "text-gray-900" : "text-[#8B6200]"}`}
+              className={`text-xs font-body-semibold ${mealFilter === "all" ? "text-gray-900" : "text-[#8B6200]"}`}
             >
               meal near you
             </Text>
@@ -422,7 +422,7 @@ export default function RestaurantMapView({
             className={`px-5 py-2 rounded-full ${mealFilter === "free" ? "bg-[#FFC107]" : ""}`}
           >
             <Text
-              className={`text-xs font-semibold ${mealFilter === "free" ? "text-gray-900" : "text-[#8B6200]"}`}
+              className={`text-xs font-body-semibold ${mealFilter === "free" ? "text-gray-900" : "text-[#8B6200]"}`}
             >
               free meal near you
             </Text>
@@ -443,7 +443,7 @@ export default function RestaurantMapView({
             className="flex-row items-center gap-1 bg-gray-100 px-3 py-1.5 rounded-full"
           >
             <Ionicons name="locate" size={14} color="#374151" />
-            <Text className="text-xs font-semibold text-gray-700">
+            <Text className="text-xs font-body-semibold text-gray-700">
               My location
             </Text>
           </TouchableOpacity>
@@ -455,7 +455,7 @@ export default function RestaurantMapView({
               <Text className="text-xs text-gray-400">Searching…</Text>
             </View>
           ) : (
-            <Text className="text-xs font-semibold text-gray-700">
+            <Text className="text-xs font-body-semibold text-gray-700">
               {restaurants.length} found within {formatRadius(radiusMeters)}
               {mealFilter === "free" &&
                 ` • ${availableTokenCount || restaurants.length} Tokens Available`}
@@ -526,7 +526,7 @@ export default function RestaurantMapView({
                       {/* Name + distance */}
                       <View className="flex-row items-start justify-between mb-2">
                         <Text
-                          className="text-gray-900 font-bold text-base flex-1 mr-3"
+                          className="text-gray-900 font-heading-semibold text-base flex-1 mr-3"
                           numberOfLines={2}
                         >
                           {restaurant.restaurantName}
@@ -537,7 +537,7 @@ export default function RestaurantMapView({
                             size={12}
                             color="#F59E0B"
                           />
-                          <Text className="text-amber-600 text-xs font-bold mt-0.5">
+                          <Text className="text-amber-600 text-xs font-body-bold mt-0.5">
                             {formatDistance(restaurant.distance)}
                           </Text>
                         </View>
@@ -585,7 +585,7 @@ export default function RestaurantMapView({
                             size={14}
                             color="#D97706"
                           />
-                          <Text className="text-amber-700 text-xs font-semibold">
+                          <Text className="text-amber-700 text-xs font-body-semibold">
                             Tap to view details →
                           </Text>
                         </View>
@@ -643,7 +643,7 @@ export default function RestaurantMapView({
               {/* Route stats */}
               <View className="flex-1">
                 <Text
-                  className="text-white font-bold text-sm"
+                  className="text-white font-body-bold text-sm"
                   numberOfLines={1}
                 >
                   {selectedRestaurant.restaurantName}
@@ -674,7 +674,7 @@ export default function RestaurantMapView({
 
               {/* Open Maps label */}
               <View className="bg-[#FFC107] px-3 py-2 rounded-xl flex-row items-center gap-1">
-                <Text className="text-gray-900 text-xs font-bold">
+                <Text className="text-gray-900 text-xs font-body-bold">
                   Open Maps
                 </Text>
                 <Ionicons name="open-outline" size={12} color="#1F2937" />

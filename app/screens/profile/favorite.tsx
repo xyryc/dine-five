@@ -158,7 +158,7 @@ export default function FavoriteScreen() {
                         <View className="flex-row justify-between items-start">
                             <Text
                                 numberOfLines={1}
-                                className="text-base font-extrabold text-gray-900 flex-1 mr-2"
+                                className="text-base font-heading-semibold text-gray-900 flex-1 mr-2"
                             >
                                 {food.title || "Food Item"}
                             </Text>
@@ -177,7 +177,7 @@ export default function FavoriteScreen() {
                         {favoritedLabel ? (
                             <View className="flex-row items-center gap-1 mt-1">
                                 <Ionicons name="calendar-outline" size={12} color="#9CA3AF" />
-                                <Text className="text-[10px] text-gray-400 font-bold ml-1">
+                                <Text className="text-[10px] text-gray-400 font-body-semibold ml-1">
                                     {favoritedLabel}
                                 </Text>
                             </View>
@@ -185,7 +185,7 @@ export default function FavoriteScreen() {
                     </View>
 
                     <View className="flex-row items-center justify-between mt-auto">
-                        <Text className="text-base font-black text-gray-900">
+                        <Text className="text-base font-heading text-gray-900">
                             ${price.toFixed(2)}
                         </Text>
 
@@ -203,7 +203,7 @@ export default function FavoriteScreen() {
                             ) : (
                                 <>
                                     <Ionicons name="bag-add-outline" size={13} color="#1F2937" />
-                                    <Text className="text-[#1F2937] text-[10px] font-black uppercase">Add</Text>
+                                    <Text className="text-[#1F2937] text-[10px] font-body-bold uppercase">Add</Text>
                                 </>
                             )}
                         </TouchableOpacity>
@@ -226,7 +226,7 @@ export default function FavoriteScreen() {
                 >
                     <Ionicons name="chevron-back" size={20} color="#1F2937" />
                 </TouchableOpacity>
-                <Text className="text-lg font-bold text-gray-900">Favorites</Text>
+                <Text className="text-lg font-heading text-gray-900">Favorites</Text>
                 <View className="w-10" />
             </View>
 
@@ -237,7 +237,7 @@ export default function FavoriteScreen() {
                     <View className="w-20 h-20 bg-[#FFF5F5] rounded-full items-center justify-center mb-5">
                         <Ionicons name="heart-dislike-outline" size={36} color="#EC407A" />
                     </View>
-                    <Text className="text-lg font-bold text-gray-900 mb-2">No Favorites Yet</Text>
+                    <Text className="text-lg font-heading text-gray-900 mb-2">No Favorites Yet</Text>
                     <Text className="text-xs text-gray-400 text-center max-w-[260px] leading-relaxed mb-6">
                         Explore foods and tap the heart icon to save your favorite dishes here.
                     </Text>
@@ -245,7 +245,7 @@ export default function FavoriteScreen() {
                         onPress={() => router.push("/(tabs)")}
                         className="bg-gray-900 px-6 py-3 rounded-2xl shadow-sm"
                     >
-                        <Text className="text-white text-xs font-black uppercase tracking-wider">
+                        <Text className="text-white text-xs font-body-bold uppercase tracking-wider">
                             Explore Menu
                         </Text>
                     </TouchableOpacity>

@@ -48,7 +48,7 @@ export const RestaurantCard: React.FC<Props> = ({
         <View className="flex-1 justify-between">
           <View>
             <Text
-              className="text-gray-900 font-bold text-base leading-tight"
+              className="text-gray-900 font-heading-semibold text-base leading-tight"
               numberOfLines={1}
             >
               {restaurant.restaurantName}
@@ -65,7 +65,7 @@ export const RestaurantCard: React.FC<Props> = ({
           <View className="flex-row items-center gap-3 mt-2">
             <View className="flex-row items-center gap-1 bg-amber-50 px-2 py-1 rounded-full">
               <Ionicons name="navigate-outline" size={11} color="#F59E0B" />
-              <Text className="text-amber-600 text-xs font-semibold">
+              <Text className="text-amber-600 text-xs font-body-semibold">
                 {formatDistance(restaurant.distance)}
               </Text>
             </View>
@@ -94,7 +94,7 @@ export const RestaurantCard: React.FC<Props> = ({
         onPress={onOrder}
         className="mx-4 mb-4 bg-[#FFC107] rounded-2xl py-3 items-center"
       >
-        <Text className="text-gray-900 font-bold text-sm">View Restaurant</Text>
+        <Text className="text-gray-900 font-body-bold text-sm">View Restaurant</Text>
       </TouchableOpacity>
     </View>
   );

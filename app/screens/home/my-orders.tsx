@@ -20,7 +20,7 @@ export default function MyOrdersScreen() {
                     className="absolute left-4 z-10 p-2">
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text className="text-xl font-bold text-gray-900">My Orders</Text>
+                <Text className="text-xl font-heading text-gray-900">My Orders</Text>
             </View>
 
             {/* Empty State */}

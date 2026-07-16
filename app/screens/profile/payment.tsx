@@ -78,7 +78,7 @@ export default function PaymentScreen() {
           <Ionicons name="card" size={20} color={isDefault ? "#FFC107" : "#9CA3AF"} />
         </View>
         <View>
-          <Text className="text-base font-bold text-gray-900">
+          <Text className="text-base font-heading-semibold text-gray-900">
             {card.cardholderName}
           </Text>
           <Text className="text-gray-500 text-xs mt-0.5">{card.cardNumber}</Text>
@@ -100,7 +100,7 @@ export default function PaymentScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Payment</Text>
+        <Text className="text-xl font-heading text-gray-900">Payment</Text>
 
         <TouchableOpacity
           onPress={() => router.push("/screens/profile/add-card")}
@@ -113,14 +113,14 @@ export default function PaymentScreen() {
       <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
         {defaultCard && (
           <View className="mb-6">
-            <Text className="text-gray-500 text-[10px] uppercase font-bold mb-3 ml-1 tracking-widest">Default Method</Text>
+            <Text className="text-gray-500 text-[10px] uppercase font-body-bold mb-3 ml-1 tracking-widest">Default Method</Text>
             <CardRow card={defaultCard} isDefault={true} />
           </View>
         )}
 
         {otherCards.length > 0 && (
           <View>
-            <Text className="text-gray-500 text-[10px] uppercase font-bold mb-3 ml-1 tracking-widest">Other Methods</Text>
+            <Text className="text-gray-500 text-[10px] uppercase font-body-bold mb-3 ml-1 tracking-widest">Other Methods</Text>
             {otherCards.map((card: any) => (
               <CardRow key={card.id} card={card} />
             ))}
@@ -132,7 +132,7 @@ export default function PaymentScreen() {
             <View className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-4">
                <Ionicons name="card-outline" size={32} color="#D1D5DB" />
             </View>
-            <Text className="text-gray-400 text-center font-semibold">No cards added yet</Text>
+            <Text className="text-gray-400 text-center font-body-semibold">No cards added yet</Text>
           </View>
         )}
       </ScrollView>
@@ -149,7 +149,7 @@ export default function PaymentScreen() {
             <View className="w-12 h-1.5 bg-gray-100 rounded-full self-center mb-8" />
             
             <View className="flex-row justify-between items-center mb-8">
-              <Text className="text-2xl font-bold text-gray-900">Card Details</Text>
+              <Text className="text-2xl font-heading text-gray-900">Card Details</Text>
               <TouchableOpacity onPress={() => setShowModal(false)} className="bg-gray-50 p-1 rounded-full">
                 <Ionicons name="close" size={24} color="#000" />
               </TouchableOpacity>
@@ -164,21 +164,21 @@ export default function PaymentScreen() {
                         <View className="w-8 h-8 bg-red-500 rounded-full opacity-80 mr-[-12] border border-white/20" />
                         <View className="w-8 h-8 bg-yellow-500 rounded-full opacity-80 border border-white/20" />
                      </View>
-                    <Text className="text-white/60 font-bold italic tracking-tighter text-base">DineFive</Text>
+                    <Text className="text-white/60 font-body-bold italic tracking-tighter text-base">DineFive</Text>
                   </View>
                   
-                  <Text className="text-white text-2xl font-medium tracking-[4px] mb-8">
+                  <Text className="text-white text-2xl font-body-medium tracking-[4px] mb-8">
                     {selectedCard.cardNumber}
                   </Text>
                   
                   <View className="flex-row justify-between items-end">
                     <View>
-                      <Text className="text-white/40 text-[9px] uppercase font-bold tracking-widest mb-1">Card Holder</Text>
-                      <Text className="text-white font-bold text-sm">{selectedCard.cardholderName}</Text>
+                      <Text className="text-white/40 text-[9px] uppercase font-body-bold tracking-widest mb-1">Card Holder</Text>
+                      <Text className="text-white font-body-bold text-sm">{selectedCard.cardholderName}</Text>
                     </View>
                     <View className="items-end">
-                      <Text className="text-white/40 text-[9px] uppercase font-bold tracking-widest mb-1">Expires</Text>
-                      <Text className="text-white font-bold text-sm">{selectedCard.expirationDate}</Text>
+                      <Text className="text-white/40 text-[9px] uppercase font-body-bold tracking-widest mb-1">Expires</Text>
+                      <Text className="text-white font-body-bold text-sm">{selectedCard.expirationDate}</Text>
                     </View>
                   </View>
                 </View>
@@ -190,7 +190,7 @@ export default function PaymentScreen() {
                       <Ionicons name="star" size={18} color={selectedCard.isDefault ? "#FFC107" : "#9CA3AF"} />
                     </View>
                     <View className="ml-4">
-                       <Text className="text-gray-900 font-bold text-base">Default Payment</Text>
+                       <Text className="text-gray-900 font-heading-semibold text-base">Default Payment</Text>
                        <Text className="text-gray-400 text-xs">Use this card for quick checkout</Text>
                     </View>
                   </View>
@@ -209,7 +209,7 @@ export default function PaymentScreen() {
                   className="bg-red-50 py-5 rounded-3xl flex-row items-center justify-center border border-red-100"
                 >
                   <Ionicons name="trash" size={18} color="#EF4444" style={{marginRight: 10}} />
-                  <Text className="text-red-500 font-bold text-base">Remove Payment Method</Text>
+                  <Text className="text-red-500 font-heading-semibold text-base">Remove Payment Method</Text>
                 </TouchableOpacity>
               </View>
             )}

@@ -370,12 +370,12 @@ export default function CustomerSupportScreen() {
         </TouchableOpacity>
         
         <View className="items-center">
-          <Text className="text-base font-bold text-gray-900">
+          <Text className="text-base font-heading text-gray-900">
             Support Chat
           </Text>
           <View className="flex-row items-center mt-0.5">
             <View className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-            <Text className="text-[11px] font-semibold text-gray-400">
+            <Text className="text-[11px] font-body-semibold text-gray-400">
               Agent Online
             </Text>
           </View>
@@ -414,7 +414,7 @@ export default function CustomerSupportScreen() {
                     }`}
                   >
                     <View className="flex-row items-center gap-x-2">
-                      <Text className="text-[15px] font-medium text-gray-800 leading-5 flex-shrink">
+                      <Text className="text-[15px] font-body-medium text-gray-800 leading-5 flex-shrink">
                         {msg.text}
                       </Text>
 
@@ -453,7 +453,7 @@ export default function CustomerSupportScreen() {
                     )}
                   </View>
                   <Text
-                    className={`text-[10px] font-bold text-gray-400 mt-1.5 ml-1 ${
+                    className={`text-[10px] font-body-semibold text-gray-400 mt-1.5 ml-1 ${
                       msg.isSupport ? "text-left" : "text-right"
                     }`}
                   >
@@ -568,7 +568,7 @@ export default function CustomerSupportScreen() {
                 onFocus={() => setIsMenuExpanded(false)}
                 placeholder="Type your message..."
                 placeholderTextColor="#9CA3AF"
-                className="text-gray-900 text-[15px] font-medium p-0"
+                className="text-gray-900 text-[15px] font-body-medium p-0"
                 multiline
               />
             </View>

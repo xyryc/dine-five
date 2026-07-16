@@ -156,7 +156,7 @@ export const CustomerReviews = ({ reviews = [] }: CustomerReviewsProps) => {
   if (reviews.length === 0) {
     return (
       <View className="mb-4 items-center py-4">
-        <Text className="text-gray-400 text-sm italic">
+        <Text className="text-gray-400 font-body text-sm italic">
           No reviews yet for this item.
         </Text>
       </View>
@@ -165,7 +165,7 @@ export const CustomerReviews = ({ reviews = [] }: CustomerReviewsProps) => {
 
   return (
     <View className="mb-4">
-      <Text className="text-lg font-bold text-[#1F2A33] mb-4">
+      <Text className="text-lg font-heading-semibold text-[#1F2A33] mb-4">
         Customer Reviews
       </Text>
       {reviews.map((review, index) => (
@@ -181,7 +181,7 @@ export const CustomerReviews = ({ reviews = [] }: CustomerReviewsProps) => {
             contentFit="cover"
           />
           <View className="flex-1 ml-4">
-            <Text className="text-sm font-semibold text-[#1F2A33] mb-1">
+            <Text className="text-sm font-body-semibold text-[#1F2A33] mb-1">
               {getReviewerName(review)}
             </Text>
 
@@ -199,12 +199,12 @@ export const CustomerReviews = ({ reviews = [] }: CustomerReviewsProps) => {
                   />
                 ))}
               </View>
-              <Text className="text-xs text-gray-400 ml-2">
+              <Text className="text-xs font-body text-gray-400 ml-2">
                 {getReviewDate(review)}
               </Text>
             </View>
 
-            <Text className="text-[#7A7A7A] text-sm leading-5">
+            <Text className="text-[#7A7A7A] font-body text-sm leading-5">
               {getReviewComment(review)}
             </Text>
           </View>

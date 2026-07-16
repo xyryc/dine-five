@@ -66,7 +66,7 @@ const LoginComponents = () => {
           onPress={() => router.push("/(auth)/signup")}
           className=" flex-1"
         >
-          <Text className="font-bold text-[#91958E] py-4 text-center">
+          <Text className="font-body-bold text-[#91958E] py-4 text-center">
             Sign Up
           </Text>
         </TouchableOpacity>
@@ -112,7 +112,7 @@ const LoginComponents = () => {
           >
             {rememberMe && <Feather name="check" size={18} color="black" />}
           </TouchableOpacity>
-          <Text className="ml-2 text-[#1F2A33] font-medium text-sm">
+          <Text className="ml-2 text-[#1F2A33] font-body-medium text-sm">
             Remember me
           </Text>
         </View>
@@ -121,7 +121,7 @@ const LoginComponents = () => {
         <TouchableOpacity
           onPress={() => router.push("/(auth)/forgot-password")}
         >
-          <Text className="text-[#D32F1E] font-medium text-sm">
+          <Text className="text-[#D32F1E] font-body-medium text-sm">
             Forgot Password?
           </Text>
         </TouchableOpacity>

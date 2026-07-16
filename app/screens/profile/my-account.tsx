@@ -327,14 +327,14 @@ export default function MyAccountScreen() {
           >
             <Ionicons name="chevron-back" size={20} color="#1F2937" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">Profile Details</Text>
+          <Text className="text-lg font-heading text-gray-900">Profile Details</Text>
           {isEditing ? (
             <TouchableOpacity
               onPress={handleCancel}
               activeOpacity={0.7}
               className="px-3 py-1.5 rounded-full bg-gray-100"
             >
-              <Text className="text-gray-600 font-semibold text-sm">Cancel</Text>
+              <Text className="text-gray-600 font-body-semibold text-sm">Cancel</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -342,7 +342,7 @@ export default function MyAccountScreen() {
               activeOpacity={0.7}
               className="px-4 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FFE8B5]"
             >
-              <Text className="text-[#E29E10] font-bold text-sm">Edit</Text>
+              <Text className="text-[#E29E10] font-body-semibold text-sm">Edit</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -383,10 +383,10 @@ export default function MyAccountScreen() {
                 </TouchableOpacity>
               )}
             </View>
-            <Text className="text-xl font-extrabold text-gray-900 mt-4 text-center">
+            <Text className="text-xl font-heading text-gray-900 mt-4 text-center">
               {formData.name || "User"}
             </Text>
-            <Text className="text-gray-400 text-sm font-medium mt-1 text-center">
+            <Text className="text-gray-400 text-sm font-body-medium mt-1 text-center">
               {formData.email}
             </Text>
           </View>
@@ -395,7 +395,7 @@ export default function MyAccountScreen() {
           <View className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm gap-y-5">
             {/* Full Name */}
             <View className="gap-y-1.5">
-              <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                 Full Name
               </Text>
               <View
@@ -407,22 +407,22 @@ export default function MyAccountScreen() {
                 style={{ height: 56 }}
               >
                 <Ionicons name="person-outline" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                {isEditing ? (
+                  {isEditing ? (
                   <TextInput
                     value={formData.name}
                     onChangeText={(t) => handleChange("name", t)}
                     placeholder="Enter name"
-                    className="flex-1 text-base font-semibold text-gray-900 p-0"
+                    className="flex-1 text-base font-body-semibold text-gray-900 p-0"
                     placeholderTextColor="#9CA3AF"
                   />
                 ) : (
-                  <Text className="flex-1 text-base font-semibold text-gray-800">
+                  <Text className="flex-1 text-base font-body-semibold text-gray-800">
                     {formData.name || "Not set"}
                   </Text>
                 )}
               </View>
               {isEditing && errors.name && (
-                <Text className="text-red-500 text-xs mt-1 ml-1 font-semibold">
+                <Text className="text-red-500 text-xs mt-1 ml-1 font-body-semibold">
                   {errors.name}
                 </Text>
               )}
@@ -430,7 +430,7 @@ export default function MyAccountScreen() {
 
             {/* Email Address (Read-only always to protect account consistency) */}
             <View className="gap-y-1.5">
-              <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                 Email Address
               </Text>
               <View
@@ -438,7 +438,7 @@ export default function MyAccountScreen() {
                 style={{ height: 56 }}
               >
                 <Ionicons name="mail-outline" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                <Text className="flex-1 text-base font-semibold text-gray-400">
+                <Text className="flex-1 text-base font-body-semibold text-gray-400">
                   {formData.email}
                 </Text>
               </View>
@@ -446,7 +446,7 @@ export default function MyAccountScreen() {
 
             {/* Phone Number */}
             <View className="gap-y-1.5">
-              <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                 Phone Number
               </Text>
               <View
@@ -495,7 +495,7 @@ export default function MyAccountScreen() {
                 />
               </View>
               {isEditing && errors.phone && (
-                <Text className="text-red-500 text-xs mt-1 ml-1 font-semibold">
+                <Text className="text-red-500 text-xs mt-1 ml-1 font-body-semibold">
                   {errors.phone}
                 </Text>
               )}
@@ -503,7 +503,7 @@ export default function MyAccountScreen() {
 
             {/* Bio */}
             <View className="gap-y-1.5">
-              <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                 Bio / About Me
               </Text>
               <View
@@ -522,12 +522,12 @@ export default function MyAccountScreen() {
                     placeholder="Tell us about yourself..."
                     multiline
                     numberOfLines={3}
-                    className="flex-1 text-base font-semibold text-gray-900 leading-5 p-0"
+                    className="flex-1 text-base font-body-semibold text-gray-900 leading-5 p-0"
                     placeholderTextColor="#9CA3AF"
                     style={{ textAlignVertical: 'top' }}
                   />
                 ) : (
-                  <Text className="flex-1 text-base font-semibold text-gray-800 leading-5">
+                  <Text className="flex-1 text-base font-body-semibold text-gray-800 leading-5">
                     {formData.bio || "No bio added yet"}
                   </Text>
                 )}
@@ -537,7 +537,7 @@ export default function MyAccountScreen() {
             {/* City & State (Row Layout) */}
             <View className="flex-row gap-x-4">
               <View className="flex-1 gap-y-1.5">
-                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                   City
                 </Text>
                 <View
@@ -554,24 +554,24 @@ export default function MyAccountScreen() {
                       value={formData.city}
                       onChangeText={(t) => handleChange("city", t)}
                       placeholder="City"
-                      className="flex-1 text-base font-semibold text-gray-900 p-0"
+                      className="flex-1 text-base font-body-semibold text-gray-900 p-0"
                       placeholderTextColor="#9CA3AF"
                     />
                   ) : (
-                    <Text className="flex-1 text-base font-semibold text-gray-800">
+                    <Text className="flex-1 text-base font-body-semibold text-gray-800">
                       {formData.city || "Not set"}
                     </Text>
                   )}
                 </View>
                 {isEditing && errors.city && (
-                  <Text className="text-red-500 text-xs mt-1 ml-1 font-semibold">
+                  <Text className="text-red-500 text-xs mt-1 ml-1 font-body-semibold">
                     {errors.city}
                   </Text>
                 )}
               </View>
 
               <View className="flex-1 gap-y-1.5">
-                <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+                <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                   State
                 </Text>
                 <View
@@ -587,17 +587,17 @@ export default function MyAccountScreen() {
                       value={formData.state}
                       onChangeText={(t) => handleChange("state", t)}
                       placeholder="State"
-                      className="flex-1 text-base font-semibold text-gray-900 p-0"
+                      className="flex-1 text-base font-body-semibold text-gray-900 p-0"
                       placeholderTextColor="#9CA3AF"
                     />
                   ) : (
-                    <Text className="flex-1 text-base font-semibold text-gray-800">
+                    <Text className="flex-1 text-base font-body-semibold text-gray-800">
                       {formData.state || "Not set"}
                     </Text>
                   )}
                 </View>
                 {isEditing && errors.state && (
-                  <Text className="text-red-500 text-xs mt-1 ml-1 font-semibold">
+                  <Text className="text-red-500 text-xs mt-1 ml-1 font-body-semibold">
                     {errors.state}
                   </Text>
                 )}
@@ -606,7 +606,7 @@ export default function MyAccountScreen() {
 
             {/* Address */}
             <View className="gap-y-1.5">
-              <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest ml-1">
                 Street Address
               </Text>
               <View
@@ -623,17 +623,17 @@ export default function MyAccountScreen() {
                     value={formData.address}
                     onChangeText={(t) => handleChange("address", t)}
                     placeholder="Enter street address"
-                    className="flex-1 text-base font-semibold text-gray-900 p-0"
+                    className="flex-1 text-base font-body-semibold text-gray-900 p-0"
                     placeholderTextColor="#9CA3AF"
                   />
                 ) : (
-                  <Text className="flex-1 text-base font-semibold text-gray-800">
+                  <Text className="flex-1 text-base font-body-semibold text-gray-800">
                     {formData.address || "No address added yet"}
                   </Text>
                 )}
               </View>
               {isEditing && errors.address && (
-                <Text className="text-red-500 text-xs mt-1 ml-1 font-semibold">
+                <Text className="text-red-500 text-xs mt-1 ml-1 font-body-semibold">
                   {errors.address}
                 </Text>
               )}
@@ -660,7 +660,7 @@ export default function MyAccountScreen() {
               className="flex-1 py-4 bg-gray-50 rounded-2xl items-center justify-center border border-gray-100"
               style={{ height: 56 }}
             >
-              <Text className="text-gray-600 font-bold text-base">
+              <Text className="text-gray-600 font-body-semibold text-base">
                 {isLoading ? "Saving Profile..." : "Discard"}
               </Text>
             </TouchableOpacity>
@@ -690,7 +690,7 @@ export default function MyAccountScreen() {
                     justifyContent: 'center',
                   }}
                 >
-                  <Text className="text-white font-bold text-base px-10">Save Changes</Text>
+                  <Text className="text-white font-body-bold text-base px-10">Save Changes</Text>
                 </LinearGradient>
               </TouchableOpacity>
             )}

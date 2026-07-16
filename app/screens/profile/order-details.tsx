@@ -263,7 +263,7 @@ export default function OrderDetailsScreen() {
             } z-10`}
           />
           <View>
-            <Text className={`font-bold text-base ${activeStep === 0 ? "text-gray-900" : "text-gray-400"}`}>
+            <Text className={`font-heading text-base ${activeStep === 0 ? "text-gray-900" : "text-gray-400"}`}>
               Order Placed
             </Text>
             <Text className="text-gray-500 text-xs mt-0.5">
@@ -280,7 +280,7 @@ export default function OrderDetailsScreen() {
             } z-10`}
           />
           <View>
-            <Text className={`font-bold text-base ${activeStep === 1 ? "text-gray-900" : "text-gray-400"}`}>
+            <Text className={`font-heading text-base ${activeStep === 1 ? "text-gray-900" : "text-gray-400"}`}>
               Preparing your food
             </Text>
             {activeStep === 1 && (
@@ -299,7 +299,7 @@ export default function OrderDetailsScreen() {
             } z-10`}
           />
           <View>
-            <Text className={`font-bold text-base ${activeStep === 2 ? "text-gray-900" : "text-gray-400"}`}>
+            <Text className={`font-heading text-base ${activeStep === 2 ? "text-gray-900" : "text-gray-400"}`}>
               Ready for Pickup / Delivery
             </Text>
             {activeStep === 2 && (
@@ -309,7 +309,7 @@ export default function OrderDetailsScreen() {
                 </Text>
                 {orderData?.logisticsType?.toLowerCase() === "pickup" && (
                   <TouchableOpacity className="mt-2.5 border border-gray-200 rounded-xl py-2 px-4 items-center bg-white shadow-sm self-start">
-                    <Text className="font-bold text-xs text-gray-900">I'm here at the counter</Text>
+                    <Text className="font-body-semibold text-xs text-gray-900">I'm here at the counter</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -325,7 +325,7 @@ export default function OrderDetailsScreen() {
             } z-10`}
           />
           <View>
-            <Text className={`font-bold text-base ${activeStep === 3 ? "text-gray-900" : "text-gray-400"}`}>
+            <Text className={`font-heading text-base ${activeStep === 3 ? "text-gray-900" : "text-gray-400"}`}>
               Order Completed
             </Text>
             {activeStep === 3 && (
@@ -338,7 +338,7 @@ export default function OrderDetailsScreen() {
                   className="mt-2.5 border border-yellow-400 bg-yellow-50 rounded-xl py-2 px-4 flex-row items-center justify-center shadow-sm self-start"
                 >
                   <Ionicons name="star" size={14} color="#FFC107" />
-                  <Text className="font-bold text-[#332701] ml-1.5 text-xs">
+                  <Text className="font-body-semibold text-[#332701] ml-1.5 text-xs">
                     {existingReviewId ? "Edit Review" : "Rate the food!"}
                   </Text>
                 </TouchableOpacity>
@@ -411,7 +411,7 @@ export default function OrderDetailsScreen() {
       <SafeAreaView className="flex-1 bg-[#FDFBF7] items-center justify-center">
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color="#FFC107" />
-        <Text className="text-gray-500 mt-4 font-medium">Loading order details...</Text>
+        <Text className="text-gray-500 mt-4 font-body-medium">Loading order details...</Text>
       </SafeAreaView>
     );
   }
@@ -430,7 +430,7 @@ export default function OrderDetailsScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Order Details</Text>
+        <Text className="text-xl font-heading text-gray-900">Order Details</Text>
       </View>
 
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -439,7 +439,7 @@ export default function OrderDetailsScreen() {
           <View className="flex-row items-center gap-3 flex-1 mr-2">
             {renderHeaderProfile()}
             <View className="flex-1">
-              <Text className="text-base font-bold text-gray-950" numberOfLines={1}>
+              <Text className="text-base font-heading text-gray-950" numberOfLines={1}>
                 {getHeaderTitle()}
               </Text>
               <Text className="text-gray-400 text-xs mt-0.5">
@@ -453,7 +453,7 @@ export default function OrderDetailsScreen() {
               onPress={handleCancelPress}
               className="bg-rose-50 border border-rose-100 px-4 py-2.5 rounded-xl active:bg-rose-100"
             >
-              <Text className="text-rose-600 font-bold text-xs">
+              <Text className="text-rose-600 font-body-semibold text-xs">
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -466,7 +466,7 @@ export default function OrderDetailsScreen() {
         </View>
 
         {/* Items Grouped by Restaurant */}
-        <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-3 px-1">Items Grouped by Restaurant</Text>
+        <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-3 px-1">Items Grouped by Restaurant</Text>
         {groups.map((group: any, index: number) => {
           const phone =
             group.phoneNumber ||
@@ -490,16 +490,16 @@ export default function OrderDetailsScreen() {
                     )}
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs font-bold text-gray-900" numberOfLines={1}>
+                    <Text className="text-xs font-heading text-gray-900" numberOfLines={1}>
                       {group.restaurantName}
                     </Text>
-                    <Text className="text-[10px] text-gray-400 font-medium mt-0.5" numberOfLines={1}>
+                    <Text className="text-[10px] text-gray-400 font-body-medium mt-0.5" numberOfLines={1}>
                       {group.restaurantAddress}
                     </Text>
                     {phone ? (
                       <View className="flex-row items-center gap-1 mt-1">
                         <Ionicons name="call-outline" size={10} color="#9CA3AF" />
-                        <Text className="text-[10px] text-gray-400 font-semibold">
+                        <Text className="text-[10px] text-gray-400 font-body-semibold">
                           {phone}
                         </Text>
                         <TouchableOpacity
@@ -508,7 +508,7 @@ export default function OrderDetailsScreen() {
                           activeOpacity={0.8}
                         >
                           <Ionicons name="call" size={8} color="#1F2937" />
-                          <Text className="text-[8px] font-black text-gray-900">Call</Text>
+                          <Text className="text-[8px] font-body-bold text-gray-900">Call</Text>
                         </TouchableOpacity>
                       </View>
                     ) : null}
@@ -516,7 +516,7 @@ export default function OrderDetailsScreen() {
                 </View>
               
               <View className={`px-2 py-0.5 rounded-full border ${getStatusBadgeStyle(group.status || currentOrderStatus).container}`}>
-                <Text className={`text-[9px] font-bold uppercase ${getStatusBadgeStyle(group.status || currentOrderStatus).text}`}>
+                <Text className={`text-[9px] font-body-semibold uppercase ${getStatusBadgeStyle(group.status || currentOrderStatus).text}`}>
                   {formatStatus(group.status || currentOrderStatus)}
                 </Text>
               </View>
@@ -538,16 +538,16 @@ export default function OrderDetailsScreen() {
                         )}
                       </View>
                       <View className="flex-1">
-                        <Text className="text-xs font-bold text-gray-800" numberOfLines={1}>
+                        <Text className="text-xs font-body-semibold text-gray-800" numberOfLines={1}>
                           {item.title || item.food?.title || "Item"}
                         </Text>
-                        <Text className="text-[10px] text-gray-400 font-semibold mt-0.5">
+                        <Text className="text-[10px] text-gray-400 font-body-semibold mt-0.5">
                           x{item.quantity} · ${item.unitPrice || item.price || 5.99}
                         </Text>
                       </View>
                     </View>
                     
-                    <Text className="text-xs font-bold text-gray-900">
+                    <Text className="text-xs font-body-semibold text-gray-900">
                       ${(item.lineTotal || (item.quantity * (item.unitPrice || item.price || 5.99))).toFixed(2)}
                     </Text>
                   </View>
@@ -560,24 +560,24 @@ export default function OrderDetailsScreen() {
 
         {/* Logistics & Payment details */}
         <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6">
-          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-3">Order Details</Text>
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-3">Order Details</Text>
           
           <View className="space-y-3">
             <View className="flex-row justify-between items-start">
               <View className="flex-row items-center gap-2.5 mr-4" style={{ width: 100 }}>
                 <Ionicons name="location-outline" size={16} color="#6B7280" />
-                <Text className="text-gray-500 text-xs font-semibold">
+                <Text className="text-gray-500 text-xs font-body-semibold">
                   {orderData?.logisticsType?.toLowerCase() === "delivery" ? "Deliver to" : "Pickup at"}
                 </Text>
               </View>
               {orderData?.logisticsType?.toLowerCase() === "delivery" ? (
-                <Text className="text-gray-800 font-bold text-xs flex-1 text-right" numberOfLines={2}>
+                <Text className="text-gray-800 font-body-semibold text-xs flex-1 text-right" numberOfLines={2}>
                   {orderData.state || "NY"}
                 </Text>
               ) : (
                 <View className="flex-col flex-1 items-end gap-1">
                   {groups.map((group: any, idx: number) => (
-                    <Text key={idx} className="text-gray-800 font-bold text-[11px] text-right" numberOfLines={2}>
+                    <Text key={idx} className="text-gray-800 font-body-semibold text-[11px] text-right" numberOfLines={2}>
                       {group.restaurantName}: {group.restaurantAddress || "No address"}
                     </Text>
                   ))}
@@ -592,9 +592,9 @@ export default function OrderDetailsScreen() {
                   size={16}
                   color="#6B7280"
                 />
-                <Text className="text-gray-500 text-xs font-semibold">Logistics</Text>
+                <Text className="text-gray-500 text-xs font-body-semibold">Logistics</Text>
               </View>
-              <Text className="text-gray-800 font-bold text-xs capitalize">
+              <Text className="text-gray-800 font-body-semibold text-xs capitalize">
                 {orderData?.logisticsType || "Delivery"}
               </Text>
             </View>
@@ -602,9 +602,9 @@ export default function OrderDetailsScreen() {
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2.5">
                 <Ionicons name="card-outline" size={16} color="#6B7280" />
-                <Text className="text-gray-500 text-xs font-semibold">Payment Method</Text>
+                <Text className="text-gray-500 text-xs font-body-semibold">Payment Method</Text>
               </View>
-              <Text className="text-gray-800 font-bold text-xs capitalize">
+              <Text className="text-gray-800 font-body-semibold text-xs capitalize">
                 {orderData?.paymentMethod || "Card"}
               </Text>
             </View>
@@ -612,9 +612,9 @@ export default function OrderDetailsScreen() {
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center gap-2.5">
                 <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-                <Text className="text-gray-500 text-xs font-semibold">Placed On</Text>
+                <Text className="text-gray-500 text-xs font-body-semibold">Placed On</Text>
               </View>
-              <Text className="text-gray-800 font-bold text-xs">
+              <Text className="text-gray-800 font-body-semibold text-xs">
                 {orderData?.createdAt ? formatDate(orderData.createdAt) : "N/A"}
               </Text>
             </View>
@@ -623,44 +623,44 @@ export default function OrderDetailsScreen() {
 
         {/* Bill / Invoice Details Card */}
         <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6">
-          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-3">Bill Details</Text>
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-3">Bill Details</Text>
           
           <View className="space-y-2 border-b border-gray-50 pb-3 mb-3">
             <View className="flex-row justify-between items-center">
-              <Text className="text-xs text-gray-500 font-semibold">Subtotal</Text>
-              <Text className="text-xs font-bold text-gray-800">${orderData?.subtotal?.toFixed(2) || "0.00"}</Text>
+              <Text className="text-xs text-gray-500 font-body-semibold">Subtotal</Text>
+              <Text className="text-xs font-body-semibold text-gray-800">${orderData?.subtotal?.toFixed(2) || "0.00"}</Text>
             </View>
 
             <View className="flex-row justify-between items-center">
-              <Text className="text-xs text-gray-500 font-semibold">Platform Fee</Text>
-              <Text className="text-xs font-bold text-gray-800">${orderData?.platformFee?.toFixed(2) || "0.00"}</Text>
+              <Text className="text-xs text-gray-500 font-body-semibold">Platform Fee</Text>
+              <Text className="text-xs font-body-semibold text-gray-800">${orderData?.platformFee?.toFixed(2) || "0.00"}</Text>
             </View>
 
             {orderData?.cityTax > 0 && (
               <View className="flex-row justify-between items-center">
-                <Text className="text-xs text-gray-500 font-semibold">City Tax</Text>
-                <Text className="text-xs font-bold text-gray-800">${orderData.cityTax.toFixed(2)}</Text>
+                <Text className="text-xs text-gray-500 font-body-semibold">City Tax</Text>
+                <Text className="text-xs font-body-semibold text-gray-800">${orderData.cityTax.toFixed(2)}</Text>
               </View>
             )}
 
             {orderData?.stateTax > 0 && (
               <View className="flex-row justify-between items-center">
-                <Text className="text-xs text-gray-500 font-semibold">State Tax</Text>
-                <Text className="text-xs font-bold text-gray-800">${orderData.stateTax.toFixed(2)}</Text>
+                <Text className="text-xs text-gray-500 font-body-semibold">State Tax</Text>
+                <Text className="text-xs font-body-semibold text-gray-800">${orderData.stateTax.toFixed(2)}</Text>
               </View>
             )}
 
             {orderData?.isDonation && (
               <View className="flex-row justify-between items-center">
-                <Text className="text-xs text-rose-500 font-semibold">Donation Amount</Text>
-                <Text className="text-xs font-bold text-rose-600">${orderData.donationAmount.toFixed(2)}</Text>
+                <Text className="text-xs text-rose-500 font-body-semibold">Donation Amount</Text>
+                <Text className="text-xs font-body-semibold text-rose-600">${orderData.donationAmount.toFixed(2)}</Text>
               </View>
             )}
           </View>
 
           <View className="flex-row justify-between items-center">
-            <Text className="text-sm font-bold text-gray-900">Total Paid</Text>
-            <Text className="text-lg font-black text-[#D97706]">
+            <Text className="text-sm font-heading text-gray-900">Total Paid</Text>
+            <Text className="text-lg font-heading text-[#D97706]">
               ${(orderData?.totalPrice || orderData?.displayTotal || 0).toFixed(2)}
             </Text>
           </View>
@@ -674,7 +674,7 @@ export default function OrderDetailsScreen() {
           className="flex-row items-center justify-center bg-amber-50/50 border border-amber-100 rounded-2xl py-3.5"
         >
           <Ionicons name="chatbubble-ellipses-outline" size={18} color="#D97706" />
-          <Text className="text-amber-800 font-bold text-xs ml-2">
+          <Text className="text-amber-800 font-body-semibold text-xs ml-2">
             Need Help? Chat with Support
           </Text>
         </TouchableOpacity>
@@ -689,10 +689,10 @@ export default function OrderDetailsScreen() {
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
           <View className="bg-white w-full rounded-3xl p-6 items-center">
-            <Text className="text-xl font-bold text-gray-900 mb-2">
+            <Text className="text-xl font-heading text-gray-900 mb-2">
               Did you like the food!
             </Text>
-            <Text className="text-gray-500 text-center mb-6">
+            <Text className="text-gray-500 font-body text-center mb-6">
               Please rate this food so, that we can improve it!
             </Text>
 
@@ -731,7 +731,7 @@ export default function OrderDetailsScreen() {
               className={`w-full py-4 rounded-2xl items-center mt-4 ${isLoading ? "bg-gray-100" : "bg-[#FFC107]"}`}
             >
               <Text
-                className={`font-bold text-lg ${isLoading ? "text-gray-400" : "text-gray-900"}`}
+                className={`font-body-bold text-lg ${isLoading ? "text-gray-400" : "text-gray-900"}`}
               >
                 {isLoading ? "Submitting..." : (existingReviewId ? "Update Review" : "Submit Rating")}
               </Text>

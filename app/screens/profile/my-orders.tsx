@@ -31,11 +31,11 @@ function CurrentOrderCard({
       {/* Header section of card */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
-          <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
+          <Text className="text-base font-heading text-gray-900" numberOfLines={1}>
             {getProviderName(order)}
           </Text>
           <View className="flex-row items-center mt-1">
-            <Text className="text-xs text-gray-400 font-medium">
+            <Text className="text-xs text-gray-400 font-body-medium">
               #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
             </Text>
             <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
@@ -45,7 +45,7 @@ function CurrentOrderCard({
           </View>
         </View>
         <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
-          <Text className={`text-[10px] font-bold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+          <Text className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
             {formatStatus(order.status)}
           </Text>
         </View>
@@ -55,10 +55,10 @@ function CurrentOrderCard({
       <View className="flex-row items-center py-3 border-t border-b border-gray-50 mb-4">
         {renderOrderImage(order)}
         <View className="flex-1 justify-center">
-          <Text className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-1">
             {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
           </Text>
-          <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+          <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
             {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
           </Text>
           
@@ -69,14 +69,14 @@ function CurrentOrderCard({
                 size={12}
                 color="#6B7280"
               />
-              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize">
                 {order.logisticsType || "Delivery"}
               </Text>
             </View>
             
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons name="card-outline" size={12} color="#6B7280" />
-              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
                 {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
               </Text>
             </View>
@@ -87,8 +87,8 @@ function CurrentOrderCard({
       {/* Action buttons and pricing */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Paid</Text>
-          <Text className="text-base font-black text-gray-900 mt-0.5">
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-base font-heading text-gray-900 mt-0.5">
             ${order.totalPrice?.toFixed(2)}
           </Text>
         </View>
@@ -110,7 +110,7 @@ function CurrentOrderCard({
             className="bg-[#FFC107] px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
           >
             <Ionicons name="eye-outline" size={14} color="#1F2937" />
-            <Text className="text-gray-900 font-bold text-xs ml-1">
+            <Text className="text-gray-900 font-body-semibold text-xs ml-1">
               Details
             </Text>
           </TouchableOpacity>
@@ -156,12 +156,12 @@ function PreviousOrderCard({
               <View className="bg-rose-50 p-1 rounded-md mr-1.5">
                 <Ionicons name="heart" size={14} color="#E11D48" />
               </View>
-              <Text className="text-base font-bold text-gray-950" numberOfLines={1}>
+              <Text className="text-base font-heading text-gray-950" numberOfLines={1}>
                 Meal Donation
               </Text>
             </View>
             <View className="flex-row items-center mt-1">
-              <Text className="text-xs text-gray-400 font-medium">
+              <Text className="text-xs text-gray-400 font-body-medium">
                 #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
               </Text>
               <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
@@ -171,7 +171,7 @@ function PreviousOrderCard({
             </View>
           </View>
           <View className="px-2.5 py-1 rounded-full border bg-emerald-50 border-emerald-100">
-            <Text className="text-[10px] font-bold tracking-wide uppercase text-emerald-700">
+            <Text className="text-[10px] font-body-semibold tracking-wide uppercase text-emerald-700">
               Completed
             </Text>
           </View>
@@ -197,23 +197,23 @@ function PreviousOrderCard({
           </View>
 
           <View className="flex-1 justify-center">
-            <Text className="text-[10px] text-rose-500 font-bold uppercase tracking-wider mb-1">
+            <Text className="text-[10px] text-rose-500 font-body-semibold uppercase tracking-wider mb-1">
               Community Contribution
             </Text>
-            <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+            <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
               {order.items?.[0]?.description || `${order.items?.[0]?.quantity || order.itemCount || 1} meal token(s) added to the community pool`}
             </Text>
             
             <View className="flex-row items-center gap-2">
               <View className="flex-row items-center bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
                 <Ionicons name="heart-outline" size={12} color="#E11D48" />
-                <Text className="text-[10px] text-rose-700 font-medium ml-1 capitalize">
+                <Text className="text-[10px] text-rose-700 font-body-medium ml-1 capitalize">
                   Donation
                 </Text>
               </View>
               <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
                 <Ionicons name="card-outline" size={12} color="#6B7280" />
-                <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+                <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize">
                   {order.paymentMethod || "Card"}
                 </Text>
               </View>
@@ -224,8 +224,8 @@ function PreviousOrderCard({
         {/* Pricing and actions */}
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Donated</Text>
-            <Text className="text-base font-black text-rose-600 mt-0.5">
+            <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Donated</Text>
+            <Text className="text-base font-heading text-rose-600 mt-0.5">
               ${order.totalPrice?.toFixed(2)}
             </Text>
           </View>
@@ -238,7 +238,7 @@ function PreviousOrderCard({
               className="bg-rose-500 px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
             >
               <Ionicons name="heart" size={14} color="#FFF" />
-              <Text className="text-white font-bold text-xs ml-1">
+              <Text className="text-white font-body-semibold text-xs ml-1">
                 Donate Again
               </Text>
             </TouchableOpacity>
@@ -270,11 +270,11 @@ function PreviousOrderCard({
       {/* Header section of card */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
-          <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
+          <Text className="text-base font-heading text-gray-900" numberOfLines={1}>
             {getProviderName(order)}
           </Text>
           <View className="flex-row items-center mt-1">
-            <Text className="text-xs text-gray-400 font-medium">
+            <Text className="text-xs text-gray-400 font-body-medium">
               #{order.orderId ? order.orderId.split("-").pop() : "N/A"}
             </Text>
             <View className="w-1 h-1 rounded-full bg-gray-300 mx-2" />
@@ -284,7 +284,7 @@ function PreviousOrderCard({
           </View>
         </View>
         <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
-          <Text className={`text-[10px] font-bold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+          <Text className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
             {formatStatus(order.status)}
           </Text>
         </View>
@@ -294,10 +294,10 @@ function PreviousOrderCard({
       <View className="flex-row items-center py-3 border-t border-b border-gray-50 mb-3">
         {renderOrderImage(order)}
         <View className="flex-1 justify-center">
-          <Text className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-1">
             {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
           </Text>
-          <Text className="text-sm font-semibold text-gray-700 mb-1.5" numberOfLines={2}>
+          <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
             {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
           </Text>
           
@@ -308,14 +308,14 @@ function PreviousOrderCard({
                 size={12}
                 color="#6B7280"
               />
-              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize">
+              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize">
                 {order.logisticsType || "Delivery"}
               </Text>
             </View>
             
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons name="card-outline" size={12} color="#6B7280" />
-              <Text className="text-[10px] text-gray-500 font-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
                 {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
               </Text>
             </View>
@@ -327,7 +327,7 @@ function PreviousOrderCard({
       {isCancelled && order.cancellationReason && (
         <View className="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5 mb-4 flex-row items-start">
           <Ionicons name="alert-circle-outline" size={16} color="#E11D48" className="mt-0.5" />
-          <Text className="text-xs text-rose-700 font-medium ml-1.5 flex-1">
+          <Text className="text-xs text-rose-700 font-body-medium ml-1.5 flex-1">
             Reason: {order.cancellationReason}
           </Text>
         </View>
@@ -336,8 +336,8 @@ function PreviousOrderCard({
       {/* Action buttons and pricing */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Paid</Text>
-          <Text className="text-base font-black text-gray-900 mt-0.5">
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-base font-heading text-gray-900 mt-0.5">
             {order.orderType === "free_meal" || order.totalPrice === 0 ? "FREE" : `$${order.totalPrice?.toFixed(2)}`}
           </Text>
         </View>
@@ -350,7 +350,7 @@ function PreviousOrderCard({
             className="border border-gray-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row bg-white active:bg-gray-50"
           >
             <Ionicons name="refresh-outline" size={14} color="#4B5563" />
-            <Text className="text-gray-600 font-bold text-xs ml-1">
+            <Text className="text-gray-600 font-body-semibold text-xs ml-1">
               Reorder
             </Text>
           </TouchableOpacity>
@@ -372,7 +372,7 @@ function PreviousOrderCard({
               className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row active:bg-amber-100"
             >
               <Ionicons name="star" size={14} color="#D97706" />
-              <Text className="text-amber-800 font-bold text-xs ml-1">
+              <Text className="text-amber-800 font-body-semibold text-xs ml-1">
                 Rate
               </Text>
             </TouchableOpacity>
@@ -528,7 +528,7 @@ export default function MyOrdersScreen() {
           </View>
           {order.restaurants.length > 2 && (
             <View className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full w-5 h-5 items-center justify-center border border-white shadow-sm">
-              <Text className="text-[9px] font-bold text-white">+{order.restaurants.length - 2}</Text>
+              <Text className="text-[9px] font-body-semibold text-white">+{order.restaurants.length - 2}</Text>
             </View>
           )}
         </View>
@@ -567,7 +567,7 @@ export default function MyOrdersScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">My Orders</Text>
+        <Text className="text-xl font-heading text-gray-900">My Orders</Text>
       </View>
 
       {/* Tabs */}
@@ -593,7 +593,7 @@ export default function MyOrdersScreen() {
             ]}
           >
             <Text
-              className={`text-base font-semibold ${activeTab === "current" ? "text-gray-900" : "text-gray-600"}`}
+              className={`text-base font-body-semibold ${activeTab === "current" ? "text-gray-900" : "text-gray-600"}`}
             >
               Current
             </Text>
@@ -615,7 +615,7 @@ export default function MyOrdersScreen() {
             ]}
           >
             <Text
-              className={`text-base font-semibold ${activeTab === "previous" ? "text-gray-900" : "text-gray-600"}`}
+              className={`text-base font-body-semibold ${activeTab === "previous" ? "text-gray-900" : "text-gray-600"}`}
             >
               Previous
             </Text>
@@ -635,7 +635,7 @@ export default function MyOrdersScreen() {
         {isLoading && !refreshing && ordersToShow.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-32">
             <ActivityIndicator size="large" color="#FFC107" />
-            <Text className="text-gray-500 mt-4 font-medium">Loading your orders...</Text>
+            <Text className="text-gray-500 mt-4 font-body-medium">Loading your orders...</Text>
           </View>
         ) : ordersToShow.length === 0 ? (
           <View className="flex-1 justify-center">

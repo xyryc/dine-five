@@ -463,8 +463,8 @@ export default function RestaurantMapView({
           <Ionicons name="location-outline" size={40} color="#E29E10" />
         </View>
         <View className="items-center px-4">
-          <Text className="text-lg font-bold text-gray-900 text-center">Location Access Required</Text>
-          <Text className="text-sm text-gray-400 font-semibold text-center mt-1.5 leading-relaxed">
+          <Text className="text-lg font-heading text-gray-900 text-center">Location Access Required</Text>
+          <Text className="text-sm text-gray-400 font-body-semibold text-center mt-1.5 leading-relaxed">
             Dine Five uses your location to show nearby food options and restaurants on the map. Please enable location permissions.
           </Text>
         </View>
@@ -474,11 +474,11 @@ export default function RestaurantMapView({
             className="bg-[#E29E10] h-12 rounded-2xl flex-row items-center justify-center gap-2 shadow-sm"
           >
             <Ionicons name="pin" size={16} color="#FFF" />
-            <Text className="text-white font-extrabold text-sm">Enable Location Access</Text>
+            <Text className="text-white font-body-bold text-sm">Enable Location Access</Text>
           </TouchableOpacity>
 
           <View className="w-full border-t border-gray-200/60 my-1 pt-3">
-            <Text className="text-xs font-bold text-gray-500 mb-2">Or enter address manually:</Text>
+            <Text className="text-xs font-body-semibold text-gray-500 mb-2">Or enter address manually:</Text>
             <View className="flex-row items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-1.5 shadow-sm">
               <Ionicons name="search" size={16} color="#9CA3AF" />
               <TextInput
@@ -513,7 +513,7 @@ export default function RestaurantMapView({
                   {isSearchingMapAddress ? (
                     <ActivityIndicator size="small" color="#FFF" />
                   ) : (
-                    <Text className="text-white text-xs font-extrabold">Set</Text>
+                    <Text className="text-white text-xs font-body-bold">Set</Text>
                   )}
                 </TouchableOpacity>
               )}
@@ -556,7 +556,7 @@ export default function RestaurantMapView({
           }}
           className="mt-6 bg-[#FFC107] px-8 py-3 rounded-full shadow-sm"
         >
-          <Text className="font-bold text-gray-900">Retry</Text>
+          <Text className="font-body-bold text-gray-900">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -607,7 +607,7 @@ export default function RestaurantMapView({
               <View className="items-center justify-center">
                 {/* Distance Badge */}
                 <View className="bg-[#FFC107] px-2 py-0.5 rounded-full mb-0.5 shadow-md border border-white">
-                  <Text className="text-[11px] font-black text-gray-900">
+                  <Text className="text-[11px] font-body-bold text-gray-900">
                     {formatRestaurantDistance(restaurant.distance)}
                   </Text>
                 </View>
@@ -657,7 +657,7 @@ export default function RestaurantMapView({
             <View className="w-[1px] h-5 bg-gray-200 mx-2" />
             <TouchableOpacity onPress={handlePickerPress} className="flex-row items-center">
               <Ionicons name="location-sharp" size={18} color="#9CA3AF" />
-              <Text className="ml-1 text-[14px] text-[#9CA3AF] font-medium max-w-[120px]" numberOfLines={1}>
+              <Text className="ml-1 text-[14px] text-[#9CA3AF] font-body-medium max-w-[120px]" numberOfLines={1}>
                 {addressLabel}
               </Text>
             </TouchableOpacity>
@@ -679,7 +679,7 @@ export default function RestaurantMapView({
                 className={`px-3 py-1.5 rounded-full border ${active ? "bg-[#FFC107] border-[#FFC107]" : "bg-white border-gray-200"
                   }`}
               >
-                <Text className={`text-xs font-semibold ${active ? "text-gray-900" : "text-gray-500"}`}>
+                <Text className={`text-xs font-body-semibold ${active ? "text-gray-900" : "text-gray-500"}`}>
                   {formatRadius(radius)}
                 </Text>
               </TouchableOpacity>
@@ -695,7 +695,7 @@ export default function RestaurantMapView({
             <Text className="text-xs text-gray-500">Searching...</Text>
           </View>
         ) : (
-          <Text className="text-xs font-semibold text-gray-700">
+          <Text className="text-xs font-body-semibold text-gray-700">
             {isShowingHomeProviders
               ? `${filteredRestaurants.length} providers available`
               : `${filteredRestaurants.length} found within ${formatRadius(radiusMeters)}`}
@@ -742,7 +742,7 @@ export default function RestaurantMapView({
               size={16}
               color={mealFilter === "all" ? "#000" : "#6B7280"}
             />
-            <Text className={`font-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "all" ? "text-gray-900" : "text-gray-500"
+            <Text className={`font-body-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "all" ? "text-gray-900" : "text-gray-500"
               }`}>
               Meal near you
             </Text>
@@ -775,7 +775,7 @@ export default function RestaurantMapView({
               size={16}
               color={mealFilter === "free" ? "#000" : "#6B7280"}
             />
-            <Text className={`font-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "free" ? "text-gray-900" : "text-gray-500"
+            <Text className={`font-body-bold text-[12px] ml-2 uppercase tracking-tight ${mealFilter === "free" ? "text-gray-900" : "text-gray-500"
               }`}>
               free meal near you
             </Text>
@@ -847,11 +847,11 @@ export default function RestaurantMapView({
                             resizeMode="cover"
                           />
                         </View>
-                        <Text className="text-xs font-bold text-gray-700 flex-1" numberOfLines={1}>
+                        <Text className="text-xs font-body-bold text-gray-700 flex-1" numberOfLines={1}>
                           {item.restaurantName}
                         </Text>
                         <View className="bg-green-100 px-2 py-0.5 rounded-full">
-                          <Text className="text-[10px] font-bold text-green-700 uppercase">Free</Text>
+                          <Text className="text-[10px] font-body-bold text-green-700 uppercase">Free</Text>
                         </View>
                       </View>
                     ) : null}
@@ -864,7 +864,7 @@ export default function RestaurantMapView({
 
                     <View className="px-3 py-2.5">
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-base font-bold text-gray-900 flex-1" numberOfLines={1}>
+                        <Text className="text-base font-heading-semibold text-gray-900 flex-1" numberOfLines={1}>
                           {isFreeMode ? ((item as any).name || (item as any).title || (item as any).mealName) : item.restaurantName}
                         </Text>
                       </View>
@@ -879,7 +879,7 @@ export default function RestaurantMapView({
                       <View className="flex-row items-center justify-between pt-3 border-t border-gray-50">
                         <View className="flex-row items-center">
                           <Ionicons name="navigate-outline" size={14} color="#FFC107" />
-                          <Text className="text-[11px] font-bold text-gray-700 ml-1">
+                          <Text className="text-[11px] font-body-bold text-gray-700 ml-1">
                             {formatRestaurantDistance(item.distance)}
                           </Text>
                         </View>
@@ -888,7 +888,7 @@ export default function RestaurantMapView({
                            className="bg-[#FFC107] px-5 py-2 rounded-2xl shadow-sm"
                            onPress={() => openRestaurantDetail(item)}
                          >
-                           <Text className="text-gray-900 font-black text-[11px] uppercase tracking-wide">
+                           <Text className="text-gray-900 font-body-bold text-[11px] uppercase tracking-wide">
                              View Details
                            </Text>
                          </TouchableOpacity>
@@ -943,12 +943,12 @@ function AddressModal({
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
         <View className="bg-white rounded-[28px] w-full p-6 shadow-xl gap-y-4">
           <View className="flex-row justify-between items-center">
-            <Text className="text-lg font-black text-gray-900">Set Location</Text>
+            <Text className="text-lg font-heading text-gray-900">Set Location</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
-          <Text className="text-xs text-gray-400 font-semibold leading-relaxed">
+          <Text className="text-xs text-gray-400 font-body-semibold leading-relaxed">
             Enter your address, city, or zip code below to find nearby restaurants:
           </Text>
           <View className="flex-row items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl px-3 py-2">
@@ -967,7 +967,7 @@ function AddressModal({
               onPress={onClose}
               className="flex-1 bg-gray-50 border border-gray-200/60 h-12 rounded-2xl items-center justify-center"
             >
-              <Text className="text-gray-500 font-extrabold text-sm">Cancel</Text>
+              <Text className="text-gray-500 font-body-bold text-sm">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSearch}
@@ -977,7 +977,7 @@ function AddressModal({
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text className="text-white font-extrabold text-sm">Search</Text>
+                <Text className="text-white font-body-bold text-sm">Search</Text>
               )}
             </TouchableOpacity>
           </View>

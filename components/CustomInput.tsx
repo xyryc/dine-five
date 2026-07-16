@@ -18,7 +18,7 @@ const CustomInput = ({
       {/* Label */}
       {label && (
         // Label text with styling
-        <Text className="text-black font-medium text-sm">{label}</Text>
+        <Text className="text-black font-body-medium text-sm">{label}</Text>
       )}
 
       {/* Input Container */}

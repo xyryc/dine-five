@@ -87,7 +87,7 @@ const ForgotPassword = () => {
                 borderTopRightRadius: 28,
               }}
             >
-              <Text className="text-2xl font-bold text-center mb-4">
+              <Text className="text-2xl font-heading text-center mb-4">
                 Forgot Password?
               </Text>
               <Text className="text-gray-600 text-center mb-6">

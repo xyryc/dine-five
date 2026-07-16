@@ -18,12 +18,12 @@ export const ViewCart = ({ count, total }: ViewCartProps) => {
                 activeOpacity={0.9}
                 className="flex-row items-center justify-between bg-[#EFEEEA] rounded-full pl-6 pr-2 py-2 shadow-xl border border-white/50"
             >
-                <Text className="text-[#1F2A33] font-semibold text-base">
+                <Text className="text-[#1F2A33] font-body-semibold text-base">
                     {count.toString().padStart(2, '0')} Items selected
                 </Text>
 
                 <View className="flex-row items-center gap-3">
-                    <Text className="text-lg font-bold text-[#1F2A33]">
+                    <Text className="text-lg font-heading text-[#1F2A33]">
                         <Text className="text-yellow-500">$</Text> {total.toFixed(2)}
                     </Text>
 

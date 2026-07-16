@@ -33,7 +33,7 @@ export default function AllCategoriesScreen() {
                 >
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text className="text-xl font-bold text-gray-900 ml-4">All Categories</Text>
+                <Text className="text-xl font-heading text-gray-900 ml-4">All Categories</Text>
             </View>
 
             <FlatList
@@ -58,7 +58,7 @@ export default function AllCategoriesScreen() {
                         >
                             <Ionicons name={item.icon as any} size={32} color={item.color} />
                         </View>
-                        <Text className="text-base font-semibold text-gray-800">{item.name}</Text>
+                        <Text className="text-base font-body-semibold text-gray-800">{item.name}</Text>
                     </TouchableOpacity>
                 )}
             />

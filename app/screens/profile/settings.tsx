@@ -96,7 +96,7 @@ export default function SettingsScreen() {
         >
           <Ionicons name="chevron-back" size={20} color="#1F2937" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-gray-900">Settings</Text>
+        <Text className="text-lg font-heading text-gray-900">Settings</Text>
         <View className="w-10" />
       </View>
 
@@ -105,7 +105,7 @@ export default function SettingsScreen() {
         className="flex-1 px-6 mt-6"
       >
         {/* General Settings */}
-        <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+        <Text className="text-[11px] font-body-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
           Support & Legal
         </Text>
         <View className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm mb-6">
@@ -125,7 +125,7 @@ export default function SettingsScreen() {
                 >
                   <Ionicons name={item.icon as any} size={18} color={item.color} />
                 </View>
-                <Text className="text-[15px] font-semibold text-gray-800">
+                <Text className="text-[15px] font-body-semibold text-gray-800">
                   {item.title}
                 </Text>
               </View>
@@ -135,7 +135,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Danger Zone */}
-        <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+        <Text className="text-[11px] font-body-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
           Danger Zone
         </Text>
         <View className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm mb-10">
@@ -148,7 +148,7 @@ export default function SettingsScreen() {
               <View className="w-9 h-9 rounded-xl bg-[#FFF8E7] items-center justify-center border border-[#FFE8B5]">
                 <Ionicons name="log-out-outline" size={18} color="#E29E10" />
               </View>
-              <Text className="text-[15px] font-bold text-gray-800">
+              <Text className="text-[15px] font-body-bold text-gray-800">
                 Log Out
               </Text>
             </View>
@@ -164,7 +164,7 @@ export default function SettingsScreen() {
               <View className="w-9 h-9 rounded-xl bg-[#FFF5F5] items-center justify-center border border-[#FED7D7]">
                 <Ionicons name="trash-outline" size={18} color="#E53E3E" />
               </View>
-              <Text className="text-[15px] font-bold text-red-600">
+              <Text className="text-[15px] font-body-bold text-red-600">
                 Delete Account
               </Text>
             </View>

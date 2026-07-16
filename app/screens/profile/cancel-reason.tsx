@@ -50,11 +50,11 @@ export default function CancelOrderScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Cancel order</Text>
+        <Text className="text-xl font-heading text-gray-900">Cancel order</Text>
       </View>
 
       <ScrollView className="flex-1 px-6">
-        <Text className="text-xl font-bold text-gray-900 mb-2">
+        <Text className="text-xl font-heading text-gray-900 mb-2">
           We are sorry to hear this
         </Text>
         <Text className="text-gray-500 leading-6 mb-6">
@@ -87,7 +87,7 @@ export default function CancelOrderScreen() {
           className={`w-full py-4 rounded-2xl items-center shadow-sm ${isLoading ? "bg-yellow-200" : "bg-yellow-400"
             }`}
         >
-          <Text className="text-gray-900 font-bold text-lg">
+          <Text className="text-gray-900 font-body-bold text-lg">
             {isLoading ? "Submitting..." : "Submit"}
           </Text>
         </TouchableOpacity>

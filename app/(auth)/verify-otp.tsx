@@ -106,13 +106,13 @@ const VerifyOTP = () => {
                 borderTopRightRadius: 28,
               }}
             >
-              <Text className="text-2xl font-bold text-center mb-4">
+              <Text className="text-2xl font-heading text-center mb-4">
                 Enter Verification OTP
               </Text>
               <Text className="text-gray-600 text-center mb-2">
                 We have sent a verification code to:
               </Text>
-              <Text className="text-gray-900 font-bold text-center mb-6">
+              <Text className="text-gray-900 font-body-bold text-center mb-6">
                 {email || "your email address"}
               </Text>
 

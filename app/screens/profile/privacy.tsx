@@ -147,7 +147,7 @@ export default function PrivacyScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Privacy Policy</Text>
+        <Text className="text-xl font-heading text-gray-900">Privacy Policy</Text>
       </View>
 
       {/* Body */}
@@ -159,7 +159,7 @@ export default function PrivacyScreen() {
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8 gap-4">
           <Ionicons name="alert-circle-outline" size={48} color="#f87171" />
-          <Text className="text-gray-700 font-semibold text-base text-center">
+          <Text className="text-gray-700 font-body-semibold text-base text-center">
             Failed to load Privacy Policy
           </Text>
           <Text className="text-gray-400 text-sm text-center">{error}</Text>
@@ -172,7 +172,7 @@ export default function PrivacyScreen() {
             }}
             className="bg-orange-500 px-6 py-2 rounded-full"
           >
-            <Text className="text-white font-semibold">Retry</Text>
+            <Text className="text-white font-body-semibold">Retry</Text>
           </TouchableOpacity>
         </View>
       ) : document ? (

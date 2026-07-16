@@ -467,17 +467,17 @@ function ProductDetailsInner() {
                   </View>
                 )}
                 <View>
-                  <Text className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+                  <Text className="text-xs font-body-semibold text-gray-400 uppercase tracking-wide">
                     Restaurant
                   </Text>
-                  <Text className="text-sm font-black text-gray-800">
+                  <Text className="text-sm font-heading text-gray-800">
                     {product.restaurantName}
                   </Text>
                 </View>
               </View>
               <View className="bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full flex-row items-center gap-1">
                 <Ionicons name="star" size={12} color="#F5C518" />
-                <Text className="text-[10px] font-extrabold text-amber-800">
+                <Text className="text-[10px] font-body-bold text-amber-800">
                   Verified
                 </Text>
               </View>
@@ -486,10 +486,10 @@ function ProductDetailsInner() {
             {/* Title, Pricing */}
             <View className="mb-6">
               <View className="flex-row items-start justify-between">
-                <Text className="text-2xl font-black text-gray-900 leading-tight flex-1 mr-3">
+                <Text className="text-2xl font-heading text-gray-900 leading-tight flex-1 mr-3">
                   {product.name}
                 </Text>
-                <Text className="text-2xl font-black text-[#E29E10]">
+                <Text className="text-2xl font-heading text-[#E29E10]">
                   {isFreeMeal ? "FREE" : `$${product.price}`}
                 </Text>
               </View>
@@ -500,10 +500,10 @@ function ProductDetailsInner() {
               {/* Rating Card */}
               <View className="flex-1 bg-amber-50/40 border border-amber-100/50 rounded-2xl p-3 items-center justify-center">
                 <Ionicons name="star" size={16} color="#F5C518" />
-                <Text className="text-sm font-black text-gray-900 mt-1">
+                <Text className="text-sm font-heading text-gray-900 mt-1">
                   {product.rating}
                 </Text>
-                <Text className="text-[9px] font-bold text-amber-800/60 uppercase tracking-wide mt-0.5">
+                <Text className="text-[9px] font-body-semibold text-amber-800/60 uppercase tracking-wide mt-0.5">
                   {product.reviews} reviews
                 </Text>
               </View>
@@ -511,10 +511,10 @@ function ProductDetailsInner() {
               {/* Calories Card */}
               <View className="flex-1 bg-rose-50/40 border border-rose-100/50 rounded-2xl p-3 items-center justify-center">
                 <Ionicons name="flame" size={16} color="#FF5A5F" />
-                <Text className="text-sm font-black text-gray-900 mt-1">
+                <Text className="text-sm font-heading text-gray-900 mt-1">
                   {product.calories}
                 </Text>
-                <Text className="text-[9px] font-bold text-rose-800/60 uppercase tracking-wide mt-0.5">
+                <Text className="text-[9px] font-body-semibold text-rose-800/60 uppercase tracking-wide mt-0.5">
                   Calories (kcal)
                 </Text>
               </View>
@@ -522,10 +522,10 @@ function ProductDetailsInner() {
               {/* Delivery Time Card */}
               <View className="flex-1 bg-blue-50/40 border border-blue-100/50 rounded-2xl p-3 items-center justify-center">
                 <Ionicons name="time" size={16} color="#2D9CDB" />
-                <Text className="text-sm font-black text-gray-900 mt-1">
+                <Text className="text-sm font-heading text-gray-900 mt-1">
                   {product.time}
                 </Text>
-                <Text className="text-[9px] font-bold text-blue-800/60 uppercase tracking-wide mt-0.5">
+                <Text className="text-[9px] font-body-semibold text-blue-800/60 uppercase tracking-wide mt-0.5">
                   Est. Minutes
                 </Text>
               </View>
@@ -534,10 +534,10 @@ function ProductDetailsInner() {
             {/* Quantity Controller Capsule */}
             <View className="flex-row items-center justify-between mb-6 bg-slate-50/50 border border-slate-100 rounded-2xl px-4 py-3.5">
               <View>
-                <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <Text className="text-[10px] font-body-semibold text-gray-400 uppercase tracking-wider">
                   Select Quantity
                 </Text>
-                <Text className="text-sm font-black text-gray-800 mt-0.5">
+                <Text className="text-sm font-heading text-gray-800 mt-0.5">
                   Quantity
                 </Text>
               </View>
@@ -559,7 +559,7 @@ function ProductDetailsInner() {
                 >
                   <Ionicons name="remove" size={16} color={isFreeMeal ? "#9CA3AF" : "#1F2937"} />
                 </TouchableOpacity>
-                <Text className="text-sm font-black text-gray-950 min-w-[20px] text-center">
+                <Text className="text-sm font-heading text-gray-950 min-w-[20px] text-center">
                   {quantity}
                 </Text>
                 <TouchableOpacity
@@ -582,7 +582,7 @@ function ProductDetailsInner() {
 
             {/* Description Block */}
             <View className="mb-6">
-              <Text className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-0.5">
+              <Text className="text-xs font-body-semibold text-gray-400 uppercase tracking-widest mb-2 ml-0.5">
                 Description
               </Text>
               <TouchableOpacity
@@ -590,12 +590,12 @@ function ProductDetailsInner() {
                 onPress={() => setIsExpanded(!isExpanded)}
               >
                 <Text
-                  className="text-gray-500 text-sm font-semibold leading-relaxed"
+                  className="text-gray-500 text-sm font-body-semibold leading-relaxed"
                   numberOfLines={isExpanded ? undefined : 3}
                 >
                   {product.description}
                 </Text>
-                <Text className="text-[#E29E10] font-extrabold mt-1 text-xs">
+                <Text className="text-[#E29E10] font-body-bold mt-1 text-xs">
                   {isExpanded ? "Show less" : "Read more"}
                 </Text>
               </TouchableOpacity>
@@ -687,7 +687,7 @@ function ProductDetailsInner() {
             {isFreeMeal && (
               <View className="bg-amber-50 border border-amber-100/50 rounded-2xl p-4 mb-8 flex-row gap-2">
                 <Ionicons name="information-circle" size={18} color="#D97706" />
-                <Text className="text-xs text-amber-800 font-semibold flex-1 leading-normal">
+                <Text className="text-xs text-amber-800 font-body-semibold flex-1 leading-normal">
                   One donated meal can be claimed once every 48 hours, and each
                   token covers 1 meal only.
                 </Text>
@@ -732,7 +732,7 @@ function ProductDetailsInner() {
             {/* Customer Reviews Section */}
             {reviewsLoading ? (
               <View className="mb-4">
-                <Text className="text-lg font-bold text-[#1F2A33] mb-4">
+                <Text className="text-lg font-heading-semibold text-[#1F2A33] mb-4">
                   Customer Reviews
                 </Text>
                 {/* 2 skeleton reviews */}

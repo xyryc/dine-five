@@ -205,7 +205,7 @@ function MenuItem({
       {/* Info Column */}
       <View className="flex-1 justify-center py-1">
         <Text
-          className="text-sm font-extrabold text-gray-900 mb-1"
+          className="text-sm font-heading-semibold text-gray-900 mb-1"
           numberOfLines={1}
         >
           {item.name}
@@ -213,25 +213,25 @@ function MenuItem({
 
         {item.description ? (
           <Text
-            className="text-[11px] text-gray-400 font-semibold mb-2 pr-2"
+            className="text-[11px] text-gray-400 font-body-semibold mb-2 pr-2"
             numberOfLines={2}
           >
             {item.description}
           </Text>
         ) : (
-          <Text className="text-[11px] text-gray-300 italic font-semibold mb-2">
+          <Text className="text-[11px] text-gray-300 italic font-body-semibold mb-2">
             No description available
           </Text>
         )}
 
         <View className="flex-row items-center justify-between">
-          <Text className="text-base font-black text-gray-900">
+          <Text className="text-base font-heading text-gray-900">
             {isFreeFlow ? "FREE" : `$${item.price}`}
           </Text>
 
           <View className="flex-row items-center bg-gray-100 px-2.5 py-1 rounded-full">
             <Ionicons name="time-outline" size={11} color="#6B7280" />
-            <Text className="text-[10px] font-bold text-gray-600 ml-1">
+            <Text className="text-[10px] font-body-semibold text-gray-600 ml-1">
               {item.time}
             </Text>
           </View>
@@ -578,7 +578,7 @@ function RestaurantDetailScreenInner() {
           <Ionicons name="restaurant" size={32} color="#F5C518" />
         </View>
         <ActivityIndicator size="small" color="#F5C518" />
-        <Text className="text-gray-500 mt-3 font-semibold text-sm">
+        <Text className="text-gray-500 mt-3 font-body-semibold text-sm">
           Preparing menu...
         </Text>
       </View>
@@ -682,21 +682,21 @@ function RestaurantDetailScreenInner() {
           <View className="bg-white px-5 pt-6 pb-6 -mt-8 rounded-t-[32px] flex-1">
             <View className="mb-6">
               <View className="flex-row items-start justify-between gap-3">
-                <Text className="text-2xl font-black text-gray-900 leading-tight flex-1">
+                <Text className="text-2xl font-heading text-gray-900 leading-tight flex-1">
                   {restaurantName}
                 </Text>
 
                 <View className="flex-row items-center gap-1.5 mt-1">
                   <View className="flex-row items-center px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 gap-1">
                     <Ionicons name="star" size={12} color="#F5C518" />
-                    <Text className="text-[10px] font-extrabold text-amber-800">
+                    <Text className="text-[10px] font-body-bold text-amber-800">
                       {restaurantRating}
                     </Text>
                   </View>
 
                   <View className="flex-row items-center px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 gap-1">
                     <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <Text className="text-[10px] font-extrabold text-emerald-800">
+                    <Text className="text-[10px] font-body-bold text-emerald-800">
                       Open Now
                     </Text>
                   </View>
@@ -707,7 +707,7 @@ function RestaurantDetailScreenInner() {
                 <View className="flex-row items-center flex-1 mr-2">
                   <Ionicons name="location-outline" size={14} color="#9CA3AF" />
                   <Text
-                    className="text-xs font-semibold text-gray-500 ml-1 flex-1"
+                    className="text-xs font-body-semibold text-gray-500 ml-1 flex-1"
                     numberOfLines={1}
                   >
                     {restaurantAddress || "Address not available"}
@@ -717,7 +717,7 @@ function RestaurantDetailScreenInner() {
                 {restaurantDistance !== "N/A" && (
                   <View className="flex-row items-center px-2.5 py-1 rounded-full bg-blue-50 border border-blue-100 gap-1">
                     <Ionicons name="bicycle-outline" size={12} color="#2D9CDB" />
-                    <Text className="text-[10px] font-extrabold text-blue-800">
+                    <Text className="text-[10px] font-body-bold text-blue-800">
                       Pickup {restaurantDistance}
                     </Text>
                   </View>
@@ -731,10 +731,10 @@ function RestaurantDetailScreenInner() {
                       <Ionicons name="call-outline" size={16} color="#4B5563" />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      <Text className="text-[10px] font-body-semibold text-gray-400 uppercase tracking-wider">
                         Phone Number
                       </Text>
-                      <Text className="text-sm font-bold text-gray-800" numberOfLines={1} adjustsFontSizeToFit>
+                      <Text className="text-sm font-body-semibold text-gray-800" numberOfLines={1} adjustsFontSizeToFit>
                         {restaurantPhone}
                       </Text>
                     </View>
@@ -745,7 +745,7 @@ function RestaurantDetailScreenInner() {
                     activeOpacity={0.8}
                   >
                     <Ionicons name="call" size={14} color="#1F2937" />
-                    <Text className="text-xs font-black text-gray-900">
+                    <Text className="text-xs font-body-bold text-gray-900">
                       Call
                     </Text>
                   </TouchableOpacity>
@@ -781,7 +781,7 @@ function RestaurantDetailScreenInner() {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className="text-base font-black text-gray-900 mb-1"
+                      className="text-base font-heading text-gray-900 mb-1"
                       style={{ color: currentTokenId ? "#065F46" : "#78350F" }}
                     >
                       {currentTokenId
@@ -789,7 +789,7 @@ function RestaurantDetailScreenInner() {
                         : "Free Meal Token Available"}
                     </Text>
                     <Text
-                      className="text-xs font-semibold leading-normal mb-3"
+                      className="text-xs font-body-semibold leading-normal mb-3"
                       style={{ color: currentTokenId ? "#047857" : "#B45309" }}
                     >
                       {currentTokenId
@@ -819,7 +819,7 @@ function RestaurantDetailScreenInner() {
                         {isClaimingMeal ? (
                           <ActivityIndicator size="small" color="#FFFFFF" />
                         ) : (
-                          <Text className="text-white font-extrabold text-xs">
+                          <Text className="text-white font-body-bold text-xs">
                             Claim Free Meal Token
                           </Text>
                         )}
@@ -827,7 +827,7 @@ function RestaurantDetailScreenInner() {
                     ) : (
                       <View className="flex-row items-center gap-1.5 bg-emerald-100 border border-emerald-200 self-start px-3 py-1.5 rounded-full">
                         <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        <Text className="text-[10px] font-black text-emerald-800 uppercase tracking-wider">
+                        <Text className="text-[10px] font-body-bold text-emerald-800 uppercase tracking-wider">
                           Ready to order
                         </Text>
                       </View>
@@ -884,7 +884,7 @@ function RestaurantDetailScreenInner() {
                       }}
                     >
                       <Text
-                        className={`text-xs font-bold ${
+                        className={`text-xs font-body-semibold ${
                           isActive ? "text-[#F5C518]" : "text-gray-500"
                         }`}
                       >
@@ -899,19 +899,19 @@ function RestaurantDetailScreenInner() {
             {menuLoading && (
               <View className="py-10 items-center justify-center">
                 <ActivityIndicator size="small" color="#F5C518" />
-                <Text className="text-gray-400 mt-2">Loading menu...</Text>
+                <Text className="text-gray-400 font-body mt-2">Loading menu...</Text>
               </View>
             )}
 
             {!menuLoading && !!menuError && (
               <View className="py-10 items-center justify-center px-4">
-                <Text className="text-gray-400 text-center">{menuError}</Text>
+                <Text className="text-gray-400 font-body text-center">{menuError}</Text>
                 <TouchableOpacity
                   onPress={loadMenu}
                   className="mt-3 px-4 py-2 rounded-full"
                   style={{ backgroundColor: "#F5C518" }}
                 >
-                  <Text className="text-xs font-bold text-gray-900">Retry</Text>
+                  <Text className="text-xs font-body-semibold text-gray-900">Retry</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -927,7 +927,7 @@ function RestaurantDetailScreenInner() {
                   }}
                   className="mt-4"
                 >
-                  <Text className="text-base font-black text-gray-900 px-1 mb-3">
+                  <Text className="text-base font-heading text-gray-900 px-1 mb-3">
                     {section.title}
                   </Text>
 
@@ -946,7 +946,7 @@ function RestaurantDetailScreenInner() {
 
             {!menuLoading && !menuError && visibleSections.length === 0 && (
               <View className="py-10 items-center justify-center">
-                <Text className="text-gray-400">No menu items found.</Text>
+                <Text className="text-gray-400 font-body">No menu items found.</Text>
               </View>
             )}
           </View>
@@ -968,10 +968,10 @@ function RestaurantDetailScreenInner() {
                 <Ionicons name="bag" size={20} color="#1F2937" />
               </View>
               <View>
-                <Text className="text-white font-extrabold text-sm">
+                <Text className="text-white font-body-bold text-sm">
                   {cartCount} {cartCount === 1 ? "item" : "items"} in bag
                 </Text>
-                <Text className="text-gray-400 text-xs font-semibold">
+                <Text className="text-gray-400 text-xs font-body-semibold">
                   Fresh food ready for pickup
                 </Text>
               </View>
@@ -981,7 +981,7 @@ function RestaurantDetailScreenInner() {
               activeOpacity={0.8}
               className="bg-[#F5C518] px-5 py-2.5 rounded-2xl"
             >
-              <Text className="text-gray-900 font-extrabold text-xs">
+              <Text className="text-gray-900 font-body-bold text-xs">
                 View Bag
               </Text>
             </TouchableOpacity>

@@ -122,7 +122,7 @@ export default function TermsScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">
+        <Text className="text-xl font-heading text-gray-900">
           Terms &amp; Conditions
         </Text>
       </View>
@@ -136,7 +136,7 @@ export default function TermsScreen() {
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8 gap-4">
           <Ionicons name="alert-circle-outline" size={48} color="#f87171" />
-          <Text className="text-gray-700 font-semibold text-base text-center">
+          <Text className="text-gray-700 font-body-semibold text-base text-center">
             Failed to load Terms &amp; Conditions
           </Text>
           <Text className="text-gray-400 text-sm text-center">{error}</Text>
@@ -149,7 +149,7 @@ export default function TermsScreen() {
             }}
             className="bg-orange-500 px-6 py-2 rounded-full"
           >
-            <Text className="text-white font-semibold">Retry</Text>
+            <Text className="text-white font-body-semibold">Retry</Text>
           </TouchableOpacity>
         </View>
       ) : document ? (

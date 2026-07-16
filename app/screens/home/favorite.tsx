@@ -30,18 +30,18 @@ export default function FavoriteScreen() {
       />
       <View className="flex-1 ml-3">
         <View className="flex-row justify-between items-start">
-          <Text className="text-lg font-bold text-gray-900 mb-1">
+          <Text className="text-lg font-heading text-gray-900 mb-1">
             {item.name}
           </Text>
           <View className="flex-row items-center">
             <Ionicons name="star" size={14} color="#FFC107" />
-            <Text className="text-sm font-bold text-gray-600 ml-1">
+            <Text className="text-sm font-body-bold text-gray-600 ml-1">
               4.7 (2.5k)
             </Text>
           </View>
         </View>
 
-        <Text className="text-lg font-bold text-gray-900 mb-1">
+        <Text className="text-lg font-heading text-gray-900 mb-1">
           $ {item.price}
         </Text>
 
@@ -83,7 +83,7 @@ export default function FavoriteScreen() {
         </TouchableOpacity>
         <View className="flex-row items-center gap-2">
           <Ionicons name="heart-outline" size={24} color="#333" />
-          <Text className="text-xl font-bold text-gray-900">Favorite</Text>
+          <Text className="text-xl font-heading text-gray-900">Favorite</Text>
         </View>
       </View>
 

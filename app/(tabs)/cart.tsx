@@ -461,7 +461,7 @@ export default function CartScreen() {
       <SafeAreaView className="flex-1 bg-[#FDFBF7] justify-center items-center">
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color="#FFC107" />
-        <Text className="mt-4 text-gray-500 text-sm">Loading Cart...</Text>
+        <Text className="mt-4 text-gray-500 font-body text-sm">Loading Cart...</Text>
       </SafeAreaView>
     );
   }
@@ -516,7 +516,7 @@ export default function CartScreen() {
       <View className="flex-row items-center justify-center pt-3 pb-4 border-b border-gray-100/50 bg-white">
         <View className="flex-row items-center gap-2">
           <Ionicons name="cart-outline" size={20} color="#1F2937" />
-          <Text className="text-lg font-bold text-gray-900">My Cart</Text>
+          <Text className="text-lg font-heading text-gray-900">My Cart</Text>
         </View>
       </View>
 
@@ -545,12 +545,12 @@ export default function CartScreen() {
                 )}
               </View>
               <View className="flex-1">
-                <Text className="text-base font-extrabold text-gray-900" numberOfLines={1}>
+                <Text className="text-base font-heading text-gray-900" numberOfLines={1}>
                   {group.restaurantName}
                 </Text>
                 <View className="flex-row items-center mt-1">
                   <Ionicons name="location-outline" size={12} color="#9CA3AF" />
-                  <Text className="text-[11px] text-gray-400 ml-1 font-medium flex-1" numberOfLines={1}>
+                  <Text className="text-[11px] text-gray-400 ml-1 font-body-medium flex-1" numberOfLines={1}>
                     {group.restaurantAddress}
                   </Text>
                 </View>
@@ -581,10 +581,10 @@ export default function CartScreen() {
 
                   {/* Item Details */}
                   <View className="flex-1 justify-center mr-2">
-                    <Text className="text-sm font-bold text-gray-900" numberOfLines={2}>
+                    <Text className="text-sm font-body-semibold text-gray-900" numberOfLines={2}>
                       {item.name}
                     </Text>
-                    <Text className="text-sm font-semibold text-[#E29E10] mt-1">
+                    <Text className="text-sm font-body-semibold text-[#E29E10] mt-1">
                       {formatMoney(toNumber(item.price, 0))}
                     </Text>
                   </View>
@@ -606,7 +606,7 @@ export default function CartScreen() {
                       <Ionicons name="remove" size={14} color="#1F2937" />
                     </TouchableOpacity>
 
-                    <Text className="text-sm font-extrabold text-gray-800 min-w-[20px] text-center">
+                    <Text className="text-sm font-body-bold text-gray-800 min-w-[20px] text-center">
                       {item.quantity}
                     </Text>
 
@@ -632,27 +632,27 @@ export default function CartScreen() {
             {/* Group Price Breakdown Footer */}
             <View className="px-4 py-3 bg-gray-50/10 border-t border-gray-100/50 gap-y-1.5">
               <View className="flex-row justify-between items-center">
-                <Text className="text-[11px] text-gray-400 font-semibold">Subtotal</Text>
-                <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.subtotal)}</Text>
+                <Text className="text-[11px] text-gray-400 font-body-semibold">Subtotal</Text>
+                <Text className="text-xs font-body-semibold text-gray-600">{formatMoney(group.subtotal)}</Text>
               </View>
 
               {group.stateTax > 0 && (
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-[11px] text-gray-400 font-semibold">State Tax</Text>
-                  <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.stateTax)}</Text>
+                  <Text className="text-[11px] text-gray-400 font-body-semibold">State Tax</Text>
+                  <Text className="text-xs font-body-semibold text-gray-600">{formatMoney(group.stateTax)}</Text>
                 </View>
               )}
 
               {group.cityTax > 0 && (
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-[11px] text-gray-400 font-semibold">City Tax</Text>
-                  <Text className="text-xs font-semibold text-gray-600">{formatMoney(group.cityTax)}</Text>
+                  <Text className="text-[11px] text-gray-400 font-body-semibold">City Tax</Text>
+                  <Text className="text-xs font-body-semibold text-gray-600">{formatMoney(group.cityTax)}</Text>
                 </View>
               )}
 
               <View className="flex-row justify-between items-center pt-1.5 mt-1 border-t border-gray-100/50">
-                <Text className="text-[12px] font-extrabold text-gray-800">Total for this restaurant</Text>
-                <Text className="text-sm font-black text-gray-900">{formatMoney(group.total)}</Text>
+                <Text className="text-[12px] font-body-bold text-gray-800">Total for this restaurant</Text>
+                <Text className="text-sm font-heading text-gray-900">{formatMoney(group.total)}</Text>
               </View>
             </View>
           </View>
@@ -665,10 +665,10 @@ export default function CartScreen() {
               <Ionicons name="restaurant-outline" size={18} color="#E29E10" />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-bold text-gray-800">
+              <Text className="text-sm font-body-semibold text-gray-800">
                 Include utensils
               </Text>
-              <Text className="text-xs text-gray-400 font-medium mt-0.5">
+              <Text className="text-xs text-gray-400 font-body-medium mt-0.5">
                 Napkins, forks, straws, etc.
               </Text>
             </View>
@@ -683,37 +683,37 @@ export default function CartScreen() {
 
         {/* Price Breakdown Card */}
         <View className="bg-white rounded-3xl border border-gray-100/80 p-5 shadow-sm">
-          <Text className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-0.5">
+          <Text className="text-[11px] font-body-semibold text-gray-400 uppercase tracking-widest mb-3 ml-0.5">
             Bill Details
           </Text>
 
           <View className="gap-y-2.5">
             <View className="flex-row justify-between items-center">
-              <Text className="text-sm font-medium text-gray-500">Item subtotal</Text>
+              <Text className="text-sm font-body-medium text-gray-500">Item subtotal</Text>
               {loading ? (
                 <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-sm font-semibold text-gray-800">{formatMoney(subtotal)}</Text>
+                <Text className="text-sm font-body-semibold text-gray-800">{formatMoney(subtotal)}</Text>
               )}
             </View>
 
             <View className="flex-row justify-between items-center">
-              <Text className="text-sm font-medium text-gray-500">Platform fee</Text>
+              <Text className="text-sm font-body-medium text-gray-500">Platform fee</Text>
               {loading ? (
                 <View className="bg-gray-100 h-5 w-16 rounded animate-pulse" />
               ) : (
-                <Text className="text-sm font-semibold text-gray-800">{formatMoney(platformFee)}</Text>
+                <Text className="text-sm font-body-semibold text-gray-800">{formatMoney(platformFee)}</Text>
               )}
             </View>
 
             {/* Taxes are itemized per restaurant card above */}
 
             <View className="flex-row justify-between items-center pt-3 mt-1 border-t border-gray-50">
-              <Text className="text-base font-bold text-gray-900">Total Amount</Text>
+              <Text className="text-base font-heading text-gray-900">Total Amount</Text>
               {loading ? (
                 <View className="bg-gray-100 h-6 w-20 rounded animate-pulse" />
               ) : (
-                <Text className="text-base font-extrabold text-gray-900">{formatMoney(total)}</Text>
+                <Text className="text-base font-heading text-gray-900">{formatMoney(total)}</Text>
               )}
             </View>
           </View>
@@ -739,10 +739,10 @@ export default function CartScreen() {
             }}
           >
             <Ionicons name="trash-outline" size={14} color="#EF4444" />
-            <Text className="text-[12px] font-bold text-red-500 ml-1">Clear Cart</Text>
+            <Text className="text-[12px] font-body-semibold text-red-500 ml-1">Clear Cart</Text>
           </TouchableOpacity>
-          
-          <Text className="text-base font-extrabold text-gray-900">
+
+          <Text className="text-base font-heading text-gray-900">
             Total: {formatMoney(total)}
           </Text>
         </View>
@@ -754,7 +754,7 @@ export default function CartScreen() {
             className="flex-1 h-12 rounded-2xl border border-gray-200 bg-white items-center justify-center flex-row"
           >
             <Ionicons name="add" size={18} color="#1F2937" />
-            <Text className="text-sm font-bold text-gray-800 ml-1">
+            <Text className="text-sm font-body-semibold text-gray-800 ml-1">
               Add More
             </Text>
           </TouchableOpacity>
@@ -770,7 +770,7 @@ export default function CartScreen() {
               end={{ x: 1, y: 1 }}
               style={{ height: '100%', width: '100%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}
             >
-              <Text className="text-sm font-bold text-white">
+              <Text className="text-sm font-body-semibold text-white">
                 Checkout
               </Text>
               <Ionicons name="chevron-forward" size={16} color="#ffffff" style={{ marginLeft: 4 }} />
