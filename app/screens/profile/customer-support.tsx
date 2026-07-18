@@ -55,7 +55,7 @@ export default function CustomerSupportScreen() {
     (params.conversationId as string) || null,
   );
   const [providerId] = useState<string | null>(
-    (params.providerId as string) || "69814b5b4d784da531fb6517",
+    (params.providerId as string) || null,
   );
 
   const [message, setMessage] = useState("");
@@ -94,39 +94,30 @@ export default function CustomerSupportScreen() {
     try {
       if (conversationId) {
         await refreshMessages();
-      } else if (providerId) {
-        // Try to find if there's an existing conversation or create a new one
-        console.log("Creating/Fetching conversation for providerId:", providerId);
-        const data = await createConversation(providerId);
-        console.log("createConversation data:", JSON.stringify(data, null, 2));
+        return;
+      }
 
+      // First, try to find an existing admin conversation
+      const result = await fetchConversations();
+      const convs = result?.conversations || result || [];
+
+      const adminConv = Array.isArray(convs)
+        ? convs.find((c: any) => c.adminId || c.counterpartRole === "ADMIN")
+        : null;
+
+      if (adminConv) {
+        const id = adminConv.id || adminConv._id;
+        setConversationId(id);
+        return;
+      }
+
+      // No admin conversation found — try with providerId if given
+      if (providerId) {
+        console.log("Creating conversation for providerId:", providerId);
+        const data = await createConversation(providerId);
         if (data) {
           const id = data.id || data._id;
-          console.log("Extracted conversationId:", id);
-          if (id) {
-            setConversationId(id);
-          }
-        }
-
-        // Create support ticket when entering
-        if (user) {
-          console.log("Creating support ticket for user:", user?.id || user?._id);
-          createSupportTicket({
-            userId: user?.id || user?._id,
-            userType: "Customer",
-            subject: "Cannot update menu items",
-            description: "I am trying to change the price of my pizza but it failsgfgtgertertretrert.",
-            priority: "Medium",
-          }).catch((err: any) => console.log("Silent ticket creation error:", err));
-        }
-      } else {
-        // Fallback: try to fetch all conversations
-        const result = await fetchConversations();
-        const convs = result?.conversations || result || [];
-
-        if (convs.length > 0) {
-          const targetConv = convs[0];
-          setConversationId(targetConv.id || targetConv._id);
+          if (id) setConversationId(id);
         }
       }
     } catch (error) {
@@ -288,30 +279,22 @@ export default function CustomerSupportScreen() {
 
     try {
       let result;
-      // We always use sendMessageToProvider because the user confirmed
-      // /api/chat/message/customer-to-provider is the working endpoint in Postman
-      if (providerId) {
-        result = await sendMessageToProvider(
-          providerId,
-          currentMessage,
-          currentAttachments,
-        );
+      result = await sendMessageToProvider(
+        providerId || undefined,
+        currentMessage,
+        currentAttachments,
+      );
 
-        // If the API returns the new conversation ID or we need to sync
-        const newConvId =
-          result?.data?.conversationId ||
-          result?.conversationId ||
-          result?.data?.id;
+      const newConvId =
+        result?.data?.conversationId ||
+        result?.conversationId ||
+        result?.data?.id;
 
-        if (newConvId && !conversationId) {
-          setConversationId(newConvId);
-        }
-      } else {
-        throw new Error("Missing provider ID");
+      if (newConvId && !conversationId) {
+        setConversationId(newConvId);
       }
 
       if (result) {
-        // Update optimistic message with real messageId from API
         const responseData = result.data;
         if (responseData) {
           setMessages((prev) =>
@@ -328,7 +311,6 @@ export default function CustomerSupportScreen() {
         }
 
         if (!conversationId) {
-          // If first message, we need to refresh to get the new conversationId
           const list = await fetchConversations();
           const convs = list?.conversations || [];
           if (convs.length > 0) {

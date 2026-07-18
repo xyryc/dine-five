@@ -1521,7 +1521,7 @@ export const useStore = create((rawSet, get) => {
     },
 
     sendMessageToProvider: async (
-      providerId: string,
+      providerId: string | undefined,
       message: string,
       attachments: any[] = [],
     ) => {
