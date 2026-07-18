@@ -20,10 +20,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function OrderDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { submitReview, fetchReviewByOrderId, updateReview, fetchOrderById, isLoading } = useStore() as any;
+  const { submitReview, fetchReviewByOrderId, updateReview, fetchOrderById } = useStore() as any;
   const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<any>(null);
   const [orderLoading, setOrderLoading] = useState(true);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const currentState = (params.state as string) || "pending";
   const pickupAddress =
     (params.restaurantAddress as string) ||
@@ -130,11 +131,13 @@ export default function OrderDetailsScreen() {
 
       let result;
       const foodIdToSend = (params.foodId as string) || "";
+      setIsSubmittingReview(true);
       if (existingReviewId) {
         result = await updateReview(existingReviewId, rating, review);
       } else {
         result = await submitReview(orderIdToSend, foodIdToSend, rating, review);
       }
+      setIsSubmittingReview(false);
 
       if (result.success) {
         Alert.alert(
@@ -151,6 +154,7 @@ export default function OrderDetailsScreen() {
         setRateModalVisible(false);
       }
     } catch (error: any) {
+      setIsSubmittingReview(false);
       const errorMsg = error.message || "";
 
       if (
@@ -727,13 +731,13 @@ export default function OrderDetailsScreen() {
 
             <TouchableOpacity
               onPress={handleReviewSubmit}
-              disabled={isLoading}
-              className={`w-full py-4 rounded-2xl items-center mt-4 ${isLoading ? "bg-gray-100" : "bg-[#FFC107]"}`}
+              disabled={isSubmittingReview}
+              className={`w-full py-4 rounded-2xl items-center mt-4 ${isSubmittingReview ? "bg-gray-100" : "bg-[#FFC107]"}`}
             >
               <Text
-                className={`font-body-bold text-lg ${isLoading ? "text-gray-400" : "text-gray-900"}`}
+                className={`font-body-bold text-lg ${isSubmittingReview ? "text-gray-400" : "text-gray-900"}`}
               >
-                {isLoading ? "Submitting..." : (existingReviewId ? "Update Review" : "Submit Rating")}
+                {isSubmittingReview ? "Submitting..." : (existingReviewId ? "Update Review" : "Submit Rating")}
               </Text>
             </TouchableOpacity>
           </View>

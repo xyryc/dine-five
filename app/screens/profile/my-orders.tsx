@@ -343,7 +343,7 @@ function PreviousOrderCard({
         </View>
 
         <View className="flex-row gap-2 flex-1 justify-end ml-4">
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => {
               // Logic for reordering could be added here
             }}
@@ -353,7 +353,7 @@ function PreviousOrderCard({
             <Text className="text-gray-600 font-body-semibold text-xs ml-1">
               Reorder
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {!isCancelled && ["picked_up", "delivered", "completed"].includes(order.status?.toLowerCase()) && (
             <TouchableOpacity
               onPress={() => {
