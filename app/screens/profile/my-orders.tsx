@@ -1,4 +1,5 @@
 import { EmptyState } from "@/components/common/EmptyState";
+import { DonateModal } from "@/components/home/DonateModal";
 import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -15,6 +16,7 @@ interface OrderCardProps {
   getProviderName: (order: any) => string;
   getStatusBadgeStyle: (status: string) => { container: string; text: string };
   renderOrderImage: (order: any) => React.ReactNode;
+  onDonateAgain?: () => void;
 }
 
 function CurrentOrderCard({
@@ -128,6 +130,7 @@ function PreviousOrderCard({
   getProviderName,
   getStatusBadgeStyle,
   renderOrderImage,
+  onDonateAgain,
 }: OrderCardProps) {
   const isDonation = order.isDonation || order.orderType === "donation" || order.logisticsType === "donation";
 
@@ -232,9 +235,7 @@ function PreviousOrderCard({
 
           <View className="flex-row gap-2 flex-1 justify-end ml-4">
             <TouchableOpacity
-              onPress={() => {
-                router.push("/screens/profile/donation-tokens");
-              }}
+              onPress={onDonateAgain}
               className="bg-rose-500 px-4 py-2.5 rounded-xl items-center justify-center flex-row shadow-sm active:opacity-90"
             >
               <Ionicons name="heart" size={14} color="#FFF" />
@@ -391,6 +392,18 @@ export default function MyOrdersScreen() {
   const [previousOrders, setPreviousOrders] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [donateModalVisible, setDonateModalVisible] = useState(false);
+
+  const handleDonateConfirm = (mealCount: number) => {
+    setDonateModalVisible(false);
+    router.push({
+      pathname: "/screens/cart/checkout",
+      params: {
+        mealCount: String(mealCount),
+        type: "donation",
+      },
+    } as any);
+  };
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -673,11 +686,18 @@ export default function MyOrdersScreen() {
                 getProviderName={getProviderName}
                 getStatusBadgeStyle={getStatusBadgeStyle}
                 renderOrderImage={renderOrderImage}
+                onDonateAgain={() => setDonateModalVisible(true)}
               />
             )
           ))
         )}
       </ScrollView>
+
+      <DonateModal
+        visible={donateModalVisible}
+        onClose={() => setDonateModalVisible(false)}
+        onConfirm={handleDonateConfirm}
+      />
     </SafeAreaView>
   );
 }
