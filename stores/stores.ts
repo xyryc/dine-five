@@ -1536,7 +1536,6 @@ export const useStore = create((rawSet, get) => {
 
         if (isFormData) {
           body = new FormData();
-          body.append("receiverId", providerId);
           body.append("text", message);
 
           for (let index = 0; index < attachments.length; index++) {
@@ -1546,7 +1545,7 @@ export const useStore = create((rawSet, get) => {
             body.append("image", blob, fileName);
           }
         } else {
-          body = JSON.stringify({ receiverId: providerId, text: message });
+          body = JSON.stringify({ text: message });
         }
 
         console.log("--- OUTGOING MESSAGE DETAILS ---");

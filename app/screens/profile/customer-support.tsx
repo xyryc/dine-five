@@ -413,52 +413,49 @@ export default function CustomerSupportScreen() {
                         : "bg-[#FFF8E7] border-[#FFE8B5] rounded-tr-none shadow-xs"
                     }`}
                   >
-                    <View className="flex-row items-center gap-x-2">
-                      <Text className="text-[15px] font-body-medium text-gray-800 leading-5 flex-shrink">
-                        {msg.text}
-                      </Text>
+                    <Text className="text-[15px] font-body-medium text-gray-800 leading-5">
+                      {msg.text}
+                    </Text>
 
-                      {msg.sending && (
-                        <ActivityIndicator
-                          size="small"
-                          color="#E29E10"
-                          style={{ transform: [{ scale: 0.8 }] }}
-                        />
-                      )}
-                    </View>
-
-                    {/* Message Attachments */}
                     {msg.attachments && msg.attachments.length > 0 && (
                       <View className="mt-2.5 flex-row flex-wrap gap-2">
                         {msg.attachments.map((attachment: any, index: number) => (
                           <View key={index} className="rounded-xl overflow-hidden border border-gray-100 shadow-xs">
                              {attachment.type === "image" ? (
-                               <Image
-                                 source={{ uri: attachment.uri }}
-                                 className="h-56 w-56"
-                                 resizeMode="cover"
-                               />
-                             ) : (
-                               <View className="relative">
-                                 <SupportVideoPlayer
-                                   uri={attachment.uri}
-                                   className="w-56 h-56"
-                                   useNativeControls
-                                 />
-                               </View>
-                             )}
+                                <Image
+                                  source={{ uri: attachment.uri }}
+                                  className="h-56 w-56"
+                                  resizeMode="cover"
+                                />
+                              ) : (
+                                <View className="relative">
+                                  <SupportVideoPlayer
+                                    uri={attachment.uri}
+                                    className="w-56 h-56"
+                                    useNativeControls
+                                  />
+                                </View>
+                              )}
                           </View>
                         ))}
                       </View>
                     )}
                   </View>
-                  <Text
-                    className={`text-[10px] font-body-semibold text-gray-400 mt-1.5 ml-1 ${
-                      msg.isSupport ? "text-left" : "text-right"
-                    }`}
-                  >
-                    {msg.time}
-                  </Text>
+                  <View className={`flex-row items-center gap-1 mt-1.5 ml-1 ${msg.isSupport ? "justify-start" : "justify-end"}`}>
+                    <Text className="text-[10px] font-body-semibold text-gray-400">
+                      {msg.time}
+                    </Text>
+                    {!msg.isSupport && (
+                      msg.sending ? (
+                        <Text className="text-[10px] font-body-medium text-amber-500">Sending...</Text>
+                      ) : (
+                        <View className="flex-row items-center gap-0.5">
+                          <Ionicons name="checkmark-done" size={11} color="#10B981" />
+                          <Text className="text-[10px] font-body-medium text-emerald-500">Sent</Text>
+                        </View>
+                      )
+                    )}
+                  </View>
                 </View>
               </View>
             </View>
