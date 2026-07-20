@@ -3,6 +3,7 @@ import { create } from "zustand";
 import type { NearbyParams, Restaurant } from "./restaurantService";
 import { restaurantService } from "./restaurantService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useStore } from "./stores";
 
 export type { NearbyParams, Restaurant } from "./restaurantService";
 
@@ -12,6 +13,23 @@ const isNear = (a: number, b: number, tolerance = 0.02) =>
   Math.abs(a - b) <= tolerance;
 
 type FeedMode = "all" | "free";
+
+/** Helper to sync coordinate changes to user profile endpoint */
+const syncUserLocation = async (lat: number, lng: number) => {
+  try {
+    const user = useStore.getState().user;
+    if (user) {
+      // Avoid redundant API calls if coordinates are identical to existing state
+      if (user.lat === lat && user.lng === lng) {
+        return;
+      }
+      console.log("📍 [syncUserLocation] Syncing coordinates to user profile:", { lat, lng });
+      await useStore.getState().updateProfile({ lat, lng });
+    }
+  } catch (error) {
+    console.warn("Failed to sync user location to profile:", error);
+  }
+};
 
 interface RestaurantState {
   location: { latitude: number; longitude: number } | null;
@@ -77,6 +95,8 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
           locationLoading: false,
         });
         await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(newLoc));
+        // Sync to backend user profile if logged in
+        syncUserLocation(newLoc.latitude, newLoc.longitude);
         return { success: true, location: newLoc };
       }
       return { success: false, error: "Address not found" };
@@ -100,6 +120,8 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
               locationLoading: false,
             });
             console.log("Loaded cached location from AsyncStorage:", parsed);
+            // Sync cached location to profile
+            syncUserLocation(parsed.latitude, parsed.longitude);
             return;
           }
         }
@@ -125,6 +147,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
           locationLoading: false,
         });
         await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(coords));
+        syncUserLocation(coords.latitude, coords.longitude);
       }
 
       const current = await Location.getCurrentPositionAsync({
@@ -139,6 +162,7 @@ export const useRestaurantStore = create<RestaurantState>((set, get) => ({
         location: coords,
       });
       await AsyncStorage.setItem("DINE_FIVE_USER_LOCATION", JSON.stringify(coords));
+      syncUserLocation(coords.latitude, coords.longitude);
     } catch (err) {
       console.log("Error in fetchLocation:", err);
       if (!get().location) {

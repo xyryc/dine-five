@@ -43,12 +43,15 @@ const uriToBlob = (uri: string): Promise<Blob> => {
   });
 };
 
+import * as Location from "expo-location";
+
 export default function MyAccountScreen() {
   const router = useRouter();
   const { user, updateProfile, fetchProfile } = useStore() as any;
   const [isEditing, setIsEditing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
@@ -97,6 +100,8 @@ export default function MyAccountScreen() {
     city: user?.city || "",
     state: user?.state || "",
     address: user?.address || "",
+    lat: user?.lat || null,
+    lng: user?.lng || null,
   });
 
   useEffect(() => {
@@ -170,12 +175,63 @@ export default function MyAccountScreen() {
         city: user.city || prev.city,
         state: user.state || prev.state,
         address: user.address || prev.address,
+        lat: user.lat || null,
+        lng: user.lng || null,
       }));
     }
   }, [user, isEditing]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleLocateMe = async () => {
+    setIsLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Location permission is required to detect your address automatically."
+        );
+        return;
+      }
+
+      const current = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const { latitude, longitude } = current.coords;
+      const reverse = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+
+      if (reverse && reverse.length > 0) {
+        const addr = reverse[0];
+        const city = addr.city || addr.subregion || addr.district || "";
+        const state = addr.region || "";
+        const street = addr.street || addr.name || "";
+        const streetNumber = addr.streetNumber || "";
+        const address = [streetNumber, street].filter(Boolean).join(" ");
+
+        setFormData((prev) => ({
+          ...prev,
+          city,
+          state,
+          address: address || street,
+        }));
+
+        Alert.alert("Success", "Detected and filled your location details!");
+      } else {
+        Alert.alert("Error", "Could not resolve address details for your coordinates.");
+      }
+    } catch (err: any) {
+      console.log("Locate me error:", err);
+      Alert.alert("Error", err?.message || "Failed to retrieve location details.");
+    } finally {
+      setIsLocating(false);
+    }
   };
 
   const pickImage = async () => {
@@ -213,6 +269,8 @@ export default function MyAccountScreen() {
         city: user.city || "",
         state: user.state || "",
         address: user.address || "",
+        lat: user.lat || null,
+        lng: user.lng || null,
       });
     }
   };
@@ -273,6 +331,8 @@ export default function MyAccountScreen() {
       if (formData.city.trim()) payload.city = formData.city;
       if (formData.state.trim()) payload.state = formData.state;
       if (formData.address.trim()) payload.address = formData.address;
+      if (formData.lat !== null && formData.lat !== undefined) payload.lat = Number(formData.lat);
+      if (formData.lng !== null && formData.lng !== undefined) payload.lng = Number(formData.lng);
 
       let dataToUpdate: any;
       if (selectedImage) {
@@ -283,6 +343,8 @@ export default function MyAccountScreen() {
         if (payload.city) form.append("city", payload.city);
         if (payload.state) form.append("state", payload.state);
         if (payload.address) form.append("address", payload.address);
+        if (payload.lat !== null && payload.lat !== undefined) form.append("lat", String(payload.lat));
+        if (payload.lng !== null && payload.lng !== undefined) form.append("lng", String(payload.lng));
 
         const filename = selectedImage.split("/").pop() || "profile.jpg";
         const blob = await uriToBlob(selectedImage);
@@ -315,27 +377,49 @@ export default function MyAccountScreen() {
     <SafeAreaView className="flex-1 bg-[#FBF9F6]" edges={["top", "bottom"]}>
       <StatusBar style="dark" />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
         style={{ flex: 1 }}
       >
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 pt-3 pb-4">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-            className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
-          >
-            <Ionicons name="chevron-back" size={20} color="#1F2937" />
-          </TouchableOpacity>
-          <Text className="text-lg font-heading text-gray-900">Profile Details</Text>
           {isEditing ? (
             <TouchableOpacity
               onPress={handleCancel}
               activeOpacity={0.7}
-              className="px-3 py-1.5 rounded-full bg-gray-100"
+              className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
+              disabled={isLoading}
             >
-              <Text className="text-gray-600 font-body-semibold text-sm">Cancel</Text>
+              <Ionicons name="close" size={20} color="#1F2937" />
             </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+              className="w-10 h-10 bg-white rounded-full items-center justify-center border border-gray-100 shadow-sm"
+            >
+              <Ionicons name="chevron-back" size={20} color="#1F2937" />
+            </TouchableOpacity>
+          )}
+
+          <Text className="text-lg font-heading text-gray-900">
+            {isEditing ? "Edit Profile" : "Profile Details"}
+          </Text>
+
+          {isEditing ? (
+            isLoading ? (
+              <View className="px-4 py-1.5 rounded-full bg-gray-50 border border-gray-100 items-center justify-center" style={{ minWidth: 60 }}>
+                <ActivityIndicator size="small" color="#E29E10" />
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={handleSave}
+                activeOpacity={0.7}
+                className="px-4 py-1.5 rounded-full bg-[#FFF8E7] border border-[#FFE8B5]"
+              >
+                <Text className="text-[#E29E10] font-body-bold text-sm">Save</Text>
+              </TouchableOpacity>
+            )
           ) : (
             <TouchableOpacity
               onPress={() => setIsEditing(true)}
@@ -349,7 +433,7 @@ export default function MyAccountScreen() {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: isEditing ? 120 : 60 }}
+          contentContainerStyle={{ paddingBottom: 40 }}
           className="flex-1 px-6"
         >
           {/* Profile Card Section */}
@@ -534,6 +618,25 @@ export default function MyAccountScreen() {
               </View>
             </View>
 
+            {/* Locate Me Button */}
+            {isEditing && (
+              <TouchableOpacity
+                onPress={handleLocateMe}
+                disabled={isLocating}
+                activeOpacity={0.7}
+                className="flex-row items-center justify-center gap-x-2 py-3.5 rounded-2xl border border-dashed border-[#E29E10] bg-[#FFF8E7]/40"
+              >
+                {isLocating ? (
+                  <ActivityIndicator size="small" color="#E29E10" />
+                ) : (
+                  <Ionicons name="location" size={16} color="#E29E10" />
+                )}
+                <Text className="text-[#E29E10] font-body-bold text-sm">
+                  {isLocating ? "Detecting Location..." : "Locate Me"}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             {/* City & State (Row Layout) */}
             <View className="flex-row gap-x-4">
               <View className="flex-1 gap-y-1.5">
@@ -640,62 +743,6 @@ export default function MyAccountScreen() {
             </View>
           </View>
         </ScrollView>
-
-        {/* Floating/Bottom Action Buttons when editing */}
-        {isEditing && (
-          <View
-            className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-6 flex-row gap-x-4"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -4 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 10,
-            }}
-          >
-            <TouchableOpacity
-              onPress={handleCancel}
-              disabled={isLoading}
-              activeOpacity={0.8}
-              className="flex-1 py-4 bg-gray-50 rounded-2xl items-center justify-center border border-gray-100"
-              style={{ height: 56 }}
-            >
-              <Text className="text-gray-600 font-body-semibold text-base">
-                {isLoading ? "Saving Profile..." : "Discard"}
-              </Text>
-            </TouchableOpacity>
-
-            {isLoading ? (
-              <View
-                className="bg-[#FFF8E7] rounded-2xl items-center justify-center border border-[#FFE8B5]"
-                style={{ height: 56, width: 56 }}
-              >
-                <ActivityIndicator size="small" color="#E29E10" />
-              </View>
-            ) : (
-              <TouchableOpacity
-                onPress={handleSave}
-                activeOpacity={0.8}
-                className="flex-2 rounded-2xl overflow-hidden"
-                style={{ height: 56 }}
-              >
-                <LinearGradient
-                  colors={["#F5C518", "#E29E10"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{
-                    height: '100%',
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text className="text-white font-body-bold text-base px-10">Save Changes</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -258,6 +258,9 @@ export const useStore = create((rawSet, get) => {
             isLoading: false,
           });
 
+          // Sync location coordinates to profile if available
+          (get() as any).syncCurrentLocation().catch(() => {});
+
           return result.data || result;
         }
 
@@ -449,6 +452,9 @@ export const useStore = create((rawSet, get) => {
             isLoading: false,
           });
 
+          // Sync location coordinates to profile if available
+          (get() as any).syncCurrentLocation().catch(() => {});
+
           return result.data || result;
         } else {
           throw new Error("Invalid response format: User data is missing");
@@ -524,6 +530,9 @@ export const useStore = create((rawSet, get) => {
             isLoading: false,
           });
 
+          // Sync location coordinates to profile if available
+          (get() as any).syncCurrentLocation().catch(() => {});
+
           return result.data || result;
         } else {
           throw new Error("Invalid response format: User or token is missing");
@@ -598,6 +607,9 @@ export const useStore = create((rawSet, get) => {
             refreshToken: verifiedRefreshToken,
             isLoading: false,
           });
+
+          // Sync location coordinates to profile if available
+          (get() as any).syncCurrentLocation().catch(() => {});
         } else {
           set({ isLoading: false });
         }
@@ -799,6 +811,19 @@ export const useStore = create((rawSet, get) => {
         console.log("updateProfile error", error);
         set({ error: error.message, isLoading: false });
         return null;
+      }
+    },
+
+    syncCurrentLocation: async () => {
+      try {
+        const { useRestaurantStore } = await import("./useRestaurantStore");
+        const loc = useRestaurantStore.getState().location;
+        if (loc) {
+          console.log("📍 [syncCurrentLocation] Syncing coordinates to user profile:", loc);
+          await (get() as any).updateProfile({ lat: loc.latitude, lng: loc.longitude });
+        }
+      } catch (e) {
+        console.log("Failed to sync current location:", e);
       }
     },
 
