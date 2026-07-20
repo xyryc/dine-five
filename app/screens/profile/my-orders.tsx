@@ -5,7 +5,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface OrderCardProps {
@@ -33,7 +41,10 @@ function CurrentOrderCard({
       {/* Header section of card */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
-          <Text className="text-base font-heading text-gray-900" numberOfLines={1}>
+          <Text
+            className="text-base font-heading text-gray-900"
+            numberOfLines={1}
+          >
             {getProviderName(order)}
           </Text>
           <View className="flex-row items-center mt-1">
@@ -46,8 +57,12 @@ function CurrentOrderCard({
             </Text>
           </View>
         </View>
-        <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
-          <Text className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+        <View
+          className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}
+        >
+          <Text
+            className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}
+          >
             {formatStatus(order.status)}
           </Text>
         </View>
@@ -60,14 +75,26 @@ function CurrentOrderCard({
           <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-1">
             {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
           </Text>
-          <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
-            {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
+          <Text
+            className="text-sm font-body-semibold text-gray-700 mb-1.5"
+            numberOfLines={2}
+          >
+            {order.items
+              ?.map(
+                (item: any) =>
+                  `${item.quantity}x ${item.title || item.food?.title || "Item"}`,
+              )
+              .join(", ")}
           </Text>
-          
+
           <View className="flex-row items-center gap-2">
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons
-                name={order.logisticsType?.toLowerCase() === "pickup" ? "walk-outline" : "bicycle-outline"}
+                name={
+                  order.logisticsType?.toLowerCase() === "pickup"
+                    ? "walk-outline"
+                    : "bicycle-outline"
+                }
                 size={12}
                 color="#6B7280"
               />
@@ -75,10 +102,14 @@ function CurrentOrderCard({
                 {order.logisticsType || "Delivery"}
               </Text>
             </View>
-            
+
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons name="card-outline" size={12} color="#6B7280" />
-              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+              <Text
+                className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize"
+                numberOfLines={1}
+                style={{ maxWidth: 80 }}
+              >
                 {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
               </Text>
             </View>
@@ -89,7 +120,9 @@ function CurrentOrderCard({
       {/* Action buttons and pricing */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">
+            Total Paid
+          </Text>
           <Text className="text-base font-heading text-gray-900 mt-0.5">
             ${order.totalPrice?.toFixed(2)}
           </Text>
@@ -98,14 +131,17 @@ function CurrentOrderCard({
         <View className="flex-row gap-2 flex-1 justify-end ml-4">
           <TouchableOpacity
             onPress={() => {
-              const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+              const foodId =
+                order.items?.[0]?.foodId ||
+                order.items?.[0]?.food?._id ||
+                order.items?.[0]?._id;
               router.push({
                 pathname: "/screens/profile/order-details",
                 params: {
                   orderId: order.orderId,
                   _id: order._id,
                   state: order.status,
-                  foodId: foodId
+                  foodId: foodId,
                 },
               });
             }}
@@ -132,21 +168,27 @@ function PreviousOrderCard({
   renderOrderImage,
   onDonateAgain,
 }: OrderCardProps) {
-  const isDonation = order.isDonation || order.orderType === "donation" || order.logisticsType === "donation";
+  const isDonation =
+    order.isDonation ||
+    order.orderType === "donation" ||
+    order.logisticsType === "donation";
 
   if (isDonation) {
     return (
       <TouchableOpacity
         activeOpacity={0.95}
         onPress={() => {
-          const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+          const foodId =
+            order.items?.[0]?.foodId ||
+            order.items?.[0]?.food?._id ||
+            order.items?.[0]?._id;
           router.push({
             pathname: "/screens/profile/order-details",
             params: {
               orderId: order.orderId,
               _id: order._id,
               state: order.status,
-              foodId: foodId
+              foodId: foodId,
             },
           });
         }}
@@ -159,7 +201,10 @@ function PreviousOrderCard({
               <View className="bg-rose-50 p-1 rounded-md mr-1.5">
                 <Ionicons name="heart" size={14} color="#E11D48" />
               </View>
-              <Text className="text-base font-heading text-gray-950" numberOfLines={1}>
+              <Text
+                className="text-base font-heading text-gray-950"
+                numberOfLines={1}
+              >
                 Meal Donation
               </Text>
             </View>
@@ -203,10 +248,14 @@ function PreviousOrderCard({
             <Text className="text-[10px] text-rose-500 font-body-semibold uppercase tracking-wider mb-1">
               Community Contribution
             </Text>
-            <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
-              {order.items?.[0]?.description || `${order.items?.[0]?.quantity || order.itemCount || 1} meal token(s) added to the community pool`}
+            <Text
+              className="text-sm font-body-semibold text-gray-700 mb-1.5"
+              numberOfLines={2}
+            >
+              {order.items?.[0]?.description ||
+                `${order.items?.[0]?.quantity || order.itemCount || 1} meal token(s) added to the community pool`}
             </Text>
-            
+
             <View className="flex-row items-center gap-2">
               <View className="flex-row items-center bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
                 <Ionicons name="heart-outline" size={12} color="#E11D48" />
@@ -227,7 +276,9 @@ function PreviousOrderCard({
         {/* Pricing and actions */}
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Donated</Text>
+            <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">
+              Donated
+            </Text>
             <Text className="text-base font-heading text-rose-600 mt-0.5">
               ${order.totalPrice?.toFixed(2)}
             </Text>
@@ -255,14 +306,17 @@ function PreviousOrderCard({
     <TouchableOpacity
       activeOpacity={0.95}
       onPress={() => {
-        const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
+        const foodId =
+          order.items?.[0]?.foodId ||
+          order.items?.[0]?.food?._id ||
+          order.items?.[0]?._id;
         router.push({
           pathname: "/screens/profile/order-details",
           params: {
             orderId: order.orderId,
             _id: order._id,
             state: order.status,
-            foodId: foodId
+            foodId: foodId,
           },
         });
       }}
@@ -271,7 +325,10 @@ function PreviousOrderCard({
       {/* Header section of card */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1 mr-2">
-          <Text className="text-base font-heading text-gray-900" numberOfLines={1}>
+          <Text
+            className="text-base font-heading text-gray-900"
+            numberOfLines={1}
+          >
             {getProviderName(order)}
           </Text>
           <View className="flex-row items-center mt-1">
@@ -284,8 +341,12 @@ function PreviousOrderCard({
             </Text>
           </View>
         </View>
-        <View className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}>
-          <Text className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}>
+        <View
+          className={`px-2.5 py-1 rounded-full border ${getStatusBadgeStyle(order.status).container}`}
+        >
+          <Text
+            className={`text-[10px] font-body-semibold tracking-wide uppercase ${getStatusBadgeStyle(order.status).text}`}
+          >
             {formatStatus(order.status)}
           </Text>
         </View>
@@ -298,14 +359,26 @@ function PreviousOrderCard({
           <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider mb-1">
             {order.isMultiVendor ? "Multi-Vendor Feast" : "Order Items"}
           </Text>
-          <Text className="text-sm font-body-semibold text-gray-700 mb-1.5" numberOfLines={2}>
-            {order.items?.map((item: any) => `${item.quantity}x ${item.title || item.food?.title || "Item"}`).join(", ")}
+          <Text
+            className="text-sm font-body-semibold text-gray-700 mb-1.5"
+            numberOfLines={2}
+          >
+            {order.items
+              ?.map(
+                (item: any) =>
+                  `${item.quantity}x ${item.title || item.food?.title || "Item"}`,
+              )
+              .join(", ")}
           </Text>
-          
+
           <View className="flex-row items-center gap-2">
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons
-                name={order.logisticsType?.toLowerCase() === "pickup" ? "walk-outline" : "bicycle-outline"}
+                name={
+                  order.logisticsType?.toLowerCase() === "pickup"
+                    ? "walk-outline"
+                    : "bicycle-outline"
+                }
                 size={12}
                 color="#6B7280"
               />
@@ -313,10 +386,14 @@ function PreviousOrderCard({
                 {order.logisticsType || "Delivery"}
               </Text>
             </View>
-            
+
             <View className="flex-row items-center bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
               <Ionicons name="card-outline" size={12} color="#6B7280" />
-              <Text className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize" numberOfLines={1} style={{ maxWidth: 80 }}>
+              <Text
+                className="text-[10px] text-gray-500 font-body-medium ml-1 capitalize"
+                numberOfLines={1}
+                style={{ maxWidth: 80 }}
+              >
                 {order.paymentMethod?.split("-")?.[0]?.trim() || "Card"}
               </Text>
             </View>
@@ -326,8 +403,13 @@ function PreviousOrderCard({
 
       {/* Cancellation Reason if cancelled */}
       {isCancelled && order.cancellationReason && (
-        <View className="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5 mb-4 flex-row items-start">
-          <Ionicons name="alert-circle-outline" size={16} color="#E11D48" className="mt-0.5" />
+        <View className="bg-rose-50/50 border border-rose-100 rounded-xl p-2.5 mb-4 flex-row items-center">
+          <Ionicons
+            name="alert-circle-outline"
+            size={16}
+            color="#E11D48"
+            className="mt-0.5"
+          />
           <Text className="text-xs text-rose-700 font-body-medium ml-1.5 flex-1">
             Reason: {order.cancellationReason}
           </Text>
@@ -337,9 +419,13 @@ function PreviousOrderCard({
       {/* Action buttons and pricing */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">Total Paid</Text>
+          <Text className="text-[10px] text-gray-400 font-body-semibold uppercase tracking-wider">
+            Total Paid
+          </Text>
           <Text className="text-base font-heading text-gray-900 mt-0.5">
-            {order.orderType === "free_meal" || order.totalPrice === 0 ? "FREE" : `$${order.totalPrice?.toFixed(2)}`}
+            {order.orderType === "free_meal" || order.totalPrice === 0
+              ? "FREE"
+              : `$${order.totalPrice?.toFixed(2)}`}
           </Text>
         </View>
 
@@ -355,29 +441,35 @@ function PreviousOrderCard({
               Reorder
             </Text>
           </TouchableOpacity> */}
-          {!isCancelled && ["picked_up", "delivered", "completed"].includes(order.status?.toLowerCase()) && (
-            <TouchableOpacity
-              onPress={() => {
-                const foodId = order.items?.[0]?.foodId || order.items?.[0]?.food?._id || order.items?.[0]?._id;
-                router.push({
-                  pathname: "/screens/profile/order-details",
-                  params: {
-                    orderId: order.orderId,
-                    _id: order._id,
-                    state: order.status,
-                    autoRate: "true",
-                    foodId: foodId
-                  },
-                });
-              }}
-              className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row active:bg-amber-100"
-            >
-              <Ionicons name="star" size={14} color="#D97706" />
-              <Text className="text-amber-800 font-body-semibold text-xs ml-1">
-                Rate
-              </Text>
-            </TouchableOpacity>
-          )}
+          {!isCancelled &&
+            ["picked_up", "delivered", "completed"].includes(
+              order.status?.toLowerCase(),
+            ) && (
+              <TouchableOpacity
+                onPress={() => {
+                  const foodId =
+                    order.items?.[0]?.foodId ||
+                    order.items?.[0]?.food?._id ||
+                    order.items?.[0]?._id;
+                  router.push({
+                    pathname: "/screens/profile/order-details",
+                    params: {
+                      orderId: order.orderId,
+                      _id: order._id,
+                      state: order.status,
+                      autoRate: "true",
+                      foodId: foodId,
+                    },
+                  });
+                }}
+                className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl items-center justify-center flex-row active:bg-amber-100"
+              >
+                <Ionicons name="star" size={14} color="#D97706" />
+                <Text className="text-amber-800 font-body-semibold text-xs ml-1">
+                  Rate
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
       </View>
     </TouchableOpacity>
@@ -423,7 +515,7 @@ export default function MyOrdersScreen() {
   useFocusEffect(
     useCallback(() => {
       loadOrders();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -514,34 +606,50 @@ export default function MyOrdersScreen() {
   };
 
   const getOrderImage = (order: any) => {
-    const img = order.restaurantImage || 
-                order.restaurants?.[0]?.restaurantImage || 
-                order.items?.[0]?.image || 
-                order.items?.[0]?.food?.image;
+    const img =
+      order.restaurantImage ||
+      order.restaurants?.[0]?.restaurantImage ||
+      order.items?.[0]?.image ||
+      order.items?.[0]?.food?.image;
     return img || null;
   };
 
   const renderOrderImage = (order: any) => {
-    if (order.isMultiVendor && order.restaurants && order.restaurants.length > 1) {
+    if (
+      order.isMultiVendor &&
+      order.restaurants &&
+      order.restaurants.length > 1
+    ) {
       return (
         <View className="relative w-16 h-16 mr-3">
           <View className="absolute bottom-0 left-0 w-11 h-11 rounded-xl border border-white overflow-hidden bg-gray-100 shadow-sm">
             <Image
-              source={{ uri: order.restaurants[0]?.restaurantImage || order.items?.[0]?.image }}
+              source={{
+                uri:
+                  order.restaurants[0]?.restaurantImage ||
+                  order.items?.[0]?.image,
+              }}
               className="w-full h-full"
               resizeMode="cover"
             />
           </View>
           <View className="absolute top-0 right-0 w-11 h-11 rounded-xl border border-white overflow-hidden bg-gray-100 shadow-md">
             <Image
-              source={{ uri: order.restaurants[1]?.restaurantImage || order.items?.[1]?.image || order.restaurants[0]?.restaurantImage }}
+              source={{
+                uri:
+                  order.restaurants[1]?.restaurantImage ||
+                  order.items?.[1]?.image ||
+                  order.restaurants[0]?.restaurantImage,
+              }}
               className="w-full h-full"
               resizeMode="cover"
             />
           </View>
           {order.restaurants.length > 2 && (
             <View className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full w-5 h-5 items-center justify-center border border-white shadow-sm">
-              <Text className="text-[9px] font-body-semibold text-white">+{order.restaurants.length - 2}</Text>
+              <Text className="text-[9px] font-body-semibold text-white">
+                +{order.restaurants.length - 2}
+              </Text>
             </View>
           )}
         </View>
@@ -585,24 +693,30 @@ export default function MyOrdersScreen() {
 
       {/* Tabs */}
       <View className="px-6 mb-6">
-        <View 
-          className="flex-row rounded-xl p-1 h-14 items-center" 
+        <View
+          className="flex-row rounded-xl p-1 h-14 items-center"
           style={{ backgroundColor: "rgba(255, 230, 156, 0.2)" }}
         >
           <TouchableOpacity
             onPress={() => setActiveTab("current")}
             style={[
-              { flex: 1, height: "100%", alignItems: "center", justifyContent: "center", borderRadius: 12 },
-              activeTab === "current" 
-                ? { 
-                    backgroundColor: "#FFC107", 
+              {
+                flex: 1,
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 12,
+              },
+              activeTab === "current"
+                ? {
+                    backgroundColor: "#FFC107",
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.15,
                     shadowRadius: 1.5,
-                    elevation: 1 
-                  } 
-                : { backgroundColor: "transparent" }
+                    elevation: 1,
+                  }
+                : { backgroundColor: "transparent" },
             ]}
           >
             <Text
@@ -614,17 +728,23 @@ export default function MyOrdersScreen() {
           <TouchableOpacity
             onPress={() => setActiveTab("previous")}
             style={[
-              { flex: 1, height: "100%", alignItems: "center", justifyContent: "center", borderRadius: 12 },
-              activeTab === "previous" 
-                ? { 
-                    backgroundColor: "#FFC107", 
+              {
+                flex: 1,
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 12,
+              },
+              activeTab === "previous"
+                ? {
+                    backgroundColor: "#FFC107",
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.15,
                     shadowRadius: 1.5,
-                    elevation: 1 
-                  } 
-                : { backgroundColor: "transparent" }
+                    elevation: 1,
+                  }
+                : { backgroundColor: "transparent" },
             ]}
           >
             <Text
@@ -648,7 +768,9 @@ export default function MyOrdersScreen() {
         {isLoading && !refreshing && ordersToShow.length === 0 ? (
           <View className="flex-1 items-center justify-center pt-32">
             <ActivityIndicator size="large" color="#FFC107" />
-            <Text className="text-gray-500 mt-4 font-body-medium">Loading your orders...</Text>
+            <Text className="text-gray-500 mt-4 font-body-medium">
+              Loading your orders...
+            </Text>
           </View>
         ) : ordersToShow.length === 0 ? (
           <View className="flex-1 justify-center">
@@ -664,7 +786,7 @@ export default function MyOrdersScreen() {
             />
           </View>
         ) : (
-          ordersToShow.map((order) => (
+          ordersToShow.map((order) =>
             activeTab === "current" ? (
               <CurrentOrderCard
                 key={order._id}
@@ -688,8 +810,8 @@ export default function MyOrdersScreen() {
                 renderOrderImage={renderOrderImage}
                 onDonateAgain={() => setDonateModalVisible(true)}
               />
-            )
-          ))
+            ),
+          )
         )}
       </ScrollView>
 

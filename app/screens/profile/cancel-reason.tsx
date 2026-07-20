@@ -2,7 +2,7 @@ import { useStore } from "@/stores/stores";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -16,25 +16,40 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CancelOrderScreen() {
   const router = useRouter();
   const { orderId } = useLocalSearchParams();
-  const { cancelOrder, isLoading } = useStore() as any;
+  const { cancelOrder } = useStore() as any;
   const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = async () => {
+    // Guard: prevent auto-submit or double-tap
+    if (isSubmittingRef.current) return;
     if (!orderId) {
       console.log("No orderId found in params");
       return;
     }
 
-    console.log("Attempting to cancel order:", orderId);
-    const result = await cancelOrder(orderId as string, reason);
+    isSubmittingRef.current = true;
+    setSubmitting(true);
 
-    if (result) {
-      Alert.alert("Success", "Order cancelled successfully");
-      router.dismissAll(); // Go back to orders list or home
-      router.push("/screens/profile/my-orders");
-    } else {
-      const { error } = useStore.getState() as any;
-      Alert.alert("Error", error || "Failed to cancel order. Please try again.");
+    try {
+      console.log("Attempting to cancel order:", orderId);
+      const result = await cancelOrder(orderId as string, reason);
+
+      if (result) {
+        Alert.alert("Success", "Order cancelled successfully");
+        router.dismissAll();
+        router.back();
+      } else {
+        const { error } = (useStore as any).getState();
+        Alert.alert(
+          "Error",
+          error || "Failed to cancel order. Please try again.",
+        );
+      }
+    } finally {
+      isSubmittingRef.current = false;
+      setSubmitting(false);
     }
   };
 
@@ -57,7 +72,7 @@ export default function CancelOrderScreen() {
         <Text className="text-xl font-heading text-gray-900 mb-2">
           We are sorry to hear this
         </Text>
-        <Text className="text-gray-500 leading-6 mb-6">
+        <Text className="text-gray-500 font-body leading-6 mb-6">
           Tell us why you choose to cancel your order, is the reason from our
           side?{"\n"}
           Write down your reason to cancel your order:
@@ -71,9 +86,9 @@ export default function CancelOrderScreen() {
             value={reason}
             onChangeText={setReason}
             maxLength={220}
-            className="flex-1 text-base text-gray-900"
+            className="flex-1 text-base font-body text-gray-900"
           />
-          <Text className="text-right text-gray-400 text-sm mt-2">
+          <Text className="text-right text-gray-400 font-body text-sm mt-2">
             {reason.length} / 220
           </Text>
         </View>
@@ -83,12 +98,13 @@ export default function CancelOrderScreen() {
       <View className="p-6">
         <TouchableOpacity
           onPress={handleSubmit}
-          disabled={isLoading}
-          className={`w-full py-4 rounded-2xl items-center shadow-sm ${isLoading ? "bg-yellow-200" : "bg-yellow-400"
-            }`}
+          disabled={submitting}
+          className={`w-full py-4 rounded-2xl items-center shadow-sm ${
+            submitting ? "bg-yellow-200" : "bg-yellow-400"
+          }`}
         >
           <Text className="text-gray-900 font-body-bold text-lg">
-            {isLoading ? "Submitting..." : "Submit"}
+            {submitting ? "Submitting..." : "Submit"}
           </Text>
         </TouchableOpacity>
       </View>
