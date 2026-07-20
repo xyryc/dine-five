@@ -293,10 +293,6 @@ function CheckoutContent() {
     }
   }, [fetchCart, isDonationCheckout]);
 
-  useEffect(() => {
-    loadCartData();
-  }, [loadCartData]);
-
   useFocusEffect(
     useCallback(() => {
       loadCartData();
