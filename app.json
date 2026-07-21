@@ -2,26 +2,27 @@
   "expo": {
     "name": "Dine Five",
     "slug": "Dine-Five",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app_icon.png",
     "scheme": "dinefive",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.dinefive.app",
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow app to use your location to find nearby restaurants."
-      },
-      "bundleIdentifier": "com.dinefive.app"
+      }
     },
     "android": {
+      "package": "com.dinefive.app",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/app_icon.png",
         "backgroundImage": "./assets/app_icon.png",
         "monochromeImage": "./assets/app_icon.png"
       },
-      "package": "com.dinefive.app",
       "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
@@ -33,8 +34,7 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ],
-      "predictiveBackGestureEnabled": false,
-      "versionCode": 1
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
